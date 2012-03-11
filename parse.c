@@ -82,7 +82,7 @@ enum binary_op get_binop(parser_state* ps)
 /* ID "<-" EXPRESSION "." */
 void parse_assignment(parser_state *ps)
 {
-    //  expect(ps, TK_ASSIGN);
+  //  expect(ps, TK_ASSIGN);
   parse_expression(ps);
 }
 
@@ -101,20 +101,20 @@ void parse_expression(parser_state *ps)
 {
   if (accept(ps, TK_ID)) {
 
-      // assignment
+    // assignment
     if (accept(ps, TK_ASSIGN)) {
       puts ("assignment");
       parse_assignment(ps);
     }
 
-      // function call
+    // function call
     if(accept(ps, '(')) {
       puts ("function call");
       parse_block(ps);
     }
 
-      // just an id
-      /* AST stuff goes here */
+    // just an id
+    /* AST stuff goes here */
   }
   else if (accept(ps, TK_FN))
     parse_function(ps);
@@ -147,13 +147,13 @@ void parse_expression(parser_state *ps)
 /* "fun" "(" ID* ")" EXPRESSION* "." */
 void parse_function(parser_state *ps)
 {
-    // argument list
+  // argument list
   expect(ps, '(');
   do {
   } while (accept(ps, TK_ID));
   expect(ps, ')');
 
-    // function body
+  // function body
   while(ps->ls->t.type != '.') {
     parse_expression(ps);
   }
