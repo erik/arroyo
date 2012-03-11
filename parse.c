@@ -26,6 +26,11 @@ void parser_error (parser_state* ps, const char* fmt, ...)
   va_end (ap);
 }
 
+void next_token (parser_state* ps)
+{
+  ps->t = lexer_next_token(ps->ls);
+}
+
 int accept (parser_state* ps, int type)
 {
   if (type == ps->t.type) {
@@ -34,7 +39,7 @@ int accept (parser_state* ps, int type)
     printf("accepting %s\t\t%s\n", str, info);
     free(str);
 
-    ps->t = lexer_next_token(ps->ls);
+    next_token (ps);
     return 1;
   }
   return 0;
@@ -55,7 +60,16 @@ int expect (parser_state* ps, int type)
   return 0;
 }
 
-enum binary_op get_binop(parser_state* ps)
+enum unary_op get_unaryop (parser_state* ps)
+{
+  switch (ps->t.type) {
+  case '-': return OP_UNM;
+  case '!': return OP_NOT;
+  default: return OP_NOTUNOP;
+  }
+}
+
+enum binary_op get_binop (parser_state* ps)
 {
   switch (ps->t.type) {
   case '+': return OP_ADD;
@@ -128,20 +142,29 @@ void parse_expression(parser_state *ps)
   else if (accept(ps, '('))
     parse_block(ps);
 
+  else if (get_unaryop (ps)) {
+    fprintf (stderr,
+             "unop %s\n", tok_to_string (ps->t.type));
+
+    next_token (ps);
+    parse_expression (ps);
+  }
+
+  // TODO: this approach currently makes operator precedence
+  // difficult to implement, should be refactored
+  else if (get_binop (ps)) {
+    printf("binop %s (%s)\n",
+           tok_to_string(ps->t.type), ps->t.info.string);
+
+    next_token (ps);
+    parse_expression(ps);
+  }
+
   else {
     parser_error(ps, "expected expression, got '%s'",
                  (char*)tok_to_string(ps->ls->t.type));
     return;
   }
-
-  int op;
-
-  while ((op = get_binop(ps)) != OP_NOTBINOP) {
-    printf(":::opr %s (%s)\n", tok_to_string(ps->t.type), ps->t.info.string);
-    ps->t = lexer_next_token(ps->ls);
-    parse_expression(ps);
-  }
-
 }
 
 /* "fun" "(" ID* ")" EXPRESSION* "." */

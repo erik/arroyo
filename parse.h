@@ -15,7 +15,17 @@ enum expression_type {
   LAST_EXP
 };
 
+enum unary_op {
+  // must be first
+  OP_NOTUNOP = 0,
+
+  OP_UNM, OP_NOT
+};
+
 enum binary_op {
+  // must be first
+  OP_NOTBINOP = 0,
+
   // arithmetic
   OP_ADD, OP_SUB, OP_MUL, OP_DIV, OP_MOD,
   // conditionals
@@ -24,8 +34,6 @@ enum binary_op {
   OP_AND, OP_OR, OP_XOR,
   // stringconcat
   OP_CONCAT,
-
-  OP_NOTBINOP
 };
 
 typedef struct expression_node {
