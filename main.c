@@ -16,8 +16,10 @@ const char* string_reader(void* dummy, unsigned* size)
 
   read = 1;
   const char* prgn =
-    //"main <- fn() longer_name123 <- 1.010002, y <- 1 + 2, print (longer_name123-1).";
-    "main <- fn() longer_name123 <- 1.010002, y <- 1, 1 = 1 and 2 < 3 , print (longer_name123).";
+    "main <- fn(x y z) longer_name123 <- 1.010002\n"            \
+    "y <- 1,\n"                                                 \
+    "z <- 1 = 1 and 2 < 3,\n"                                   \
+    "print (longer_name123).\n";
 
   *size = strlen(prgn);
   return prgn;

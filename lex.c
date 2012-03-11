@@ -195,7 +195,7 @@ void lexer_create(lexer_state *ls, reader* r)
 
   ls->r = r;
 
-  ls->linenum = 0;
+  ls->linenum = 1;
   ls->current = 0;
 
   ls->t.type = ls->next.type = TK_EOS;
@@ -209,7 +209,6 @@ void lexer_destroy(lexer_state *ls)
 
 char* tok_to_string(int tok)
 {
-
   char* string = calloc(20, 1);
 
   // single character

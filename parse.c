@@ -11,19 +11,27 @@ void parse_expression  (parser_state*);
 void parse_function    (parser_state*);
 void parse_program     (parser_state*);
 
-#define parser_error(fmt, ...) {                                \
-    ps->errcount++;                                             \
-    fprintf(stderr, "Error while parsing: " fmt, __VA_ARGS__);  \
-    puts("");                                                   \
-    ps->t = lexer_next_token(ps->ls); /* skip error token */    \
-  }
+void parser_error (parser_state* ps, const char* fmt, ...)
+{
+  va_list ap;
+  va_start (ap, fmt);
+
+  fprintf (stderr, "Line %d, at '%s': ", ps->ls->linenum, tok_to_string (ps->t.type));
+  vfprintf (stderr, fmt, ap);
+  fprintf (stderr, "\n");
+
+  if (++ps->error_count > ps->error_max || ps->die_on_error)
+    longjmp (ps->err_buf, 1);
+
+  va_end (ap);
+}
 
 int accept (parser_state* ps, int type)
 {
   if (type == ps->t.type) {
-
-    char *str = tok_to_string(type);
-    printf("accepting %s... (%s)\n", str, ps->t.info.string);
+    const char* info = ps->t.info.string == NULL ? "" : ps->t.info.string;
+    char* str = tok_to_string(type);
+    printf("accepting %s\t\t%s\n", str, info);
     free(str);
 
     ps->t = lexer_next_token(ps->ls);
@@ -39,7 +47,7 @@ int expect (parser_state* ps, int type)
   char* want = tok_to_string (type);
   char* got  = tok_to_string (ps->t.type);
 
-  parser_error ("expected type '%s', got '%s'", want, got);
+  parser_error (ps, "expected type '%s', got '%s'", want, got);
 
   free(want);
   free(got);
@@ -49,7 +57,6 @@ int expect (parser_state* ps, int type)
 
 enum binary_op get_binop(parser_state* ps)
 {
-
   switch (ps->t.type) {
   case '+': return OP_ADD;
   case '-': return OP_SUB;
@@ -64,7 +71,6 @@ enum binary_op get_binop(parser_state* ps)
   case '>': return OP_GT;
   case TK_GTE: return OP_GTE;
 
-      // TODO
   case TK_AND: return OP_AND;
   case TK_OR: return OP_OR;
   case TK_XOR: return OP_XOR;
@@ -83,7 +89,7 @@ void parse_assignment(parser_state *ps)
 /* '(' EXPRESSION* ')' */
 void parse_block(parser_state *ps)
 {
-  while(ps->t.type != ')') {
+  while (ps->t.type != ')') {
     parse_expression(ps);
   }
 
@@ -93,10 +99,10 @@ void parse_block(parser_state *ps)
 /* ID | PRIMITIVE | BLOCK | ASSIGNMENT | CONDITIONAL | FUNCCALL */
 void parse_expression(parser_state *ps)
 {
-  if(accept(ps, TK_ID)) {
+  if (accept(ps, TK_ID)) {
 
       // assignment
-    if(accept(ps, TK_ASSIGN)) {
+    if (accept(ps, TK_ASSIGN)) {
       puts ("assignment");
       parse_assignment(ps);
     }
@@ -108,6 +114,7 @@ void parse_expression(parser_state *ps)
     }
 
       // just an id
+      /* AST stuff goes here */
   }
   else if (accept(ps, TK_FN))
     parse_function(ps);
@@ -122,14 +129,14 @@ void parse_expression(parser_state *ps)
     parse_block(ps);
 
   else {
-    parser_error("expected expression, got '%s'",
+    parser_error(ps, "expected expression, got '%s'",
                  (char*)tok_to_string(ps->ls->t.type));
     return;
   }
 
   int op;
 
-  if((op = get_binop(ps)) != OP_NOTBINOP) {
+  while ((op = get_binop(ps)) != OP_NOTBINOP) {
     printf(":::opr %s (%s)\n", tok_to_string(ps->t.type), ps->t.info.string);
     ps->t = lexer_next_token(ps->ls);
     parse_expression(ps);
@@ -156,28 +163,33 @@ void parse_function(parser_state *ps)
 
 void parse_program(parser_state *ps)
 {
-  while(ps->t.type != TK_EOS && ps->errcount < ERROR_MAX) {
-    parse_expression(ps);
+  if (!setjmp (ps->err_buf)) {
+    while (ps->t.type != TK_EOS && ps->error_count < ps->error_max) {
+      parse_expression (ps);
+    }
+    expect (ps, TK_EOS);
   }
 
-  if(ps->errcount >= ERROR_MAX) {
-    fprintf(stderr, "too many errors, aborting.\n");
-    return;
-  }
+  else {
+    if (ps->error_count >= ps->error_max)
+      fprintf(stderr, "Too many errors, aborting.\n");
 
-  expect(ps, TK_EOS);
+    fprintf (stderr, "Aborting after %d error%s.\n", ps->error_count,
+             ps->error_count > 1 || ps->error_count == 0 ? "s" : "");
+  }
 }
 
 void parse(parser_state *ps)
 {
-  ps->t = lexer_next_token(ps->ls);
-  parse_program(ps);
+  ps->die_on_error = 1;
+  ps->error_max = 20;
 
-  if(ps->errcount) {
-    fprintf(stderr, "parsing failed\n");
-  } else {
-    fprintf(stderr, "no errors\n");
+  ps->t = lexer_next_token (ps->ls);
+
+  parse_program (ps);
+
+  if (!ps->error_count) {
+    fprintf(stderr, "Parsing completed successfully\n");
   }
-
 }
 

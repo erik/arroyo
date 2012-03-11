@@ -3,6 +3,8 @@
 #ifndef _PARSE_H_
 #define _PARSE_H_
 
+#include <setjmp.h>
+
 #include "lex.h"
 
 struct lexer_state;
@@ -26,8 +28,7 @@ enum binary_op {
   OP_NOTBINOP
 };
 
-typedef struct expression_node
-{
+typedef struct expression_node {
   enum expression_type type;
 
   union {
@@ -56,15 +57,15 @@ typedef struct expression_node
 
 } expression_node;
 
-typedef struct parser_state
-{
+typedef struct parser_state {
   lexer_state *ls;
   token t;
 
-  unsigned errcount;
+  jmp_buf err_buf;        // jmp_buf to error handling / exit
+  int die_on_error;       // die after a single error?
+  unsigned int error_max; // max number of errors before bailing out
+  unsigned error_count;   // current number of errors
 } parser_state;
-
-#define ERROR_MAX 20
 
 void parse (parser_state *ps);
 
