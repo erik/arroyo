@@ -6,7 +6,7 @@ void buffer_create (buffer* b, unsigned sz)
   b->size = sz; b->pos = 0;
 }
 
-void buffer_destroy(buffer* b)
+void buffer_destroy (buffer* b)
 {
   free(b->buf);
 }

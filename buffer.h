@@ -7,17 +7,17 @@
 #include <string.h>
 
 typedef struct buffer {
-  char *buf;
+  char* buf;
   unsigned pos, size;
 } buffer;
 
 
 // callocing instead of a straight realloc to initialize memory (and shut valgrind up)
-#define buffer_grow(b        ) {                                    \
-    void* _ptr = calloc((b->size*=2), 1);                           \
-    strcpy(_ptr, b->buf);                                           \
-    free(b->buf);                                                   \
-    b->buf = _ptr;                                                  \
+#define buffer_grow(b        ) {                                     \
+    void* _ptr = calloc ((b->size*=2), 1);                           \
+    strcpy (_ptr, b->buf);                                           \
+    free (b->buf);                                                   \
+    b->buf = _ptr;                                                   \
   }
 
 #define buffer_puts(b, str   ) (buffer_putsn(b, str, strlen(str)))

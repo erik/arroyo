@@ -71,9 +71,9 @@ static int read_id_or_reserved (lexer_state *ls, token_info *info)
 
 static void read_numeric (lexer_state *ls, token_info *info)
 {
-  int seen_dot = 0;
+  int seen_dot  = 0;
 
-  for(;;) {
+  for (;;) {
     if (ls->current == '.') {
       if (seen_dot) break;
       seen_dot = 1;
@@ -82,7 +82,11 @@ static void read_numeric (lexer_state *ls, token_info *info)
     save_and_next(ls);
   }
 
+  double number = strtod (ls->buf->buf, NULL);
+  printf ("=> %lf\n", number);
+
   info->string = strdup(ls->buf->buf);
+  info->number = number;
 }
 
 static int lex(lexer_state *ls, token_info *info)
@@ -105,6 +109,7 @@ static int lex(lexer_state *ls, token_info *info)
     case '-': { // comment or minus
       // minus
       if (next(ls) != '-') return '-';
+
       // comment, skip line
       while (next(ls) != EOS && !isnewline(ls));
       break;

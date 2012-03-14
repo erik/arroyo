@@ -49,7 +49,7 @@ enum token_type {
 #define NUM_TOK (LAST_TOK - FIRST_TOK)
 
 
-static const char *tokens[NUM_TOK] = {
+static const char* tokens[NUM_TOK] = {
   "<eos>", "<id>", "<real>", "<string>",
   "if", "when", "for", "to",
   "fn", "<-", "<=", ">=",

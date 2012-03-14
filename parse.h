@@ -66,7 +66,7 @@ typedef struct expression_node {
 } expression_node;
 
 typedef struct parser_state {
-  lexer_state *ls;
+  lexer_state* ls;
   token t;
 
   jmp_buf err_buf;        // jmp_buf to error handling / exit
@@ -75,6 +75,6 @@ typedef struct parser_state {
   unsigned error_count;   // current number of errors
 } parser_state;
 
-void parse (parser_state *ps);
+void parse (parser_state* ps);
 
 #endif /* _PARSE_H_ */

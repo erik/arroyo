@@ -47,15 +47,15 @@ int accept (parser_state* ps, int type)
 
 int expect (parser_state* ps, int type)
 {
-  if(accept(ps, type)) return 1;
+  if (accept (ps, type)) return 1;
 
   char* want = tok_to_string (type);
   char* got  = tok_to_string (ps->t.type);
 
   parser_error (ps, "expected type '%s', got '%s'", want, got);
 
-  free(want);
-  free(got);
+  free (want);
+  free (got);
 
   return 0;
 }
@@ -63,68 +63,67 @@ int expect (parser_state* ps, int type)
 enum unary_op get_unaryop (parser_state* ps)
 {
   switch (ps->t.type) {
-  case '-': return OP_UNM;
-  case '!': return OP_NOT;
-  default: return OP_NOTUNOP;
+  case '-' : return OP_UNM;
+  case '!' : return OP_NOT;
+  default  : return OP_NOTUNOP;
   }
 }
 
 enum binary_op get_binop (parser_state* ps)
 {
   switch (ps->t.type) {
-  case '+': return OP_ADD;
-  case '-': return OP_SUB;
-  case '*': return OP_MUL;
-  case '/': return OP_DIV;
-  case '%': return OP_MOD;
+  case '+'    : return OP_ADD;
+  case '-'    : return OP_SUB;
+  case '*'    : return OP_MUL;
+  case '/'    : return OP_DIV;
+  case '%'    : return OP_MOD;
 
-  case TK_NEQ: return OP_NEQ;
-  case '=': return OP_EQ;
-  case '<': return OP_LT;
-  case TK_LTE: return OP_LTE;
-  case '>': return OP_GT;
-  case TK_GTE: return OP_GTE;
+  case TK_NEQ : return OP_NEQ;
+  case '='    : return OP_EQ;
+  case '<'    : return OP_LT;
+  case TK_LTE : return OP_LTE;
+  case '>'    : return OP_GT;
+  case TK_GTE : return OP_GTE;
 
-  case TK_AND: return OP_AND;
-  case TK_OR: return OP_OR;
-  case TK_XOR: return OP_XOR;
+  case TK_AND : return OP_AND;
+  case TK_OR  : return OP_OR;
+  case TK_XOR : return OP_XOR;
 
-  default: return OP_NOTBINOP;
+  default     : return OP_NOTBINOP;
   }
 }
 
 /* ID "<-" EXPRESSION "." */
-void parse_assignment(parser_state *ps)
+void parse_assignment (parser_state* ps)
 {
-  //  expect(ps, TK_ASSIGN);
-  parse_expression(ps);
+  parse_expression (ps);
 }
 
 /* '(' EXPRESSION* ')' */
-void parse_block(parser_state *ps)
+void parse_block (parser_state* ps)
 {
   while (ps->t.type != ')') {
-    parse_expression(ps);
+    parse_expression (ps);
   }
 
-  expect(ps, ')');
+  expect (ps, ')');
 }
 
 /* ID | PRIMITIVE | BLOCK | ASSIGNMENT | CONDITIONAL | FUNCCALL */
-void parse_expression(parser_state *ps)
+void parse_expression (parser_state* ps)
 {
-  if (accept(ps, TK_ID)) {
+  if (accept (ps, TK_ID)) {
 
     // assignment
-    if (accept(ps, TK_ASSIGN)) {
+    if (accept (ps, TK_ASSIGN)) {
       puts ("assignment");
-      parse_assignment(ps);
+      parse_assignment (ps);
     }
 
     // function call
-    if(accept(ps, '(')) {
+    if (accept (ps, '(')) {
       puts ("function call");
-      parse_block(ps);
+      parse_block (ps);
     }
 
     // just an id
@@ -154,37 +153,37 @@ void parse_expression(parser_state *ps)
   // difficult to implement, should be refactored
   else if (get_binop (ps)) {
     printf("binop %s (%s)\n",
-           tok_to_string(ps->t.type), ps->t.info.string);
+           tok_to_string (ps->t.type), ps->t.info.string);
 
     next_token (ps);
-    parse_expression(ps);
+    parse_expression (ps);
   }
 
   else {
-    parser_error(ps, "expected expression, got '%s'",
-                 (char*)tok_to_string(ps->ls->t.type));
+    parser_error (ps, "expected expression, got '%s'",
+                  (char*)tok_to_string (ps->ls->t.type));
     return;
   }
 }
 
 /* "fun" "(" ID* ")" EXPRESSION* "." */
-void parse_function(parser_state *ps)
+void parse_function (parser_state* ps)
 {
   // argument list
-  expect(ps, '(');
+  expect (ps, '(');
   do {
-  } while (accept(ps, TK_ID));
-  expect(ps, ')');
+  } while (accept (ps, TK_ID));
+  expect (ps, ')');
 
   // function body
-  while(ps->ls->t.type != '.') {
-    parse_expression(ps);
+  while (ps->ls->t.type != '.') {
+    parse_expression (ps);
   }
 
-  expect(ps, '.');
+  expect (ps, '.');
 }
 
-void parse_program(parser_state *ps)
+void parse_program (parser_state* ps)
 {
   if (!setjmp (ps->err_buf)) {
     while (ps->t.type != TK_EOS && ps->error_count < ps->error_max) {
@@ -195,14 +194,14 @@ void parse_program(parser_state *ps)
 
   else {
     if (ps->error_count >= ps->error_max)
-      fprintf(stderr, "Too many errors, aborting.\n");
+      fprintf (stderr, "Too many errors, aborting.\n");
 
     fprintf (stderr, "Aborting after %d error%s.\n", ps->error_count,
              ps->error_count > 1 || ps->error_count == 0 ? "s" : "");
   }
 }
 
-void parse(parser_state *ps)
+void parse (parser_state* ps)
 {
   ps->die_on_error = 1;
   ps->error_max = 20;
