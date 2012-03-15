@@ -9,7 +9,7 @@ const char* string_reader(void* dummy, unsigned* size)
   (void)dummy;
 
   static int read = 0;
-  if(read) {
+  if (read) {
     *size = 0;
     return NULL;
   }
