@@ -69,10 +69,13 @@ typedef struct parser_state {
   lexer_state* ls;
   token t;
 
-  jmp_buf err_buf;        // jmp_buf to error handling / exit
-  int die_on_error;       // die after a single error?
-  unsigned int error_max; // max number of errors before bailing out
-  unsigned error_count;   // current number of errors
+  int die_on_error;   // die after a single error?
+
+  struct {
+    unsigned int max; // max number of errors before bailing out
+    jmp_buf buf;      // jmp_buf to error handling / exit
+    unsigned count;   // current number of errors
+  } error;
 } parser_state;
 
 void parse (parser_state* ps);

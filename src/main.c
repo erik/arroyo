@@ -19,7 +19,7 @@ const char* string_reader(void* dummy, unsigned* size)
     "main <- fn(x y z) longer_name123 <- 1.010002\n"            \
     "y <- -1,\n"                                                \
     "-- this is a comment\n"                                    \
-    "z <- 1 = (1 and (2 < 3)),\n"                               \
+    "z <- 1 = (1 and (2 < 3)),\n"                              \
     "print (longer_name123).\n";
 
   *size = strlen(prgn);

@@ -6,6 +6,7 @@
 #include "buffer.h"
 #include "reader.h"
 
+#include <setjmp.h>
 #include <stdio.h>
 
 // additional token values
@@ -30,17 +31,22 @@ typedef struct lexer_state {
 
   token next;   // lookahead token
   token t;      // current token
+
+  struct {
+    jmp_buf buf;
+  } error;
+
 } lexer_state;
 
 // jump out of range of char
 #define FIRST_TOK 257
 
 enum token_type {
-  TK_EOS = FIRST_TOK, TK_ID, TK_REAL, TK_STRING,
-  TK_IF, TK_WHEN, TK_FOR, TK_TO,
-  TK_FN, TK_ASSIGN, TK_LTE, TK_GTE,
-  TK_NEQ, TK_TRUE, TK_FALSE, TK_AND,
-  TK_OR, TK_XOR,
+  TK_ERROR = FIRST_TOK, TK_EOS, TK_ID, TK_REAL,
+  TK_STRING, TK_IF, TK_WHEN, TK_FOR,
+  TK_TO, TK_FN, TK_ASSIGN, TK_LTE,
+  TK_GTE, TK_NEQ, TK_TRUE, TK_FALSE,
+  TK_AND, TK_OR, TK_XOR,
 
   LAST_TOK
 };
@@ -50,11 +56,11 @@ enum token_type {
 
 
 static const char* tokens[NUM_TOK] = {
-  "<eos>", "<id>", "<real>", "<string>",
-  "if", "when", "for", "to",
-  "fn", "<-", "<=", ">=",
-  "/=", "true", "false", "and",
-  "or", "xor"
+  "<error>", "<eos>", "<id>", "<real>",
+  "<string>", "if", "when", "for",
+  "to", "fn", "<-", "<=",
+  ">=", "/=", "true", "false",
+  "and", "or", "xor"
 };
 
 // simplistic token to string handling
