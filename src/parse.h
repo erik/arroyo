@@ -34,6 +34,8 @@ enum binary_op {
   OP_AND, OP_OR, OP_XOR,
   // stringconcat
   OP_CONCAT,
+  // members
+  OP_DOT
 };
 
 typedef struct expression_node {

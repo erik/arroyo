@@ -1,3 +1,6 @@
+// for strdup
+#define _BSD_SOURCE 1
+
 #include <stdio.h>
 #include <stdarg.h>
 
@@ -16,7 +19,7 @@ static void parser_error (parser_state* ps, const char* fmt, ...)
   va_list ap;
   va_start (ap, fmt);
 
-  fprintf (stderr, "Line %d, at '%s': ", ps->ls->linenum, tok_to_string (ps->t.type));
+  fprintf (stderr, "Parse error on line %d, at '%s': ", ps->ls->linenum, tok_to_string (ps->t.type));
   vfprintf (stderr, fmt, ap);
   fprintf (stderr, "\n");
 
@@ -40,7 +43,7 @@ static int accept (parser_state* ps, int type)
   if (type == ps->t.type) {
     const char* info = ps->t.info.string == NULL ? "" : ps->t.info.string;
     char* str = tok_to_string(type);
-    printf("accepting %s\t\t%s\n", str, info);
+    printf("\taccepting %s\t\t%s\n", str, info);
     free(str);
 
     next_token (ps);
@@ -56,7 +59,7 @@ static int expect (parser_state* ps, int type)
   char* want = tok_to_string (type);
   char* got  = tok_to_string (ps->t.type);
 
-  parser_error (ps, "expected type '%s', got '%s'", want, got);
+  parser_error (ps, "expected '%s', got '%s'", want, got);
 
   free (want);
   free (got);
@@ -76,6 +79,8 @@ static enum unary_op get_unaryop (parser_state* ps)
 static enum binary_op get_binop (parser_state* ps)
 {
   switch (ps->t.type) {
+  case '.'    : return OP_DOT;
+
   case '+'    : return OP_ADD;
   case '-'    : return OP_SUB;
   case '*'    : return OP_MUL;
@@ -97,7 +102,7 @@ static enum binary_op get_binop (parser_state* ps)
   }
 }
 
-/* ID "<-" EXPRESSION "." */
+/* ID "<-" EXPRESSION */
 static void parse_assignment (parser_state* ps)
 {
   parse_expression (ps);
@@ -138,7 +143,6 @@ static void parse_expression (parser_state* ps)
 
   else if (accept(ps, TK_REAL))
     /* AST stuff here */ ;
-
   else if (accept(ps, TK_STRING))
     /* AST stuff here */ ;
 
@@ -170,21 +174,24 @@ static void parse_expression (parser_state* ps)
   }
 }
 
-/* "fun" "(" ID* ")" EXPRESSION* "." */
+/* "fn" "(" ID* ")" EXPRESSION */
 static void parse_function (parser_state* ps)
 {
   // argument list
   expect (ps, '(');
+
   do {
+    // typed argument
+    if (accept (ps, ':')) {
+      printf ("got typed argument of %s\n", ps->t.info.string);
+      expect (ps, TK_ID);
+    }
   } while (accept (ps, TK_ID));
+
   expect (ps, ')');
 
   // function body
-  while (ps->ls->t.type != '.') {
-    parse_expression (ps);
-  }
-
-  expect (ps, '.');
+  parse_expression (ps);
 }
 
 static void parse_program (parser_state* ps)
