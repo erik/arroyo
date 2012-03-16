@@ -189,21 +189,18 @@ static void parse_function (parser_state* ps)
 
 static void parse_program (parser_state* ps)
 {
-  if (!setjmp (ps->error.buf)) {
-    while (ps->t.type != TK_EOS && ps->t.type != TK_ERROR &&
-           ps->error.count < ps->error.max) {
-      parse_expression (ps);
-    }
-    expect (ps, TK_EOS);
-  }
-
-  else {
-    if (ps->error.count >= ps->error.max)
-      fprintf (stderr, "Too many errors, aborting.\n");
-
+  if (setjmp (ps->error.buf)) {
     fprintf (stderr, "Aborting after %d error%s.\n", ps->error.count,
              ps->error.count > 1 || ps->error.count == 0 ? "s" : "");
+    return;
   }
+
+  while (ps->t.type != TK_EOS && ps->t.type != TK_ERROR &&
+         ps->error.count < ps->error.max) {
+    parse_expression (ps);
+  }
+
+  expect (ps, TK_EOS);
 }
 
 void parse (parser_state* ps)

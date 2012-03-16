@@ -121,84 +121,80 @@ static int lex(lexer_state *ls, token_info *info)
 {
   buffer_reset(ls->buf);
 
-  if (!setjmp (ls->error.buf)) {
-    for (;;) {
-      switch (ls->current) {
-
-      case '\n': case '\r': { // newline
-        inc_line(ls);
-        break;
-      }
-
-      case ' ': case '\t': case ',': { // whitespace
-        next(ls);
-        break;
-      }
-
-      case '-': { // comment or minus
-        // minus
-        if (next(ls) != '-') return '-';
-
-        // comment, skip line
-        while (next(ls) != EOS && !isnewline(ls));
-        break;
-      }
-
-      case '=': { // EQ
-        next(ls);
-        return '=';
-      }
-
-      case '<': { // LT, LTE, ASSIGN
-        next(ls);
-        if(ls->current == '=') {
-          next(ls);
-          return TK_LTE;
-        }
-        else if(ls->current == '-'){
-          next(ls);
-          return TK_ASSIGN;
-        }
-        else return '<';
-      }
-
-      case '>': { // GT, GTE
-        next(ls);
-        if(ls->current == '=') return TK_GTE;
-        else return '>';
-      }
-
-      case '"': { // STRING
-        read_string(ls, info);
-        return TK_STRING;
-      }
-
-      case EOS: { // EOS
-        return TK_EOS;
-      }
-
-      default: {
-        if (lisdigit(ls->current)) { // NUMERIC
-          read_numeric (ls, info);
-          return TK_REAL;
-        }
-
-        if (lisalpha(ls->current)) { // ID or RESERVED
-          return read_id_or_reserved(ls, info);
-        }
-
-        // operators, single characters, etc.
-        int c = ls->current;
-        next(ls);
-        return c;
-      }
-      }
-    }
-  }
-
-  // error handling
-  else {
+  if (setjmp (ls->error.buf))
     return TK_ERROR;
+
+  for (;;) {
+    switch (ls->current) {
+
+    case '\n': case '\r': { // newline
+      inc_line(ls);
+      break;
+    }
+
+    case ' ': case '\t': case ',': { // whitespace
+      next(ls);
+      break;
+    }
+
+    case '-': { // comment or minus
+      // minus
+      if (next(ls) != '-') return '-';
+
+      // comment, skip line
+      while (next(ls) != EOS && !isnewline(ls));
+      break;
+    }
+
+    case '=': { // EQ
+      next(ls);
+      return '=';
+    }
+
+    case '<': { // LT, LTE, ASSIGN
+      next(ls);
+      if(ls->current == '=') {
+        next(ls);
+        return TK_LTE;
+      }
+      else if(ls->current == '-'){
+        next(ls);
+        return TK_ASSIGN;
+      }
+      else return '<';
+    }
+
+    case '>': { // GT, GTE
+      next(ls);
+      if(ls->current == '=') return TK_GTE;
+      else return '>';
+    }
+
+    case '"': { // STRING
+      read_string(ls, info);
+      return TK_STRING;
+    }
+
+    case EOS: { // EOS
+      return TK_EOS;
+    }
+
+    default: {
+      if (lisdigit(ls->current)) { // NUMERIC
+        read_numeric (ls, info);
+        return TK_REAL;
+      }
+
+      if (lisalpha(ls->current)) { // ID or RESERVED
+        return read_id_or_reserved(ls, info);
+      }
+
+      // operators, single characters, etc.
+      int c = ls->current;
+      next(ls);
+      return c;
+    }
+    }
   }
 }
 
