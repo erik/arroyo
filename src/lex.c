@@ -97,6 +97,7 @@ static void read_numeric (lexer_state *ls, token_info *info)
       seen_dot = 1;
     }
     else if (!lisdigit (ls->current)) {
+
       // bad number
       if (lisalpha (ls->current)) {
         while (lisalnum (ls->current)) save_and_next (ls);
@@ -188,10 +189,21 @@ static int lex(lexer_state *ls, token_info *info)
         return read_id_or_reserved(ls, info);
       }
 
-      // operators, single characters, etc.
+
       int c = ls->current;
-      next(ls);
-      return c;
+
+      // valid operators, single character tokens, etc.
+      switch(ls->current) {
+      case '+': case '-': case '*': case '/':
+      case '!': case '>': case '<': case '=':
+      case '(': case ')': case '[': case ']':
+      case '{': case '}': case ':': case '.':
+        next (ls);
+        return c;
+
+      default:
+        lexer_error (ls, "unrecognized symbol %c", c);
+      }
     }
     }
   }
@@ -232,6 +244,8 @@ void lexer_create(lexer_state *ls, reader* r)
 
   ls->linenum = 1;
   ls->current = 0;
+
+  next (ls);
 
   ls->t.type = ls->next.type = TK_EOS;
 }

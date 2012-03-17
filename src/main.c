@@ -3,8 +3,34 @@
 #include "parse.h"
 
 #include <stdio.h>
+#include <readline/readline.h>
+#include <readline/history.h>
 
-const char* string_reader(void* dummy, unsigned* size)
+const char* readline_reader (void* dummy, unsigned* size)
+{
+  (void)dummy;
+
+  const char* input = readline (">> ");
+
+  if (input == NULL) {
+    *size = 0;
+    return NULL;
+  }
+  add_history (input);
+
+  static char* ret = NULL;
+
+  if (ret != NULL) free (ret);
+
+  ret = malloc (strlen (input) + 2);
+  strcpy (ret, input);
+  strcat (ret, "\n");
+
+  *size = strlen (ret);
+  return ret;
+}
+
+const char* string_reader (void* dummy, unsigned* size)
 {
   (void)dummy;
 
@@ -38,10 +64,6 @@ int main (void) {
 
   parser_state* ps = calloc (sizeof (parser_state), 1);
   ps->ls = ls;
-
-  // skip leading EOF token
-  // FIXME: this shouldn't happen.
-  lexer_next_token (ls);
 
   parse (ps);
 

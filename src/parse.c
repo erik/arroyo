@@ -139,13 +139,15 @@ static void parse_expression (parser_state* ps)
     }
 
     // function call
-    if (accept (ps, '(')) {
+    else if (accept (ps, '(')) {
       puts ("function call");
       parse_block (ps);
     }
 
     // just an id
-    /* AST stuff goes here */
+    else {
+      /* AST stuff goes here */
+    }
   }
   else if (accept (ps, TK_FN))
     parse_function (ps);
@@ -171,6 +173,9 @@ static void parse_expression (parser_state* ps)
     next_token (ps);
     parse_expression (ps);
   }
+
+  else if (get_binop (ps))
+    parser_error (ps, "unexpected binary operator %s", tok_to_string (ps->t.type));
 
   else {
     parser_error (ps, "expected expression, got '%s'",
