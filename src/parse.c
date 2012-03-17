@@ -7,11 +7,13 @@
 #include "parse.h"
 #include "lex.h"
 
+static void parse_array       (parser_state*);
 static void parse_assignment  (parser_state*);
 static void parse_block       (parser_state*);
 static void parse_conditional (parser_state*);
 static void parse_expression  (parser_state*);
 static void parse_function    (parser_state*);
+static void parse_hash        (parser_state*);
 static void parse_program     (parser_state*);
 
 static void parser_error (parser_state* ps, const char* fmt, ...)
@@ -43,7 +45,7 @@ static int accept (parser_state* ps, int type)
   if (type == ps->t.type) {
     const char* info = ps->t.info.string == NULL ? "" : ps->t.info.string;
     char* str = tok_to_string(type);
-    printf("\taccepting %s\t\t%s\n", str, info);
+    printf("\t%-10s\t%s\n", str, info);
     free(str);
 
     next_token (ps);
@@ -102,6 +104,15 @@ static enum binary_op get_binop (parser_state* ps)
   }
 }
 
+/* "[" EXPRESSION* "]" */
+static void parse_array (parser_state* ps)
+{
+  while (ps->t.type != ']') {
+    parse_expression (ps);
+  }
+  expect (ps, ']');
+}
+
 /* ID "<-" EXPRESSION */
 static void parse_assignment (parser_state* ps)
 {
@@ -122,10 +133,8 @@ static void parse_block (parser_state* ps)
 static void parse_expression (parser_state* ps)
 {
   if (accept (ps, TK_ID)) {
-
     // assignment
     if (accept (ps, TK_ASSIGN)) {
-      puts ("assignment");
       parse_assignment (ps);
     }
 
@@ -138,16 +147,22 @@ static void parse_expression (parser_state* ps)
     // just an id
     /* AST stuff goes here */
   }
-  else if (accept(ps, TK_FN))
-    parse_function(ps);
+  else if (accept (ps, TK_FN))
+    parse_function (ps);
 
-  else if (accept(ps, TK_REAL))
+  else if (accept (ps, TK_REAL))
     /* AST stuff here */ ;
-  else if (accept(ps, TK_STRING))
+  else if (accept (ps, TK_STRING))
     /* AST stuff here */ ;
 
   else if (accept(ps, '('))
     parse_block(ps);
+
+  else if (accept (ps, '{'))
+    parse_hash (ps);
+
+  else if (accept (ps, '['))
+    parse_array (ps);
 
   else if (get_unaryop (ps)) {
     fprintf (stderr,
@@ -157,20 +172,21 @@ static void parse_expression (parser_state* ps)
     parse_expression (ps);
   }
 
-  // TODO: this approach currently makes operator precedence
-  // difficult to implement, should be refactored
-  else if (get_binop (ps)) {
-    printf("binop %s (%s)\n",
-           tok_to_string (ps->t.type), ps->t.info.string);
-
-    next_token (ps);
-    parse_expression (ps);
-  }
-
   else {
     parser_error (ps, "expected expression, got '%s'",
                   (char*)tok_to_string (ps->ls->t.type));
     return;
+  }
+
+
+  // TODO: this approach currently evaluates left to right and makes
+  // precendence difficult to implement, should be refactored
+  if (get_binop (ps)) {
+    printf("binop %s %s\n",
+           tok_to_string (ps->t.type), ps->t.info.string);
+
+    next_token (ps);
+    parse_expression (ps);
   }
 }
 
@@ -194,8 +210,27 @@ static void parse_function (parser_state* ps)
   parse_expression (ps);
 }
 
+/* "{" (PRIMITIVE ":" EXPRESSION)* "}" */
+static void parse_hash (parser_state* ps)
+{
+  while(ps->t.type != '}') {
+    /* TODO: AST things here */
+
+    if (accept (ps, TK_STRING)) ;
+    else if (accept (ps, TK_ID));
+    else
+      parser_error (ps, "invalid key type");
+
+    expect (ps, ':');
+
+    parse_expression (ps);
+  }
+  expect (ps, '}');
+}
+
 static void parse_program (parser_state* ps)
 {
+  // error handling
   if (setjmp (ps->error.buf)) {
     fprintf (stderr, "Aborting after %d error%s.\n", ps->error.count,
              ps->error.count > 1 || ps->error.count == 0 ? "s" : "");
