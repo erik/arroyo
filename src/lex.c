@@ -227,7 +227,7 @@ token lexer_lookahead (lexer_state* ls)
 void lexer_create(lexer_state *ls, reader* r)
 {
   ls->buf = calloc (sizeof (buffer), 1);
-  buffer_create(ls->buf, 1);
+  buffer_create(ls->buf, 8);
 
   ls->r = r;
 

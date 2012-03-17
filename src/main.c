@@ -16,7 +16,7 @@ const char* string_reader(void* dummy, unsigned* size)
 
   read = 1;
   const char* prgn =
-    "main <- fn (x:integer., y, z) (\n"                            \
+    "main <- fn (x:integer, y, z) (\n"                            \
     "  longer_name123 <- 1.010002\n"                              \
     "  y <- -1,\n"                                                \
     "  -- this is a comment\n"                                    \

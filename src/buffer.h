@@ -6,6 +6,12 @@
 #include <stdlib.h>
 #include <string.h>
 
+// Provides a dynamic string / byte buffer implementation. Buffer
+// grows exponentially as needed.
+
+// This should reduce the number of reallocations needed (but will
+// grow massive fairly quickly)
+
 typedef struct buffer {
   char* buf;
   unsigned pos, size;
