@@ -43,10 +43,11 @@ typedef struct lexer_state {
 
 enum token_type {
   TK_ERROR = FIRST_TOK, TK_EOS, TK_ID, TK_REAL,
-  TK_STRING, TK_IF, TK_WHEN, TK_FOR,
-  TK_TO, TK_FN, TK_ASSIGN, TK_LTE,
-  TK_GTE, TK_NEQ, TK_TRUE, TK_FALSE,
-  TK_AND, TK_OR, TK_XOR,
+  TK_STRING, TK_IF, TK_ELSEIF, TK_ELSE,
+  TK_WHEN, TK_FOR, TK_TO, TK_FN,
+  TK_ASSIGN, TK_LTE, TK_GTE, TK_NEQ,
+  TK_TRUE, TK_FALSE, TK_AND, TK_OR,
+  TK_XOR,
 
   LAST_TOK
 };
@@ -54,13 +55,13 @@ enum token_type {
 // numer of tokens
 #define NUM_TOK (LAST_TOK - FIRST_TOK)
 
-
 static const char* tokens[NUM_TOK] = {
   "<error>", "<eos>", "<id>", "<real>",
-  "<string>", "if", "when", "for",
-  "to", "fn", "<-", "<=",
-  ">=", "/=", "true", "false",
-  "and", "or", "xor"
+  "<string>", "if", "elseif", "else",
+  "when", "for", "to", "fn",
+  "<-", "<=", ">=", "/=",
+  "true", "false", "and", "or",
+  "xor"
 };
 
 // simplistic token to string handling

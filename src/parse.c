@@ -14,6 +14,7 @@ static void parse_conditional (parser_state*);
 static void parse_expression  (parser_state*);
 static void parse_function    (parser_state*);
 static void parse_hash        (parser_state*);
+static void parse_if          (parser_state*);
 static void parse_program     (parser_state*);
 
 static void parser_error (parser_state* ps, const char* fmt, ...)
@@ -140,7 +141,6 @@ static void parse_expression (parser_state* ps)
 
     // function call
     else if (accept (ps, '(')) {
-      puts ("function call");
       parse_block (ps);
     }
 
@@ -155,6 +155,12 @@ static void parse_expression (parser_state* ps)
   else if (accept (ps, TK_REAL))
     /* AST stuff here */ ;
   else if (accept (ps, TK_STRING))
+    /* AST stuff here */ ;
+
+  else if (accept (ps, TK_TRUE))
+    /* AST stuff here */ ;
+
+  else if (accept (ps, TK_FALSE))
     /* AST stuff here */ ;
 
   else if (accept(ps, '('))
@@ -174,12 +180,25 @@ static void parse_expression (parser_state* ps)
     parse_expression (ps);
   }
 
-  else if (get_binop (ps))
-    parser_error (ps, "unexpected binary operator %s", tok_to_string (ps->t.type));
+  else if (accept (ps, TK_IF))
+    parse_if (ps);
 
+  // binary operator is handled further down, can't start an expression by itself
+  else if (get_binop (ps))
+    parser_error (ps, "unexpected binary operator");
+
+  // bad tokens, should be eaten by relevant parse_xxxx functions
   else {
-    parser_error (ps, "expected expression, got '%s'",
-                  (char*)tok_to_string (ps->ls->t.type));
+    switch (ps->t.type) {
+    case ')': case ']': case '}':
+      parser_error (ps, "unmatched closing brace");
+      break;
+
+    default:
+      parser_error (ps, "expected expression, got '%s'",
+                    (char*)tok_to_string (ps->ls->t.type));
+    }
+
     return;
   }
 
@@ -236,6 +255,24 @@ static void parse_hash (parser_state* ps)
     parse_expression (ps);
   }
   expect (ps, '}');
+}
+
+/* "if" EXPRESSION EXPRESSION ("elseif" EXPRESSION EXPRESSION)* ("else" EXPRESSION)? */
+static void parse_if (parser_state* ps)
+{
+  // if expr
+  parse_expression (ps);
+
+  // then expr
+  parse_expression (ps);
+
+  // else if expr
+  while (accept (ps, TK_ELSEIF))
+    parse_expression (ps);
+
+  // else expr
+  if (accept (ps, TK_ELSE))
+    parse_expression (ps);
 }
 
 static void parse_program (parser_state* ps)

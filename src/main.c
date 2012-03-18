@@ -48,6 +48,7 @@ const char* string_reader (void* dummy, unsigned* size)
     "  b <- {adder : fn (v) v+1, b:2}\n"                          \
     "  -- this is a comment\n"                                    \
     "  c <- 1 = 1 and 2 < 3,\n"                                   \
+    "  print (if 2 < 3 \"sane\" else \"insane\")\n"               \
     "  print (longer_name123))\n";
 
   *size = strlen(prgn);
