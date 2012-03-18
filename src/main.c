@@ -42,7 +42,7 @@ const char* string_reader (void* dummy, unsigned* size)
 
   read = 1;
   const char* prgn =
-    "main <- fn (x:integer, y, z) (\n"                            \
+    "fn main (x:integer, y, z) (\n"                               \
     "  longer_name123 <- 1.010 + 3\n"                             \
     "  a <- [y z 4]\n"                                            \
     "  b <- {adder : fn (v) v+1, b:2}\n"                          \

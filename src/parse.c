@@ -198,6 +198,11 @@ static void parse_expression (parser_state* ps)
 /* "fn" "(" ID* ")" EXPRESSION */
 static void parse_function (parser_state* ps)
 {
+
+  // named function
+  if (accept (ps, TK_ID))
+    printf ("named func\n");
+
   // argument list
   expect (ps, '(');
 

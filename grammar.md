@@ -11,7 +11,7 @@ BOOLEAN        := "true" | "false"
 ARRAY          := "[" EXPRESSION* "]"
 HASH           := "{" (STRING | ID ":" EXPRESSION)* "}"
 
-FUNCTION       := "fn" "(" (ID (":" ID)? )* ")" EXPRESSION
+FUNCTION       := "fn" ID? "(" (ID (":" ID)? )* ")" EXPRESSION
 
 STRING         := "\"" [^"\n]* "\""
 REAL           := [0-9]+(\.[0-9]+)?
