@@ -15,6 +15,7 @@ static void parse_expression  (parser_state*);
 static void parse_function    (parser_state*);
 static void parse_hash        (parser_state*);
 static void parse_if          (parser_state*);
+static void parse_loop        (parser_state*);
 static void parse_program     (parser_state*);
 
 static void parser_error (parser_state* ps, const char* fmt, ...)
@@ -183,6 +184,13 @@ static void parse_expression (parser_state* ps)
   else if (accept (ps, TK_IF))
     parse_if (ps);
 
+  else if (accept (ps, TK_WHEN))
+    parse_expression (ps);
+
+
+  else if (accept (ps, TK_LOOP))
+    parse_loop (ps);
+
   // binary operator is handled further down, can't start an expression by itself
   else if (get_binop (ps))
     parser_error (ps, "unexpected binary operator");
@@ -273,6 +281,29 @@ static void parse_if (parser_state* ps)
   // else expr
   if (accept (ps, TK_ELSE))
     parse_expression (ps);
+}
+
+/* "loop" EXPRESSION? "while" | "until" | "do" EXPRESSION */
+static void parse_loop (parser_state* ps)
+{
+  // no expression
+  if (accept (ps, TK_WHILE))      ;
+  else if (accept (ps, TK_UNTIL)) ;
+  else if (accept (ps, TK_DO))    ;
+
+  // using expression
+  else {
+    parse_expression (ps);
+
+    if (accept (ps, TK_WHILE))      ;
+    else if (accept (ps, TK_UNTIL)) ;
+    else if (accept (ps, TK_DO))    ;
+
+    else
+      parser_error (ps, "expected loop conditional type");
+  }
+
+  parse_expression (ps);
 }
 
 static void parse_program (parser_state* ps)

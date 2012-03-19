@@ -5,7 +5,7 @@ In progress grammar for the language (not finalized).
 
 ```
 ID             := [a-zA-Z_][a-zA-Z0-9_]+
-PRIMITIVE      := FUNCTION | STRING | REAL | BOOLEAN | ARRAY | HASH | ID
+PRIMARY        := FUNCTION | STRING | REAL | BOOLEAN | ARRAY | HASH | ID
 
 BOOLEAN        := "true" | "false"
 ARRAY          := "[" EXPRESSION* "]"
@@ -16,9 +16,7 @@ FUNCTION       := "fn" ID? "(" (ID (":" ID)? )* ")" EXPRESSION
 STRING         := "\"" [^"\n]* "\""
 REAL           := [0-9]+(\.[0-9]+)?
 
-FOR            := "for" ID "<-" EXPRESSION "to" EXPRESSION ("by" EXPRESSION)?  EXPRESSION
-WHILE          := "while" EXPRESSION EXPRESSION
-LOOP           := FOR | WHILE
+LOOP           := "loop" EXPRESSION? "while" | "until" | "do" EXPRESSION
 
 IF             := "if" EXPRESSION EXPRESSION ("elseif" EXPRESSION EXPRESSION)* ("else" EXPRESSION)?
 WHEN           := "when" EXPRESSION EXPRESSION
@@ -29,7 +27,7 @@ CONDITIONALEXP := EXPRESSION CONDITIONAL EXPRESSION
 BLOCK          := "(" EXPRESSION* ")"
 ASSIGNMENT     := ID "<-" EXPRESSION
 
-EXPRESSION     := ID | PRIMITVE | CONDITIONALEXP | LOOP | BLOCK | ASSIGNMENT
+EXPRESSION     := PRIMARY | CONDITIONALEXP | LOOP | BLOCK | ASSIGNMENT
 
 PROGRAM        := EXPRESSION* EOS
 ```

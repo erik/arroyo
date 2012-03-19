@@ -42,14 +42,16 @@ const char* string_reader (void* dummy, unsigned* size)
 
   read = 1;
   const char* prgn =
-    "fn main (x:integer, y, z) (\n"                               \
-    "  longer_name123 <- 1.010 + 3\n"                             \
-    "  a <- [y z 4]\n"                                            \
-    "  b <- {adder : fn (v) v+1, b:2}\n"                          \
-    "  -- this is a comment\n"                                    \
-    "  c <- 1 = 1 and 2 < 3,\n"                                   \
-    "  print (if 2 < 3 \"sane\" else \"insane\")\n"               \
-    "  print (longer_name123))\n";
+    "fn main (x:integer, y, z) (\n"                                 \
+    "    longer_name123 <- 1.010 + 3\n"                             \
+    "    a <- [y z 4]\n"                                            \
+    "    b <- {adder : fn (v) v+1, b:2}\n"                          \
+    "    -- this is a comment\n"                                    \
+    "    c <- true and 2 < 3,\n"                                    \
+    "    print (if 2 < 3 \"sane\" else \"insane\")\n"               \
+    "    print (longer_name123))\n";
+
+  puts (prgn);
 
   *size = strlen(prgn);
   return prgn;
