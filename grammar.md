@@ -5,11 +5,12 @@ In progress grammar for the language (not finalized).
 
 ```
 ID             := [a-zA-Z_][a-zA-Z0-9_]+
-PRIMARY        := FUNCTION | STRING | REAL | BOOLEAN | ARRAY | HASH | ID
+PRIMARY        := FUNCTION | STRING | REAL | BOOLEAN | ARRAY | HASH | ID | NIL
 
 BOOLEAN        := "true" | "false"
 ARRAY          := "[" EXPRESSION* "]"
 HASH           := "{" (STRING | ID ":" EXPRESSION)* "}"
+NIL            := "nil"
 
 FUNCTION       := "fn" ID? "(" (ID (":" ID)? )* ")" EXPRESSION
 

@@ -50,7 +50,7 @@ enum token_type {
   TK_FN,
   TK_ASSIGN,
   TK_LTE, TK_GTE, TK_NEQ,
-  TK_TRUE, TK_FALSE,
+  TK_TRUE, TK_FALSE, TK_NIL,
   TK_AND, TK_OR, TK_XOR,
   TK_LOOP, TK_WHILE, TK_UNTIL, TK_DO,
 
@@ -68,7 +68,7 @@ static const char* tokens[NUM_TOK] = {
   "fn",
   "<-",
   "<=", ">=", "/=",
-  "true", "false",
+  "true", "false", "nil",
   "and", "or", "xor",
   "loop", "while", "until", "do"
 };

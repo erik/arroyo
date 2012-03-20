@@ -57,18 +57,30 @@ const char* string_reader (void* dummy, unsigned* size)
   return prgn;
 }
 
-int main (void) {
+int main (int argc, char** argv) {
+
+  int dorepl = 0;
+
+  for (int i = 1; i < argc; ++i)
+    if (!strcmp (argv[i], "repl")) dorepl = 1;
 
   reader r;
-  reader_create (&r, string_reader, NULL);
+  if (dorepl)
+    reader_create (&r, readline_reader, NULL);
+  else
+    reader_create (&r, string_reader, NULL);
 
   lexer_state *ls = calloc (sizeof (lexer_state), 1);
   lexer_create (ls, &r);
 
   parser_state* ps = calloc (sizeof (parser_state), 1);
   ps->ls = ls;
+  ps->die_on_error = 0;
 
-  parse (ps);
+  while (ps->t.type != TK_EOS) {
+    ps->error.count = 0;
+    parse (ps);
+  }
 
   lexer_destroy (ls);
   free (ls);

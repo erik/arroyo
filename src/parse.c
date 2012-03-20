@@ -157,11 +157,11 @@ static void parse_expression (parser_state* ps)
     /* AST stuff here */ ;
   else if (accept (ps, TK_STRING))
     /* AST stuff here */ ;
-
   else if (accept (ps, TK_TRUE))
     /* AST stuff here */ ;
-
   else if (accept (ps, TK_FALSE))
+    /* AST stuff here */ ;
+  else if (accept (ps, TK_NIL))
     /* AST stuff here */ ;
 
   else if (accept(ps, '('))
@@ -187,7 +187,6 @@ static void parse_expression (parser_state* ps)
   else if (accept (ps, TK_WHEN))
     parse_expression (ps);
 
-
   else if (accept (ps, TK_LOOP))
     parse_loop (ps);
 
@@ -200,6 +199,10 @@ static void parse_expression (parser_state* ps)
     switch (ps->t.type) {
     case ')': case ']': case '}':
       parser_error (ps, "unmatched closing brace");
+      break;
+
+    case TK_ASSIGN:
+      parser_error (ps, "can only assign to an id");
       break;
 
     default:
@@ -323,9 +326,8 @@ static void parse_program (parser_state* ps)
   expect (ps, TK_EOS);
 }
 
-void parse (parser_state* ps)
+int parse (parser_state* ps)
 {
-  ps->die_on_error = 1;
   ps->error.max = 20;
 
   ps->t = lexer_next_token (ps->ls);
@@ -334,6 +336,9 @@ void parse (parser_state* ps)
 
   if (!ps->error.count) {
     fprintf(stderr, "Parsing completed successfully\n");
+    return 0;
   }
+
+  return 1;
 }
 
