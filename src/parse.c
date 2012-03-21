@@ -102,6 +102,8 @@ static enum binary_op get_binop (parser_state* ps)
   case TK_OR  : return OP_OR;
   case TK_XOR : return OP_XOR;
 
+  case TK_ASSIGN : return OP_ASSIGN;
+
   default     : return OP_NOTBINOP;
   }
 }
@@ -135,13 +137,8 @@ static void parse_block (parser_state* ps)
 static void parse_expression (parser_state* ps)
 {
   if (accept (ps, TK_ID)) {
-    // assignment
-    if (accept (ps, TK_ASSIGN)) {
-      parse_assignment (ps);
-    }
-
     // function call
-    else if (accept (ps, '(')) {
+    if (accept (ps, '(')) {
       parse_block (ps);
     }
 
@@ -199,10 +196,6 @@ static void parse_expression (parser_state* ps)
     switch (ps->t.type) {
     case ')': case ']': case '}':
       parser_error (ps, "unmatched closing brace");
-      break;
-
-    case TK_ASSIGN:
-      parser_error (ps, "can only assign to an id");
       break;
 
     default:
