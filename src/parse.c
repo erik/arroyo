@@ -108,6 +108,43 @@ static enum binary_op get_binop (parser_state* ps)
   }
 }
 
+// return binary/unary operator precedence (arbitrary values, high
+// precedence is higher number)
+static int op_precedence (int op)
+{
+  switch (op) {
+    // unary operators
+  case '-':
+  case '!':
+    return 100;
+
+    // binary operators
+  case OP_DOT:
+    return 90;
+
+  case OP_MUL: case OP_DIV: case OP_MOD:
+    return 80;
+
+  case OP_ADD: case OP_SUB:
+    return 70;
+
+  case OP_NEQ: case OP_EQ: case OP_LT: case OP_LTE:
+
+  case OP_GT: case OP_GTE:
+    return 60;
+
+  case OP_AND:
+    return 55;
+
+  case OP_OR: case OP_XOR:
+    return 50;
+
+  case OP_ASSIGN:
+    return 40;
+  }
+  return -1;
+}
+
 /* "[" EXPRESSION* "]" */
 static void parse_array (parser_state* ps)
 {
