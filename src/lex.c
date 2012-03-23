@@ -1,12 +1,10 @@
-// for strdup
-#define _BSD_SOURCE 1
-
 #include <stdlib.h>
 #include <stdio.h>
 #include <ctype.h>
 #include <string.h>
 
 #include "lex.h"
+#include "util.h"
 
 #define lisalpha(c) (isalpha(c) || c == '_')
 #define lisalnum(c) (isalnum(c) || c == '_')
@@ -132,7 +130,7 @@ static int lex(lexer_state *ls, token_info *info)
       break;
     }
 
-    case ' ': case '\t': case ',': { // whitespace
+    case ' ': case '\t': { // whitespace
       next(ls);
       break;
     }
@@ -198,6 +196,7 @@ static int lex(lexer_state *ls, token_info *info)
       case '!': case '>': case '<': case '=':
       case '(': case ')': case '[': case ']':
       case '{': case '}': case ':': case '.':
+      case ',':
         next (ls);
         return c;
 

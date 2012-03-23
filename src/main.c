@@ -1,6 +1,7 @@
 #include "lex.h"
 #include "reader.h"
 #include "parse.h"
+#include "ast.h"
 
 #include <stdio.h>
 #include <readline/readline.h>
@@ -22,9 +23,9 @@ const char* readline_reader (void* dummy, unsigned* size)
 
   if (ret != NULL) free (ret);
 
-  ret = malloc (strlen (input) + 2);
+  ret = malloc (strlen (input) + 3);
   strcpy (ret, input);
-  strcat (ret, "\n");
+  strcat (ret, ",\n");
 
   *size = strlen (ret);
   return ret;
@@ -42,10 +43,10 @@ const char* string_reader (void* dummy, unsigned* size)
 
   read = 1;
   const char* prgn =
-    "fn main (x:integer, y, z) (\n"                                 \
+    "fn main (x:integer y z) (\n"                                   \
     "    longer_name123 <- 1.010 + 3\n"                             \
     "    a <- [y z 4]\n"                                            \
-    "    b <- {adder : fn (v) v+1, b:2}\n"                          \
+    "    b <- {adder : fn (v) v+1 b:2}\n"                          \
     "    -- this is a comment\n"                                    \
     "    c <- true and 2 < 3,\n"                                    \
     "    print (if 2 < 3 \"sane\" else \"insane\")\n"               \
@@ -76,10 +77,19 @@ int main (int argc, char** argv) {
   parser_state* ps = calloc (sizeof (parser_state), 1);
   ps->ls = ls;
   ps->die_on_error = 0;
+  ps->error.max = 20;
+  ps->t = lexer_next_token (ps->ls);
 
-  while (ps->t.type != TK_EOS) {
-    ps->error.count = 0;
-    parse (ps);
+  while (ps->t.type != TK_EOS && ps->t.type != TK_ERROR) {
+    expression_node* node = parse_expression (ps);
+
+    const char *str = expression_node_to_string (node);
+    if (str != NULL) {
+      printf ("==> %s\n", str);
+      free ((char*)str);
+    }
+
+    expression_node_destroy (node);
   }
 
   lexer_destroy (ls);

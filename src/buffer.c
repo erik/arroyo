@@ -20,7 +20,7 @@ void buffer_putc (buffer* b, char c)
 
 void buffer_putsn (buffer* b, const char* s, unsigned sz)
 {
-  if (++b->pos + sz >= b->size) buffer_resize (b, sz + b->size);
+  if (b->pos + sz >= b->size) buffer_resize (b, sz + b->size);
 
   for (unsigned i = 0; i < sz; ++i)
     b->buf[b->pos++] = s[i];

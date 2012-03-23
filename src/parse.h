@@ -6,6 +6,7 @@
 #include <setjmp.h>
 
 #include "lex.h"
+#include "ast.h"
 
 struct lexer_state;
 
@@ -39,38 +40,12 @@ enum binary_op {
   OP_ASSIGN
 };
 
-typedef struct expression_node {
-  enum expression_type type;
-
-  union {
-    struct {
-      double real;
-    } real_node;
-
-    struct {
-      const char* string;
-    } string_node;
-
-    struct {
-      unsigned num_expr;
-      struct expression_node* expressions;
-    } block_node;
-
-    struct {
-      const char* id;
-    } id_node;
-
-    struct {
-      struct id_node* id;
-      struct expression_node* value;
-    } assign_node;
-  } node;
-
-} expression_node;
-
 typedef struct parser_state {
   lexer_state* ls;
   token t;
+  token_info info;
+
+  expression_node* ast_root;
 
   int die_on_error;   // die after a single error?
 
@@ -82,5 +57,6 @@ typedef struct parser_state {
 } parser_state;
 
 int parse (parser_state* ps);
+expression_node* parse_expression (parser_state* ps);
 
 #endif /* _PARSE_H_ */

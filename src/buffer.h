@@ -17,7 +17,7 @@ typedef struct buffer {
   unsigned pos, size;
 } buffer;
 
-
+#include <stdio.h>
 // callocing instead of a straight realloc to initialize memory (and shut valgrind up)
 #define buffer_grow(b        ) {                                     \
     void* _ptr = calloc ((b->size*=2), 1);                           \
