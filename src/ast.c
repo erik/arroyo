@@ -14,7 +14,7 @@
     /* WHEN_NODE (HASH, var hash_node_##func);     */               \
     /* WHEN_NODE (BINARY, var binary_node_##func); */               \
     /* WHEN_NODE (UNARY, var unary_node_##func);   */               \
-    /* WHEN_NODE (LOOP, var loop_node_##func);     */               \
+    WHEN_NODE (LOOP, var loop_node_##func);                         \
     WHEN_NODE (IF, var if_node_##func);                             \
     WHEN_NODE (BLOCK, var block_node_##func);                       \
   default:                                                          \

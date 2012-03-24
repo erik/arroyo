@@ -90,6 +90,7 @@ typedef struct {
 typedef struct {
   enum loop_type type;
   struct expression_node* init;
+  struct expression_node* cond;
   struct expression_node* body;
 } loop_node;
 
@@ -180,6 +181,16 @@ string_node*     if_node_to_string_node (if_node*);
 void             if_node_set_condition (if_node*, expression_node*, expression_node*);
 void             if_node_add_elseif (if_node*, expression_node*, expression_node*);
 void             if_node_set_else (if_node*, expression_node*);
+
+// loop node
+loop_node*       loop_node_create (void);
+void             loop_node_destroy (loop_node*);
+expression_node* loop_node_evaluate (loop_node*);
+string_node*     loop_node_to_string_node (loop_node*);
+void             loop_node_set_type (loop_node*, enum loop_type);
+void             loop_node_set_init (loop_node*, expression_node*);
+void             loop_node_set_cond (loop_node*, expression_node*);
+void             loop_node_set_body (loop_node*, expression_node*);
 
 // TODO: finish
 // ... etc

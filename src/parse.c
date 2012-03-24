@@ -411,26 +411,34 @@ static if_node* parse_if (parser_state* ps, int when)
 /* "loop" EXPRESSION? "while" | "until" | "do" EXPRESSION */
 static loop_node* parse_loop (parser_state* ps)
 {
+  loop_node* loop = loop_node_create ();
+
   // no expression
-  if (accept (ps, TK_WHILE))      ;
-  else if (accept (ps, TK_UNTIL)) ;
-  else if (accept (ps, TK_DO))    ;
+  if (accept (ps, TK_WHILE))
+    loop_node_set_type (loop, LOOP_WHILE);
+  else if (accept (ps, TK_UNTIL))
+    loop_node_set_type (loop, LOOP_UNTIL);
+  else if (accept (ps, TK_DO))
+    loop_node_set_type (loop, LOOP_DO);
 
   // using expression
   else {
-    parse_expression (ps);
+    loop_node_set_init (loop, parse_expression (ps));
 
-    if (accept (ps, TK_WHILE))      ;
-    else if (accept (ps, TK_UNTIL)) ;
-    else if (accept (ps, TK_DO))    ;
-
+    if (accept (ps, TK_WHILE))
+      loop_node_set_type (loop, LOOP_WHILE);
+    else if (accept (ps, TK_UNTIL))
+      loop_node_set_type (loop, LOOP_UNTIL);
+    else if (accept (ps, TK_DO))
+      loop_node_set_type (loop, LOOP_DO);
     else
       parser_error (ps, "expected loop conditional type");
   }
 
-  parse_expression (ps);
+  loop_node_set_cond (loop, parse_expression (ps));
+  loop_node_set_body (loop, parse_expression (ps));
 
-  return NULL;
+  return loop;
 }
 
 static expression_node* parse_program (parser_state* ps)

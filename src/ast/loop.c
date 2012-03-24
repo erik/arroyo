@@ -1,0 +1,94 @@
+#include "ast.h"
+#include "buffer.h"
+
+loop_node* loop_node_create (void)
+{
+  loop_node* loop = calloc (sizeof (loop_node), 1);
+
+  loop->type = LOOP_DO;
+  loop->init = NULL;
+  loop->cond = NULL;
+  loop->body = NULL;
+
+  return loop;
+}
+
+void loop_node_destroy (loop_node* loop)
+{
+  if (loop->init) expression_node_destroy (loop->init);
+  if (loop->cond) expression_node_destroy (loop->cond);
+  expression_node_destroy (loop->body);
+
+  free (loop);
+}
+
+expression_node* loop_node_evaluate (loop_node* loop)
+{
+  // TODO
+  return NULL;
+}
+
+void loop_node_set_type (loop_node* loop, enum loop_type type)
+{
+  loop->type = type;
+}
+
+void loop_node_set_init (loop_node* loop, expression_node* init)
+{
+  loop->init = init;
+}
+
+
+void loop_node_set_cond (loop_node* loop, expression_node* cond)
+{
+  loop->cond = cond;
+}
+
+void loop_node_set_body (loop_node* loop, expression_node* body)
+{
+  loop->body = body;
+}
+
+string_node* loop_node_to_string_node (loop_node* loop)
+{
+  char* tmp;
+  buffer b;
+  buffer_create (&b, 10);
+
+  buffer_puts (&b, "loop ");
+  if (loop->init) {
+    tmp = expression_node_to_string (loop->init);
+    buffer_puts (&b, tmp);
+    buffer_putc (&b, ' ');
+    free (tmp);
+  }
+
+  switch (loop->type) {
+  case LOOP_DO:
+    buffer_puts (&b, "do");
+    break;
+  case LOOP_UNTIL:
+    buffer_puts (&b, "until ");
+    tmp = expression_node_to_string (loop->cond);
+    buffer_puts (&b, tmp);
+    free (tmp);
+    break;
+  case LOOP_WHILE:
+    buffer_puts (&b, "while ");
+    tmp = expression_node_to_string (loop->cond);
+    buffer_puts (&b, tmp);
+    free (tmp);
+    break;
+  }
+
+  buffer_putc (&b, ' ');
+
+  tmp = expression_node_to_string (loop->body);
+  buffer_puts (&b, tmp);
+  buffer_putc (&b, '\0');
+
+  string_node* string = string_node_create (b.buf);
+  buffer_destroy (&b);
+
+  return string;
+}
