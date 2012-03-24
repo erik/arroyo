@@ -16,30 +16,6 @@ enum expression_type {
   LAST_EXP
 };
 
-enum unary_op {
-  // must be first
-  OP_NOTUNOP = 0,
-
-  OP_UNM, OP_NOT
-};
-
-enum binary_op {
-  // must be first
-  OP_NOTBINOP = 0,
-
-  // arithmetic
-  OP_ADD, OP_SUB, OP_MUL, OP_DIV, OP_MOD,
-  // conditionals
-  OP_LT, OP_LTE, OP_GT, OP_GTE, OP_EQ, OP_NEQ,
-  // boolean
-  OP_AND, OP_OR, OP_XOR,
-  // stringconcat
-  OP_CONCAT,
-  // members
-  OP_DOT,
-  OP_ASSIGN
-};
-
 typedef struct parser_state {
   lexer_state* ls;
   token t;

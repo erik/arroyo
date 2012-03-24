@@ -38,7 +38,31 @@ struct typed_id {
   int arg_type; // -1 for untyped
 };
 
-enum loop_type { LOOP_WHILE, LOOP_UNTIL, LOOP_DO };
+enum loop_type {
+  LOOP_WHILE,
+  LOOP_UNTIL,
+  LOOP_DO
+ };
+
+enum unary_op {
+  OP_NOTUNOP = 0,
+  OP_UNM, OP_NOT
+};
+
+enum binary_op {
+  OP_NOTBINOP = 0,
+  // arithmetic
+  OP_ADD, OP_SUB, OP_MUL, OP_DIV, OP_MOD,
+  // conditionals
+  OP_LT, OP_LTE, OP_GT, OP_GTE, OP_EQ, OP_NEQ,
+  // boolean
+  OP_AND, OP_OR, OP_XOR,
+  // stringconcat
+  OP_CONCAT,
+  // members
+  OP_DOT,
+  OP_ASSIGN
+};
 
 struct expression_node;
 
@@ -56,7 +80,8 @@ typedef struct {
 } bool_node;
 
 typedef struct {
-  const char* id;
+  char* id;
+  struct expression_node* value;
 } id_node;
 
 typedef struct {
@@ -79,7 +104,7 @@ typedef struct {
 typedef struct {
   struct expression_node* lhs;
   struct expression_node* rhs;
-  int binary_op;
+  enum binary_op op;
 } binary_node;
 
 typedef struct {
@@ -145,7 +170,7 @@ void             bool_node_destroy (bool_node*);
 string_node*     bool_node_to_string_node (bool_node*);
 
 // id node
-id_node*         id_node_create (const char*);
+id_node*         id_node_create (char*);
 void             id_node_destroy (id_node*);
 expression_node* id_node_evaluate (id_node*);
 string_node*     id_node_to_string_node (id_node*);
@@ -191,6 +216,14 @@ void             loop_node_set_type (loop_node*, enum loop_type);
 void             loop_node_set_init (loop_node*, expression_node*);
 void             loop_node_set_cond (loop_node*, expression_node*);
 void             loop_node_set_body (loop_node*, expression_node*);
+
+// binary
+binary_node*     binary_node_create (enum binary_op);
+void             binary_node_destroy (binary_node*);
+expression_node* binary_node_evaluate (binary_node*);
+string_node*     binary_node_to_string_node (binary_node*);
+void             binary_node_set_lhs (binary_node*, expression_node*);
+void             binary_node_set_rhs (binary_node*, expression_node*);
 
 // TODO: finish
 // ... etc

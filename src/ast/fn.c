@@ -45,9 +45,11 @@ string_node* fn_node_to_string_node (fn_node* fn)
   buffer_puts (&b, " (");
   for (unsigned i = 0; i < fn->nargs; ++i) {
     buffer_puts (&b, fn->args[i].id);
-    buffer_putc (&b, ' ');
-    if (fn->args[i].arg_type != -1)
+    if (fn->args[i].arg_type != -1) {
+      buffer_putc (&b, ':');
       buffer_puts (&b, node_type_string[fn->args[i].arg_type]);
+    }
+    buffer_putc (&b, ' ');
   }
   buffer_puts (&b, ") ");
 

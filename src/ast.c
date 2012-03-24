@@ -8,11 +8,11 @@
     WHEN_NODE (REAL, var real_node_##func);                         \
     WHEN_NODE (BOOL, var bool_node_##func);                         \
     WHEN_NODE (STRING, var string_node_##func);                     \
-    /* WHEN_NODE (ID, var id_node_##func); */                       \
+    WHEN_NODE (ID, var id_node_##func);                             \
     WHEN_NODE (FN, var fn_node_##func);                             \
     WHEN_NODE (ARRAY, var array_node_##func);                       \
     /* WHEN_NODE (HASH, var hash_node_##func);     */               \
-    /* WHEN_NODE (BINARY, var binary_node_##func); */               \
+    WHEN_NODE (BINARY, var binary_node_##func);                     \
     /* WHEN_NODE (UNARY, var unary_node_##func);   */               \
     WHEN_NODE (LOOP, var loop_node_##func);                         \
     WHEN_NODE (IF, var if_node_##func);                             \

@@ -201,7 +201,8 @@ expression_node* parse_expression (parser_state* ps)
 
     // just an id
     else {
-      /* AST stuff goes here */
+      type = NODE_ID;
+      node = id_node_create (ps->info.string);
     }
   }
   else if (accept (ps, TK_FN)) {
@@ -296,14 +297,14 @@ expression_node* parse_expression (parser_state* ps)
   // TODO: this approach currently evaluates left to right and makes
   // precendence difficult to implement, should be refactored
   if (get_binop (ps)) {
-    int t = ps->t.type;
+    binary_node* binary = binary_node_create (get_binop (ps));
+    binary_node_set_lhs (binary, expression_node_create (type, node));
 
+    // skip operator
     next_token (ps);
-    parse_expression (ps);
+    binary_node_set_rhs (binary, parse_expression (ps));
 
-    printf("binop '%s'(%s)\n",
-           tok_to_string (t), ps->info.string);
-
+    return expression_node_create (NODE_BINARY, binary);
   }
 
   return expression_node_create (type, node);
