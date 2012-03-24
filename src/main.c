@@ -43,14 +43,14 @@ const char* string_reader (void* dummy, unsigned* size)
 
   read = 1;
   const char* prgn =
-    "fn main (x:real y z) (\n"                                      \
-    "    longer_name123 <- 1.010 + 3\n"                             \
-    "    a <- [y z 4]\n"                                            \
-    "    -- b <- {adder : fn (v) v+1 b:2}\n"                        \
-    "    -- this is a comment\n"                                    \
-    "    c <- true and 2 < 3,\n"                                    \
-    "    print (if 2 < 3 \"sane\" else \"insane\")\n"               \
-    "    print (longer_name123))\n";
+    "fn main (x:real y z) (\n"                                        \
+    "    longer_name123 <- 1.010 + 3\n"                               \
+    "    a <- [y z \"string\" 4]\n"                                   \
+    "    -- b <- {adder : fn (v) v+1 b:2}\n"                          \
+    "    -- this is a comment\n"                                      \
+    "    c <- true and 2 < 3\n"                                       \
+    "    --print (if 2 < 3 \"sane\" else \"insane\")\n"               \
+    "    --print (longer_name123))\n)";
 
   puts (prgn);
 
@@ -83,11 +83,12 @@ int main (int argc, char** argv) {
   while (ps->t.type != TK_EOS && ps->t.type != TK_ERROR) {
     expression_node* node = parse_expression (ps);
 
-    const char *str = expression_node_to_string (node);
-    if (str != NULL) {
-      printf ("==> %s\n", str);
-      free ((char*)str);
-    }
+    string_node *str = expression_node_to_string_node (node);
+
+    //if (str != NULL) {
+      printf ("==> %s\n", str->string);
+      string_node_destroy (str);
+//    }
 
     expression_node_destroy (node);
   }

@@ -8,7 +8,7 @@ void buffer_create (buffer* b, unsigned sz)
 
 void buffer_destroy (buffer* b)
 {
-  free(b->buf);
+  free (b->buf);
 }
 
 void buffer_putc (buffer* b, char c)

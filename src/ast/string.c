@@ -12,14 +12,13 @@ string_node* string_node_create (const char* string)
 
 void string_node_destroy (string_node* node)
 {
-  // FIXME: free shouldn't trigger double free
-  // free (node->string);
-
-  node->string = NULL;
+  free (node->string);
   free (node);
 }
 
 string_node* string_node_to_string_node (string_node* node)
 {
-  return node;
+  string_node* clone = calloc (sizeof (string_node), 1);
+  clone->string = strdup (node->string);
+  return clone;
 }

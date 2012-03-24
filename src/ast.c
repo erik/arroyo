@@ -1,5 +1,5 @@
 #include "ast.h"
-
+#include "util.h"
 #include <stdio.h>
 
 #define WHEN_NODE(node, body) case NODE_##node: { body; break; }
@@ -35,6 +35,7 @@ void expression_node_destroy (expression_node* node)
 {
   NODE_TYPE_FUNCTION (node->type, /* NONE */, destroy (node->ast_node));
 
+  free (node);
   node = NULL;
 }
 
@@ -44,13 +45,23 @@ expression_node* expression_node_evaluate (expression_node* node)
   return NULL;
 }
 
-char* expression_node_to_string (expression_node* node)
+string_node* expression_node_to_string_node (expression_node* node)
 {
   string_node* string = NULL;
-
   NODE_TYPE_FUNCTION (node->type, string=, to_string_node (node->ast_node));
+  if (!string) return NULL;
+
+  return string;
+}
+
+char* expression_node_to_string (expression_node* node)
+{
+  string_node* string = expression_node_to_string_node (node);
 
   if (!string) return NULL;
 
-  return string->string;
+  char* str = strdup (string->string);
+  string_node_destroy (string);
+
+  return str;
 }

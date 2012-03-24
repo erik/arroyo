@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdarg.h>
 #include <ctype.h>
 #include <string.h>
 
@@ -186,7 +187,6 @@ static int lex(lexer_state *ls, token_info *info)
       if (lisalpha(ls->current)) { // ID or RESERVED
         return read_id_or_reserved(ls, info);
       }
-
 
       int c = ls->current;
 

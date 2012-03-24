@@ -13,6 +13,8 @@ array_node* array_node_create ()
 
 void array_node_destroy (array_node* array)
 {
+  for (unsigned i = 0; i < array->nelements; ++i)
+    expression_node_destroy (array->elements[i]);
   free (array->elements);
   free (array);
 }
@@ -46,6 +48,6 @@ string_node* array_node_to_string_node (array_node* array)
 
 void array_node_push_expression (array_node* array, expression_node* expr)
 {
-  array->elements = realloc (array->elements, array->nelements + 1);
+  array->elements = realloc (array->elements, sizeof (expression_node*) * (array->nelements + 1));
   array->elements[array->nelements++] = expr;
 }

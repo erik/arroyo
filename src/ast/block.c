@@ -31,7 +31,7 @@ expression_node* block_node_evaluate (block_node* block)
   return last;
 }
 
-#include <stdio.h>
+
 void block_node_push_expression (block_node* block, expression_node* node)
 {
   block->expressions = realloc (block->expressions,
@@ -49,9 +49,9 @@ string_node* block_node_to_string_node (block_node* block)
 
   for (unsigned i = 0; i < block->nexpressions; ++i) {
     buffer_putc(&b, ' ');
-
-    const char *str = expression_node_to_string (block->expressions[i]);
-    buffer_putsn(&b, str, strlen (str));
+    char *str = expression_node_to_string (block->expressions[i]);
+    buffer_puts(&b, str);
+    free (str);
   }
 
   buffer_puts (&b, " )");

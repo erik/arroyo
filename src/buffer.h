@@ -28,7 +28,12 @@ typedef struct buffer {
 
 #define buffer_puts(b, str   ) (buffer_putsn(b, str, strlen(str)))
 #define buffer_reset(b       ) (memset(b->buf, 0, b->size), (b->pos = 0))
-#define buffer_resize(b, sz  ) (b->buf=realloc(b->buf, (b->size = sz)))
+#define buffer_resize(b, sz  ) {                \
+    void* _ptr = calloc (b->size=sz, 1);        \
+    strcpy (_ptr, b->buf);                      \
+    free (b->buf);                              \
+    b->buf= _ptr;                               \
+  }
 
 void buffer_create  (buffer* b, unsigned sz);
 void buffer_destroy (buffer* b);
