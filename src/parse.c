@@ -313,27 +313,46 @@ expression_node* parse_expression (parser_state* ps)
 static fn_node* parse_function (parser_state* ps)
 {
 
+  fn_node* fn = fn_node_create ();
+
   // named function
   if (accept (ps, TK_ID))
-    printf ("named func\n");
+    fn_node_set_id (fn, ps->info.string);
 
   // argument list
   expect (ps, '(');
 
-  do {
+  while (accept (ps, TK_ID)) {
+    char* id = strdup (ps->info.string);
     // typed argument
     if (accept (ps, ':')) {
-      printf ("got typed argument of %s\n", ps->t.info.string);
+      int type = -1;
+
       expect (ps, TK_ID);
-    }
-  } while (accept (ps, TK_ID));
+      printf ("got typed argument of %s\n", ps->info.string);
+
+      for (unsigned i = 0; i < MAX_NODE_TYPE; ++i) {
+        if (!strcmp (ps->info.string, node_type_string[i])) {
+          type = i;
+          break;
+        }
+      }
+
+      if (type == -1)
+        parser_error (ps, "unrecognized type: %s", ps->info.string);
+
+      fn_node_add_argument (fn, id, type);
+    } else
+      fn_node_add_argument (fn, ps->info.string, -1);
+    free (id);
+  }
 
   expect (ps, ')');
 
   // function body
-  parse_expression (ps);
+  fn_node_set_body (fn, parse_expression (ps));
 
-  return NULL;
+  return fn;
 }
 
 /* "{" (PRIMITIVE ":" EXPRESSION)* "}" */

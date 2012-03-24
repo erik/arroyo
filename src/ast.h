@@ -23,11 +23,19 @@ typedef enum {
   NODE_IF,
 
   NODE_BLOCK,
+
+  MAX_NODE_TYPE
 } node_type;
 
+static const char* node_type_string[MAX_NODE_TYPE] = {
+  "string", "real", "bool", "id", "nil",
+  "function", "array", "hash", "binary", "unary",
+  "loop", "_if", "block"
+};
+
 struct typed_id {
-  const char* id;
-  const char* type;
+  char* id;
+  int arg_type; // -1 for untyped
 };
 
 enum loop_type { LOOP_WHILE, LOOP_UNTIL, LOOP_DO };
@@ -52,7 +60,7 @@ typedef struct {
 } id_node;
 
 typedef struct {
-  const char* id;
+  char* id;
   struct typed_id* args;
   unsigned int nargs;
   struct expression_node* body;
@@ -142,10 +150,13 @@ expression_node* id_node_evaluate (id_node*);
 string_node*     id_node_to_string_node (id_node*);
 
 // fn node
-fn_node*         fn_node_create (int);
+fn_node*         fn_node_create ();
 void             fn_node_destroy (fn_node*);
 expression_node* fn_node_evaluate (fn_node*);
 string_node*     fn_node_to_string_node (fn_node*);
+void             fn_node_add_argument (fn_node*, char* name, int type);
+void             fn_node_set_id (fn_node*, char*);
+void             fn_node_set_body (fn_node*, expression_node*);
 
 // array node
 array_node*      array_node_create ();
