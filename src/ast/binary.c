@@ -57,7 +57,7 @@ string_node* binary_node_to_string_node (binary_node* binary)
   buffer_puts (&b, tmp);
   free (tmp);
 
-  buffer_putc (&b, ' ');
+  buffer_putc (&b, '\0');
 
   string_node* string = string_node_create (b.buf);
   buffer_destroy (&b);

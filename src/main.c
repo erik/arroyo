@@ -85,11 +85,9 @@ int main (int argc, char** argv) {
 
     string_node *str = expression_node_to_string_node (node);
 
-    //if (str != NULL) {
-      printf ("==> %s\n", str->string);
-      string_node_destroy (str);
-//    }
+    printf ("==> %s\n", str->string);
 
+    string_node_destroy (str);
     expression_node_destroy (node);
   }
 

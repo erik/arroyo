@@ -48,13 +48,13 @@ string_node* block_node_to_string_node (block_node* block)
   buffer_putc (&b, '(');
 
   for (unsigned i = 0; i < block->nexpressions; ++i) {
-    buffer_putc(&b, ' ');
     char *str = expression_node_to_string (block->expressions[i]);
     buffer_puts(&b, str);
+    if (i != block->nexpressions - 1) buffer_putc (&b, ' ');
     free (str);
   }
 
-  buffer_puts (&b, " )");
+  buffer_putc (&b, ')');
   buffer_putc (&b, '\0');
 
   string_node* node = string_node_create (b.buf);

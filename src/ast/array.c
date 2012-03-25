@@ -30,16 +30,16 @@ string_node* array_node_to_string_node (array_node* array)
   buffer b;
   buffer_create (&b, 10);
 
-  buffer_puts (&b, "[ ");
+  buffer_putc (&b, '[');
 
   for (unsigned i = 0; i < array->nelements; ++i) {
     char* str = expression_node_to_string (array->elements[i]);
     buffer_puts (&b, str);
-    buffer_putc (&b, ' ');
+    if (i != array->nelements - 1) buffer_putc (&b, ' ');
     free (str);
   }
 
-  buffer_puts (&b, " ]");
+  buffer_putc (&b, ']');
 
   string_node* string = string_node_create (b.buf);
   buffer_destroy (&b);
@@ -48,6 +48,7 @@ string_node* array_node_to_string_node (array_node* array)
 
 void array_node_push_expression (array_node* array, expression_node* expr)
 {
-  array->elements = realloc (array->elements, sizeof (expression_node*) * (array->nelements + 1));
+  array->elements = realloc (array->elements,
+                             sizeof (expression_node*) * (array->nelements + 1));
   array->elements[array->nelements++] = expr;
 }
