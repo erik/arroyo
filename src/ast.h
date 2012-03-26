@@ -108,8 +108,8 @@ typedef struct {
 } binary_node;
 
 typedef struct {
-  struct expression_node* rhs;
-  int unary_op;
+  struct expression_node* expr;
+  enum unary_op op;
 } unary_node;
 
 typedef struct {
@@ -224,6 +224,12 @@ expression_node* binary_node_evaluate (binary_node*);
 string_node*     binary_node_to_string_node (binary_node*);
 void             binary_node_set_lhs (binary_node*, expression_node*);
 void             binary_node_set_rhs (binary_node*, expression_node*);
+
+// unary
+unary_node*      unary_node_create (enum unary_op);
+void             unary_node_destroy (unary_node*);
+expression_node* unary_node_evaluate (unary_node*);
+string_node*     unary_node_to_string_node (unary_node*);
 
 // TODO: finish
 // ... etc

@@ -249,11 +249,10 @@ expression_node* parse_expression (parser_state* ps)
   }
 
   else if (get_unaryop (ps)) {
-    fprintf (stderr,
-             "unop %s\n", tok_to_string (ps->t.type));
-
+    type = NODE_UNARY;
+    node = unary_node_create (get_unaryop (ps));
     next_token (ps);
-    parse_expression (ps);
+    ((unary_node*)node)->expr = parse_expression (ps);
   }
 
   else if (accept (ps, TK_IF)) {
