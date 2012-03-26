@@ -10,7 +10,7 @@ static binary_node*     parse_assignment (parser_state*);
 static block_node*      parse_block      (parser_state*);
 static fn_node*         parse_function   (parser_state*);
 static hash_node*       parse_hash       (parser_state*);
-static if_node*         parse_if         (parser_state*, int);
+static if_node*         parse_if         (parser_state*);
 static loop_node*       parse_loop       (parser_state*);
 static expression_node* parse_program    (parser_state*);
 
@@ -257,12 +257,7 @@ expression_node* parse_expression (parser_state* ps)
 
   else if (accept (ps, TK_IF)) {
     type = NODE_IF;
-    node = parse_if (ps, 0);
-  }
-
-  else if (accept (ps, TK_WHEN)) {
-    type = NODE_IF;
-    node = parse_if (ps, 1);
+    node = parse_if (ps);
   }
 
   else if (accept (ps, TK_LOOP)) {
@@ -376,7 +371,7 @@ static hash_node* parse_hash (parser_state* ps)
 }
 
 /* "if" EXPRESSION EXPRESSION ("elseif" EXPRESSION EXPRESSION)* ("else" EXPRESSION)? */
-static if_node* parse_if (parser_state* ps, int when)
+static if_node* parse_if (parser_state* ps)
 {
   if_node* node = if_node_create ();
 
@@ -388,21 +383,17 @@ static if_node* parse_if (parser_state* ps, int when)
 
   if_node_set_condition (node, cond, body);
 
-  // don't allow elses on when expressions
+  // else if expr
+  while (accept (ps, TK_ELSEIF)) {
+    cond = parse_expression (ps);
+    body = parse_expression (ps);
 
-  if (!when) {
-    // else if expr
-    while (accept (ps, TK_ELSEIF)) {
-      cond = parse_expression (ps);
-      body = parse_expression (ps);
+    if_node_add_elseif (node, cond, body);
+  }
 
-      if_node_add_elseif (node, cond, body);
-    }
-
-    // else expr
-    if (accept (ps, TK_ELSE)) {
-      if_node_set_else (node, parse_expression (ps));
-    }
+  // else expr
+  if (accept (ps, TK_ELSE)) {
+    if_node_set_else (node, parse_expression (ps));
   }
 
   return node;
