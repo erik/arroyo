@@ -7,7 +7,7 @@ LFLAGS := -lreadline
 CFLAGS := -Wall -Wextra -Werror -pedantic -std=c99 -g -Wno-unused -Wno-unused-parameter -Isrc/
 
 all: $(OBJ)
-	$(CC) $(OBJ) $(LFLAGS) -o test
+	$(CC) $(OBJ) $(LFLAGS) -o arroyo
 
 %.o: %.c
 	$(CC) -c $(CFLAGS) $< -o $@
