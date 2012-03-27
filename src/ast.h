@@ -67,6 +67,10 @@ enum binary_op {
 struct expression_node;
 
 typedef struct {
+  char empty;
+} nil_node;
+
+typedef struct {
   long double real;
 } real_node;
 
@@ -152,22 +156,27 @@ char*            expression_node_to_string (expression_node*);
 // nil
 expression_node* nil_node_create (void);
 void             nil_node_destroy (expression_node*);
+expression_node* nil_node_evaluate (nil_node*);
 string_node*     nil_node_to_string_node (expression_node*);
 
 // real
 real_node*       real_node_create (long double);
 void             real_node_destroy (real_node*);
+expression_node* real_node_evaluate (real_node*);
 string_node*     real_node_to_string_node (real_node*);
 
 // string node
 string_node*     string_node_create (const char* string);
 void             string_node_destroy (string_node*);
+expression_node* string_node_evaluate (string_node*);
 string_node*     string_node_to_string_node (string_node*);
 
 // bool node
 bool_node*       bool_node_create (int);
 void             bool_node_destroy (bool_node*);
+expression_node* bool_node_evaluate (bool_node*);
 string_node*     bool_node_to_string_node (bool_node*);
+bool_node*       bool_node_create_from_expression (expression_node*);
 
 // id node
 id_node*         id_node_create (char*);

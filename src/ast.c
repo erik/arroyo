@@ -4,21 +4,21 @@
 
 #define WHEN_NODE(node, body) case NODE_##node: { body; break; }
 #define NODE_TYPE_FUNCTION(type, var, func) switch (type) {         \
-    WHEN_NODE (NIL, var nil_node_##func);                           \
-    WHEN_NODE (REAL, var real_node_##func);                         \
-    WHEN_NODE (BOOL, var bool_node_##func);                         \
-    WHEN_NODE (STRING, var string_node_##func);                     \
-    WHEN_NODE (ID, var id_node_##func);                             \
-    WHEN_NODE (FN, var fn_node_##func);                             \
-    WHEN_NODE (ARRAY, var array_node_##func);                       \
     /* WHEN_NODE (HASH, var hash_node_##func);     */               \
-    WHEN_NODE (BINARY, var binary_node_##func);                     \
-    WHEN_NODE (UNARY, var unary_node_##func);                       \
-    WHEN_NODE (LOOP, var loop_node_##func);                         \
-    WHEN_NODE (IF, var if_node_##func);                             \
-    WHEN_NODE (BLOCK, var block_node_##func);                       \
+    WHEN_NODE (ARRAY,   var array_node_##func);                     \
+    WHEN_NODE (BINARY,  var binary_node_##func);                    \
+    WHEN_NODE (BLOCK,   var block_node_##func);                     \
+    WHEN_NODE (BOOL,    var bool_node_##func);                      \
+    WHEN_NODE (FN,      var fn_node_##func);                        \
+    WHEN_NODE (ID,      var id_node_##func);                        \
+    WHEN_NODE (IF,      var if_node_##func);                        \
+    WHEN_NODE (LOOP,    var loop_node_##func);                      \
+    WHEN_NODE (NIL,     var nil_node_##func);                       \
+    WHEN_NODE (REAL,    var real_node_##func);                      \
+    WHEN_NODE (STRING,  var string_node_##func);                    \
+    WHEN_NODE (UNARY,   var unary_node_##func);                     \
   default:                                                          \
-    puts ("hit default");                                           \
+    puts (#func " hit default");                                   \
   }
 
 
@@ -41,8 +41,12 @@ void expression_node_destroy (expression_node* node)
 
 expression_node* expression_node_evaluate (expression_node* node)
 {
-  // TODO
-  return NULL;
+  expression_node* evaluated = NULL;
+  NODE_TYPE_FUNCTION (node->type, evaluated=, evaluate (node->ast_node));
+
+  if (!evaluated) return nil_node_create ();
+
+  return evaluated;
 }
 
 string_node* expression_node_to_string_node (expression_node* node)

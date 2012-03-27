@@ -26,7 +26,9 @@ string_node* id_node_to_string_node (id_node* id)
 
 expression_node* id_node_evaluate (id_node* id)
 {
-  // TODO
-  return NULL;
+  id_node* clone = id_node_create (id->id);
+  // FIXME: weak clone, bound to explode
+  clone->value = id->value;
+  return expression_node_create (NODE_ID, clone);
 }
 

@@ -3,7 +3,7 @@ OBJ := $(SRC:.c=.o)
 
 CC  := clang
 
-LFLAGS := -lreadline
+LFLAGS := -lreadline -lm
 CFLAGS := -Wall -Wextra -Werror -pedantic -std=c99 -g -Wno-unused -Wno-unused-parameter -Isrc/
 
 all: $(OBJ)

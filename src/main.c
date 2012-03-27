@@ -84,8 +84,9 @@ int main (int argc, char** argv) {
     expression_node* node = parse_expression (ps);
 
     string_node *str = expression_node_to_string_node (node);
+    string_node *str2 = expression_node_to_string_node (expression_node_evaluate (node));
 
-    printf ("==> %s\n", str->string);
+    printf ("==> %s\n===> %s\n", str->string, str2->string);
 
     string_node_destroy (str);
     expression_node_destroy (node);

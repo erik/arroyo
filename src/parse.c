@@ -353,6 +353,8 @@ static fn_node* parse_function (parser_state* ps)
 /* "{" (PRIMITIVE ":" EXPRESSION)* "}" */
 static hash_node* parse_hash (parser_state* ps)
 {
+  parser_error (ps, "hash values not yet supported");
+
   while(ps->t.type != '}') {
     /* TODO: AST things here */
 
