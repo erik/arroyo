@@ -19,8 +19,33 @@ void unary_node_destroy (unary_node* node)
 
 expression_node* unary_node_evaluate (unary_node* node)
 {
-  // TODO
-  return NULL;
+  expression_node* expr = expression_node_evaluate (node->expr);
+
+  switch (node->op) {
+  case OP_UNM: {
+    if (expr->type != NODE_REAL) {
+      printf ("unary not: expected real, not %s\n", node_type_string[expr->type]);
+      break;
+    }
+
+    real_node* inverted = real_node_create (-((real_node*)expr->ast_node)->real);
+
+    expression_node_destroy (expr);
+    return expression_node_create (NODE_REAL, inverted);
+  }
+  case OP_NOT: {
+    bool_node* bool = bool_node_create_from_expression (expr);
+    bool->bool = !bool->bool;
+
+    expression_node_destroy (expr);
+    return expression_node_create (NODE_BOOL, bool);
+  }
+  default:
+    printf ("not handled / not unary operator\n");
+  }
+
+  expression_node_destroy (expr);
+  return expression_node_create (NODE_NIL, NULL);
 }
 
 string_node* unary_node_to_string_node (unary_node* node)
