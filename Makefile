@@ -4,7 +4,7 @@ OBJ := $(SRC:.c=.o)
 CC  := clang
 
 LFLAGS := -lreadline -lm
-CFLAGS := -Wall -Wextra -Werror -pedantic -std=c99 -g -Wno-unused -Wno-unused-parameter -Isrc/
+CFLAGS := -Wall -Wextra -Werror -pedantic -std=c99 -g -Wno-unused -Wno-unused-parameter -Iinclude/
 
 all: $(OBJ)
 	$(CC) $(OBJ) $(LFLAGS) -o arroyo
