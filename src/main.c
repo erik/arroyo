@@ -49,7 +49,7 @@ const char* string_reader (void* dummy, unsigned* size)
     "    -- b <- {adder : fn (v) v+1 b:2}\n"                          \
     "    -- this is a comment\n"                                      \
     "    c <- true and 2 < 3\n"                                       \
-    "    --print (if 2 < 3 \"sane\" else \"insane\")\n"               \
+    "    if 2 < 3 \"sane\" else \"insane\"\n"                         \
     "    --print (longer_name123))\n)";
 
   puts (prgn);
@@ -58,8 +58,8 @@ const char* string_reader (void* dummy, unsigned* size)
   return prgn;
 }
 
-int main (int argc, char** argv) {
-
+int main (int argc, char** argv)
+{
   int dorepl = 0;
 
   for (int i = 1; i < argc; ++i)
@@ -71,7 +71,7 @@ int main (int argc, char** argv) {
   else
     reader_create (&r, string_reader, NULL);
 
-  lexer_state *ls = calloc (sizeof (lexer_state), 1);
+  lexer_state* ls = calloc (sizeof (lexer_state), 1);
   lexer_create (ls, &r);
 
   parser_state* ps = calloc (sizeof (parser_state), 1);
@@ -82,13 +82,13 @@ int main (int argc, char** argv) {
 
   while (ps->t.type != TK_EOS && ps->t.type != TK_ERROR) {
     expression_node* node = parse_expression (ps);
+    expression_node* eval = expression_node_evaluate (node);
+    string_node* str = expression_node_to_string_node (eval);
 
-    string_node *str = expression_node_to_string_node (node);
-    string_node *str2 = expression_node_to_string_node (expression_node_evaluate (node));
-
-    printf ("==> %s\n===> %s\n", str->string, str2->string);
+    printf ("==> %s\n", str->string);
 
     string_node_destroy (str);
+    expression_node_destroy (eval);
     expression_node_destroy (node);
   }
 

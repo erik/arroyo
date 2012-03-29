@@ -14,6 +14,8 @@ static if_node*         parse_if         (parser_state*);
 static loop_node*       parse_loop       (parser_state*);
 static expression_node* parse_program    (parser_state*);
 
+static void next_token (parser_state* ps);
+
 static void parser_error (parser_state* ps, const char* fmt, ...)
 {
   va_list ap;
@@ -27,6 +29,8 @@ static void parser_error (parser_state* ps, const char* fmt, ...)
 
   if (++ps->error.count > ps->error.max || ps->die_on_error)
     longjmp (ps->error.buf, 1);
+
+  next_token (ps);
 }
 
 static void next_token (parser_state* ps)

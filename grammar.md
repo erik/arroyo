@@ -1,6 +1,9 @@
 # Grammar
 In progress grammar for the language (not finalized).
 
+**Warning** this is completely out of date. Will be rewritten when
+  syntax and interpreter are more stable.
+
 *written in pseudo BNF form*
 
 ```
