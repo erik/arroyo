@@ -152,11 +152,11 @@ static int lex(lexer_state *ls, token_info *info)
 
     case '<': { // LT, LTE, ASSIGN
       next(ls);
-      if(ls->current == '=') {
+      if (ls->current == '=') {
         next(ls);
         return TK_LTE;
       }
-      else if(ls->current == '-'){
+      else if (ls->current == '-'){
         next(ls);
         return TK_ASSIGN;
       }
@@ -165,8 +165,21 @@ static int lex(lexer_state *ls, token_info *info)
 
     case '>': { // GT, GTE
       next(ls);
-      if(ls->current == '=') return TK_GTE;
+      if (ls->current == '=') {
+        next (ls);
+        return TK_GTE;
+      }
       else return '>';
+    }
+
+    case '/': { // NEQ, DIV
+      next (ls);
+      if (ls->current == '=') {
+        next (ls);
+        return TK_NEQ;
+      }
+
+      else return '/';
     }
 
     case '"': { // STRING

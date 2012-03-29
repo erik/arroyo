@@ -31,23 +31,26 @@ string_node* binary_node_to_string_node (binary_node* binary)
   free (tmp);
 
   switch (binary->op) {
-  case OP_ADD:    tmp = "+"; break;
-  case OP_SUB:    tmp = "-"; break;
-  case OP_MUL:    tmp = "*"; break;
-  case OP_DIV:    tmp = "/"; break;
-  case OP_MOD:    tmp = "%"; break;
-  case OP_LT:     tmp = "<"; break;
-  case OP_LTE:    tmp = "<="; break;
-  case OP_GT:     tmp = ">"; break;
-  case OP_GTE:    tmp = ">="; break;
-  case OP_EQ:     tmp = "="; break;
-  case OP_NEQ:    tmp = "/="; break;
-  case OP_AND:    tmp = "and"; break;
-  case OP_OR:     tmp = "or"; break;
-  case OP_XOR:    tmp = "xor"; break;
+  case OP_ADD:    tmp = "+";      break;
+  case OP_SUB:    tmp = "-";      break;
+  case OP_MUL:    tmp = "*";      break;
+  case OP_DIV:    tmp = "/";      break;
+  case OP_MOD:    tmp = "%";      break;
+
+  case OP_LT:     tmp = "<";      break;
+  case OP_LTE:    tmp = "<=";     break;
+  case OP_GT:     tmp = ">";      break;
+  case OP_GTE:    tmp = ">=";     break;
+  case OP_EQ:     tmp = "=";      break;
+  case OP_NEQ:    tmp = "/=";     break;
+
+  case OP_AND:    tmp = "and";    break;
+  case OP_OR:     tmp = "or";     break;
+  case OP_XOR:    tmp = "xor";    break;
+
   case OP_CONCAT: tmp = "CONCAT"; break;
-  case OP_DOT:    tmp = "."; break;
-  case OP_ASSIGN: tmp = "<-"; break;
+  case OP_DOT:    tmp = ".";      break;
+  case OP_ASSIGN: tmp = "<-";     break;
   default:        tmp = "BADOP";
   }
 
@@ -84,17 +87,23 @@ expression_node* binary_node_evaluate (binary_node* binary)
   expression_node* left  = NULL;
   expression_node* right = NULL;
 
-#define LEFT  (left=expression_node_evaluate (binary->lhs))
-#define RIGHT (right=expression_node_evaluate (binary->rhs))
-#define TYPE_CHECK(obj, tpe) { node_type _t = (obj)->type;      \
+#define LEFT  (left = expression_node_evaluate (binary->lhs))
+
+#define RIGHT (right = expression_node_evaluate (binary->rhs))
+
+#define TYPE_CHECK(obj, tpe) {                                  \
+    node_type _t = (obj)->type;                                 \
     if (_t != tpe) {                                            \
       printf ("type mismatch. (got %s, expected %s)\n",         \
               node_type_string[_t], node_type_string[tpe]);     \
       return nil_node_create ();                                \
     }                                                           \
   }
+
 #define EXPR(type, val) expression_node_create (NODE_##type, val)
+
 #define REAL(expr) (((real_node*)expr->ast_node)->real)
+
 #define ARITH(op)                                                       \
   TYPE_CHECK (LEFT, NODE_REAL);                                         \
   TYPE_CHECK (RIGHT, NODE_REAL);                                        \
@@ -107,21 +116,31 @@ expression_node* binary_node_evaluate (binary_node* binary)
                                    bool_node_create (REAL (left) op REAL (right) ? 1 : 0)); \
 
   switch (binary->op){
-  case OP_ADD: ARITH (+);
-  case OP_SUB: ARITH (-);
-  case OP_MUL: ARITH (*);
-  case OP_DIV: ARITH (/);
+  case OP_ADD:
+    ARITH (+);
+  case OP_SUB:
+    ARITH (-);
+  case OP_MUL:
+    ARITH (*);
+  case OP_DIV:
+    ARITH (/);
   case OP_MOD:
     TYPE_CHECK (LEFT, NODE_REAL);
     TYPE_CHECK (RIGHT, NODE_REAL);
     return EXPR (REAL, real_node_create ((long)REAL(left) %
                                          (long)REAL(right)));
-  case OP_LT:  COMP (<);
-  case OP_LTE: COMP (<=);
-  case OP_GT:  COMP (>);
-  case OP_GTE: COMP (>=);
-  case OP_EQ:  COMP (==);
-  case OP_NEQ: COMP (!=);
+  case OP_LT:
+    COMP (<);
+  case OP_LTE:
+    COMP (<=);
+  case OP_GT:
+    COMP (>);
+  case OP_GTE:
+    COMP (>=);
+  case OP_EQ:
+    COMP (==);
+  case OP_NEQ:
+    COMP (!=);
 
   case OP_AND: {
     bool_node* left_bool = bool_node_create_from_expression (LEFT);
@@ -148,7 +167,7 @@ expression_node* binary_node_evaluate (binary_node* binary)
 
     return right;
   }
-  case OP_OR:{
+  case OP_OR: {
     bool_node* left_bool = bool_node_create_from_expression (LEFT);
     if (left_bool->bool) return left;
     return RIGHT;
