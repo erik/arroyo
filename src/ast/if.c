@@ -37,8 +37,35 @@ void if_node_destroy (if_node* node)
 
 expression_node* if_node_evaluate (if_node* node)
 {
-  // TODO
-  return NULL;
+  expression_node* value, *cond;
+  bool_node* bool;
+
+  cond = expression_node_evaluate (node->condition);
+  bool = bool_node_create_from_expression (cond);
+  if (bool->bool) {
+    expression_node_destroy (cond);
+    bool_node_destroy (bool);
+    return expression_node_evaluate (node->thenbody);
+  }
+
+  for (unsigned i = 0; i < node->nelseif; ++i) {
+    cond = expression_node_evaluate (node->elseifcondition[i]);
+    bool = bool_node_create_from_expression (cond);
+
+    if (bool->bool) {
+      expression_node_destroy (cond);
+      bool_node_destroy (bool);
+      return expression_node_evaluate (node->elseifbody[i]);
+    }
+
+    expression_node_destroy (cond);
+    bool_node_destroy (bool);
+  }
+
+  if (node->elsebody)
+    return expression_node_evaluate (node->elsebody);
+
+  return expression_node_create (NODE_NIL, NULL);
 }
 
 string_node* if_node_to_string_node (if_node* node)
