@@ -1,9 +1,11 @@
 #include "ast.h"
 #include "buffer.h"
 
-unary_node* unary_node_create (enum unary_op op)
+#include <stdio.h>
+
+unary_node* unary_node_create(enum unary_op op)
 {
-  unary_node* node = calloc (sizeof (unary_node), 1);
+  unary_node* node = calloc(sizeof(unary_node), 1);
 
   node->op = op;
   node->expr = NULL;
@@ -11,64 +13,64 @@ unary_node* unary_node_create (enum unary_op op)
   return node;
 }
 
-void unary_node_destroy (unary_node* node)
+void unary_node_destroy(unary_node* node)
 {
-  expression_node_destroy (node->expr);
-  free (node);
+  expression_node_destroy(node->expr);
+  free(node);
 }
 
-expression_node* unary_node_evaluate (unary_node* node)
+expression_node* unary_node_evaluate(unary_node* node)
 {
-  expression_node* expr = expression_node_evaluate (node->expr);
+  expression_node* expr = expression_node_evaluate(node->expr);
 
-  switch (node->op) {
+  switch(node->op) {
   case OP_UNM: {
-    if (expr->type != NODE_REAL) {
-      printf ("unary not: expected real, not %s\n", node_type_string[expr->type]);
+    if(expr->type != NODE_REAL) {
+      printf("unary not: expected real, not %s\n", node_type_string[expr->type]);
       break;
     }
 
-    real_node* inverted = real_node_create (-((real_node*)expr->ast_node)->real);
+    real_node* inverted = real_node_create(-((real_node*)expr->ast_node)->real);
 
-    expression_node_destroy (expr);
-    return expression_node_create (NODE_REAL, inverted);
+    expression_node_destroy(expr);
+    return expression_node_create(NODE_REAL, inverted);
   }
   case OP_NOT: {
-    bool_node* bool = bool_node_create_from_expression (expr);
+    bool_node* bool = bool_node_from_expression(expr);
     bool->bool = !bool->bool;
 
-    expression_node_destroy (expr);
-    return expression_node_create (NODE_BOOL, bool);
+    expression_node_destroy(expr);
+    return expression_node_create(NODE_BOOL, bool);
   }
   default:
-    printf ("not handled / not unary operator\n");
+    printf("not handled / not unary operator\n");
   }
 
-  expression_node_destroy (expr);
-  return expression_node_create (NODE_NIL, NULL);
+  expression_node_destroy(expr);
+  return expression_node_create(NODE_NIL, NULL);
 }
 
-string_node* unary_node_to_string_node (unary_node* node)
+string_node* unary_node_to_string_node(unary_node* node)
 {
   buffer b;
-  buffer_create (&b, 10);
+  buffer_create(&b, 10);
 
-  switch (node->op) {
+  switch(node->op) {
   case OP_UNM:
-    buffer_puts (&b, "-");
+    buffer_puts(&b, "-");
     break;
   case OP_NOT:
-    buffer_puts (&b, "!");
+    buffer_puts(&b, "!");
     break;
   default:
-    buffer_puts (&b, "BADUNARY");
+    buffer_puts(&b, "BADUNARY");
   }
 
-  char* tmp = expression_node_to_string (node->expr);
-  buffer_puts (&b, tmp);
-  free (tmp);
+  char* tmp = expression_node_to_string(node->expr);
+  buffer_puts(&b, tmp);
+  free(tmp);
 
-  string_node* string = string_node_create (b.buf);
-  buffer_destroy (&b);
+  string_node* string = string_node_create(b.buf);
+  buffer_destroy(&b);
   return string;
 }

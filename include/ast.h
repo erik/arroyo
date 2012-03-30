@@ -67,10 +67,6 @@ enum binary_op {
 struct expression_node;
 
 typedef struct {
-  char empty;
-} nil_node;
-
-typedef struct {
   long double real;
 } real_node;
 
@@ -147,98 +143,88 @@ typedef struct expression_node {
 } expression_node;
 
 // expression
-expression_node* expression_node_create (node_type, void* node_struct);
-void             expression_node_destroy (expression_node*);
-expression_node* expression_node_evaluate (expression_node*);
-string_node*     expression_node_to_string_node (expression_node*);
-char*            expression_node_to_string (expression_node*);
+expression_node* expression_node_create(node_type, void* node_struct);
+void             expression_node_destroy(expression_node*);
+expression_node* expression_node_evaluate(expression_node*);
+string_node*     expression_node_to_string_node(expression_node*);
+char*            expression_node_to_string(expression_node*);
 
 // nil
-expression_node* nil_node_create (void);
-void             nil_node_destroy (expression_node*);
-expression_node* nil_node_evaluate (nil_node*);
-string_node*     nil_node_to_string_node (expression_node*);
+expression_node* nil_node_create(void);
+void             nil_node_destroy(expression_node*);
+expression_node* nil_node_evaluate(void*);
+string_node*     nil_node_to_string_node(expression_node*);
 
 // real
-real_node*       real_node_create (long double);
-void             real_node_destroy (real_node*);
-expression_node* real_node_evaluate (real_node*);
-string_node*     real_node_to_string_node (real_node*);
+real_node*       real_node_create(long double);
+void             real_node_destroy(real_node*);
+expression_node* real_node_evaluate(real_node*);
+string_node*     real_node_to_string_node(real_node*);
 
 // string node
-string_node*     string_node_create (const char* string);
-void             string_node_destroy (string_node*);
-expression_node* string_node_evaluate (string_node*);
-string_node*     string_node_to_string_node (string_node*);
+string_node*     string_node_create(const char* string);
+void             string_node_destroy(string_node*);
+expression_node* string_node_evaluate(string_node*);
+string_node*     string_node_to_string_node(string_node*);
 
 // bool node
-bool_node*       bool_node_create (int);
-void             bool_node_destroy (bool_node*);
-expression_node* bool_node_evaluate (bool_node*);
-string_node*     bool_node_to_string_node (bool_node*);
-bool_node*       bool_node_create_from_expression (expression_node*);
+bool_node*       bool_node_create(int);
+void             bool_node_destroy(bool_node*);
+expression_node* bool_node_evaluate(bool_node*);
+string_node*     bool_node_to_string_node(bool_node*);
+bool_node*       bool_node_from_expression(expression_node*);
 
 // id node
-id_node*         id_node_create (char*);
-void             id_node_destroy (id_node*);
-expression_node* id_node_evaluate (id_node*);
-string_node*     id_node_to_string_node (id_node*);
+id_node*         id_node_create(char*);
+void             id_node_destroy(id_node*);
+expression_node* id_node_evaluate(id_node*);
+string_node*     id_node_to_string_node(id_node*);
 
 // fn node
-fn_node*         fn_node_create ();
-void             fn_node_destroy (fn_node*);
-expression_node* fn_node_evaluate (fn_node*);
-string_node*     fn_node_to_string_node (fn_node*);
-void             fn_node_add_argument (fn_node*, char* name, int type);
-void             fn_node_set_id (fn_node*, char*);
-void             fn_node_set_body (fn_node*, expression_node*);
+fn_node*         fn_node_create();
+void             fn_node_destroy(fn_node*);
+expression_node* fn_node_evaluate(fn_node*);
+string_node*     fn_node_to_string_node(fn_node*);
+void             fn_node_add_argument(fn_node*, char* name, int type);
 
 // array node
-array_node*      array_node_create ();
-void             array_node_destroy (array_node*);
-expression_node* array_node_evaluate (array_node*);
-string_node*     array_node_to_string_node (array_node*);
-void             array_node_push_expression (array_node*, expression_node*);
+array_node*      array_node_create();
+void             array_node_destroy(array_node*);
+expression_node* array_node_evaluate(array_node*);
+string_node*     array_node_to_string_node(array_node*);
+void             array_node_push_expression(array_node*, expression_node*);
 
 // block node
-block_node*      block_node_create (void);
-void             block_node_destroy (block_node*);
-expression_node* block_node_evaluate (block_node*);
-string_node*     block_node_to_string_node (block_node*);
-void             block_node_push_expression (block_node*, expression_node*);
+block_node*      block_node_create(void);
+void             block_node_destroy(block_node*);
+expression_node* block_node_evaluate(block_node*);
+string_node*     block_node_to_string_node(block_node*);
+void             block_node_push_expression(block_node*, expression_node*);
 
 // if node
-if_node*         if_node_create (void);
-void             if_node_destroy (if_node*);
-expression_node* if_node_evaluate (if_node*);
-string_node*     if_node_to_string_node (if_node*);
-void             if_node_set_condition (if_node*, expression_node*, expression_node*);
-void             if_node_add_elseif (if_node*, expression_node*, expression_node*);
-void             if_node_set_else (if_node*, expression_node*);
+if_node*         if_node_create(void);
+void             if_node_destroy(if_node*);
+expression_node* if_node_evaluate(if_node*);
+string_node*     if_node_to_string_node(if_node*);
+void             if_node_add_elseif(if_node*, expression_node*, expression_node*);
 
 // loop node
-loop_node*       loop_node_create (void);
-void             loop_node_destroy (loop_node*);
-expression_node* loop_node_evaluate (loop_node*);
-string_node*     loop_node_to_string_node (loop_node*);
-void             loop_node_set_type (loop_node*, enum loop_type);
-void             loop_node_set_init (loop_node*, expression_node*);
-void             loop_node_set_cond (loop_node*, expression_node*);
-void             loop_node_set_body (loop_node*, expression_node*);
+loop_node*       loop_node_create(void);
+void             loop_node_destroy(loop_node*);
+expression_node* loop_node_evaluate(loop_node*);
+string_node*     loop_node_to_string_node(loop_node*);
 
 // binary
-binary_node*     binary_node_create (enum binary_op);
-void             binary_node_destroy (binary_node*);
-expression_node* binary_node_evaluate (binary_node*);
-string_node*     binary_node_to_string_node (binary_node*);
-void             binary_node_set_lhs (binary_node*, expression_node*);
-void             binary_node_set_rhs (binary_node*, expression_node*);
+binary_node*     binary_node_create(enum binary_op);
+void             binary_node_destroy(binary_node*);
+expression_node* binary_node_evaluate(binary_node*);
+string_node*     binary_node_to_string_node(binary_node*);
 
 // unary
-unary_node*      unary_node_create (enum unary_op);
-void             unary_node_destroy (unary_node*);
-expression_node* unary_node_evaluate (unary_node*);
-string_node*     unary_node_to_string_node (unary_node*);
+unary_node*      unary_node_create(enum unary_op);
+void             unary_node_destroy(unary_node*);
+expression_node* unary_node_evaluate(unary_node*);
+string_node*     unary_node_to_string_node(unary_node*);
 
 // TODO: finish
 // ... etc

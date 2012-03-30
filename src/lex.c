@@ -18,34 +18,34 @@
 
 #define isnewline(ls)      (ls->current == '\n' || ls->current == '\r')
 
-static void lexer_error (lexer_state* ls, const char* fmt, ...)
+static void lexer_error(lexer_state* ls, const char* fmt, ...)
 {
   va_list ap;
-  va_start (ap, fmt);
+  va_start(ap, fmt);
 
   // make sure buffer doesn't have any garbage
-  buffer_putc (ls->buf, '\0');
+  buffer_putc(ls->buf, '\0');
 
-  fprintf (stderr, "Syntax error on line %d at '%s': ", ls->linenum, ls->buf->buf);
-  vfprintf (stderr, fmt, ap);
-  fprintf (stderr, "\n");
-  va_end (ap);
+  fprintf(stderr, "Syntax error on line %d at '%s': ", ls->linenum, ls->buf->buf);
+  vfprintf(stderr, fmt, ap);
+  fprintf(stderr, "\n");
+  va_end(ap);
 
-  longjmp (ls->error.buf, 1);
+  longjmp(ls->error.buf, 1);
 }
 
-static void inc_line (lexer_state *ls)
+static void inc_line(lexer_state *ls)
 {
   char first = ls->current;
   next(ls); // skip \r or \n
 
   // handle \r\n or \n\r
-  if (isnewline(ls) && ls->current != first) next(ls);
+  if(isnewline(ls) && ls->current != first) next(ls);
 
   ls->linenum++;
 }
 
-static void read_string (lexer_state *ls, token_info *info)
+static void read_string(lexer_state *ls, token_info *info)
 {
   // skip leading "
   next(ls);
@@ -53,12 +53,12 @@ static void read_string (lexer_state *ls, token_info *info)
   int cont = 1;
 
   while(cont) {
-    switch (ls->current) {
+    switch(ls->current) {
     case EOS:
-      lexer_error (ls, "unexpected eof in string");
+      lexer_error(ls, "unexpected eof in string");
       return;
     case '\n': case '\r':
-      lexer_error (ls, "unexpected new line in string");
+      lexer_error(ls, "unexpected new line in string");
       return;
     case '"': cont = 0; break;
     default: save_and_next(ls);
@@ -71,7 +71,7 @@ static void read_string (lexer_state *ls, token_info *info)
   next(ls);
 }
 
-static int read_id_or_reserved (lexer_state *ls, token_info *info)
+static int read_id_or_reserved(lexer_state *ls, token_info *info)
 {
   while(lisalnum(ls->current)) save_and_next(ls);
 
@@ -86,21 +86,21 @@ static int read_id_or_reserved (lexer_state *ls, token_info *info)
   return TK_ID;
 }
 
-static void read_numeric (lexer_state *ls, token_info *info)
+static void read_numeric(lexer_state *ls, token_info *info)
 {
   int seen_dot  = 0;
 
-  for (;;) {
-    if (ls->current == '.') {
-      if (seen_dot) break;
+  for(;;) {
+    if(ls->current == '.') {
+      if(seen_dot) break;
       seen_dot = 1;
     }
-    else if (!lisdigit (ls->current)) {
+    else if(!lisdigit(ls->current)) {
 
       // bad number
-      if (lisalpha (ls->current)) {
-        while (lisalnum (ls->current)) save_and_next (ls);
-        lexer_error (ls, "badly formatted number");
+      if(lisalpha(ls->current)) {
+        while(lisalnum(ls->current)) save_and_next(ls);
+        lexer_error(ls, "badly formatted number");
       }
 
       // end of number
@@ -110,7 +110,7 @@ static void read_numeric (lexer_state *ls, token_info *info)
     save_and_next(ls);
   }
 
-  long double number = strtold (ls->buf->buf, NULL);
+  long double number = strtold(ls->buf->buf, NULL);
 
   info->string = strdup(ls->buf->buf);
   info->number = number;
@@ -120,11 +120,11 @@ static int lex(lexer_state *ls, token_info *info)
 {
   buffer_reset(ls->buf);
 
-  if (setjmp (ls->error.buf))
+  if(setjmp(ls->error.buf))
     return TK_ERROR;
 
-  for (;;) {
-    switch (ls->current) {
+  for(;;) {
+    switch(ls->current) {
 
     case '\n': case '\r': { // newline
       inc_line(ls);
@@ -138,10 +138,10 @@ static int lex(lexer_state *ls, token_info *info)
 
     case '-': { // comment or minus
       // minus
-      if (next(ls) != '-') return '-';
+      if(next(ls) != '-') return '-';
 
       // comment, skip line
-      while (next(ls) != EOS && !isnewline(ls));
+      while(next(ls) != EOS && !isnewline(ls));
       break;
     }
 
@@ -152,11 +152,11 @@ static int lex(lexer_state *ls, token_info *info)
 
     case '<': { // LT, LTE, ASSIGN
       next(ls);
-      if (ls->current == '=') {
+      if(ls->current == '=') {
         next(ls);
         return TK_LTE;
       }
-      else if (ls->current == '-'){
+      else if(ls->current == '-'){
         next(ls);
         return TK_ASSIGN;
       }
@@ -165,17 +165,17 @@ static int lex(lexer_state *ls, token_info *info)
 
     case '>': { // GT, GTE
       next(ls);
-      if (ls->current == '=') {
-        next (ls);
+      if(ls->current == '=') {
+        next(ls);
         return TK_GTE;
       }
       else return '>';
     }
 
     case '/': { // NEQ, DIV
-      next (ls);
-      if (ls->current == '=') {
-        next (ls);
+      next(ls);
+      if(ls->current == '=') {
+        next(ls);
         return TK_NEQ;
       }
 
@@ -192,12 +192,12 @@ static int lex(lexer_state *ls, token_info *info)
     }
 
     default: {
-      if (lisdigit(ls->current)) { // NUMERIC
-        read_numeric (ls, info);
+      if(lisdigit(ls->current)) { // NUMERIC
+        read_numeric(ls, info);
         return TK_REAL;
       }
 
-      if (lisalpha(ls->current)) { // ID or RESERVED
+      if(lisalpha(ls->current)) { // ID or RESERVED
         return read_id_or_reserved(ls, info);
       }
 
@@ -210,25 +210,25 @@ static int lex(lexer_state *ls, token_info *info)
       case '(': case ')': case '[': case ']':
       case '{': case '}': case ':': case '.':
       case ',':
-        next (ls);
+        next(ls);
         return c;
 
       default:
-        lexer_error (ls, "unrecognized symbol %c", c);
+        lexer_error(ls, "unrecognized symbol %c", c);
       }
     }
     }
   }
 }
 
-token lexer_next_token (lexer_state *ls)
+token lexer_next_token(lexer_state *ls)
 {
   if(ls->t.info.string != NULL) { free(ls->t.info.string); ls->t.info.string = NULL; }
 
   ls->lastline = ls->linenum;
 
   // if there is a lookahead token, return that instead
-  if (ls->next.type != TK_EOS) {
+  if(ls->next.type != TK_EOS) {
     ls->t = ls->next;
     ls->next.type = TK_EOS;
   }
@@ -238,7 +238,7 @@ token lexer_next_token (lexer_state *ls)
   return ls->t;
 }
 
-token lexer_lookahead (lexer_state* ls)
+token lexer_lookahead(lexer_state* ls)
 {
   if(ls->next.info.string != NULL) { free(ls->next.info.string); ls->next.info.string = NULL; }
 
@@ -249,7 +249,7 @@ token lexer_lookahead (lexer_state* ls)
 
 void lexer_create(lexer_state *ls, reader* r)
 {
-  ls->buf = calloc (sizeof (buffer), 1);
+  ls->buf = calloc(sizeof(buffer), 1);
   buffer_create(ls->buf, 8);
 
   ls->r = r;
@@ -257,7 +257,7 @@ void lexer_create(lexer_state *ls, reader* r)
   ls->linenum = 1;
   ls->current = 0;
 
-  next (ls);
+  next(ls);
 
   ls->t.type = ls->next.type = TK_EOS;
 }
@@ -273,11 +273,11 @@ char* tok_to_string(int tok)
   char* string = calloc(20, 1);
 
   // single character
-  if (tok < FIRST_TOK)
+  if(tok < FIRST_TOK)
     string[0] = (char)tok;
 
   // defined token
-  else if (tok < LAST_TOK)
+  else if(tok < LAST_TOK)
     strcpy(string, tokens[tok - FIRST_TOK]);
 
   // undefined token

@@ -16,7 +16,7 @@ int reader_fillbuf(reader* r)
   unsigned size;
   const char* buf = r->fn(r->fn_data, &size);
 
-  if (buf == NULL || size == 0) {
+  if(buf == NULL || size == 0) {
     return EOS;
   }
 

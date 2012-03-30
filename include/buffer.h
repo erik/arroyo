@@ -17,21 +17,20 @@ typedef struct buffer {
   unsigned pos, size;
 } buffer;
 
-#include <stdio.h>
 // callocing instead of a straight realloc to initialize memory (and shut valgrind up)
-#define buffer_grow(b        ) {                                     \
-    void* _ptr = calloc ((b->size*=2), 1);                           \
-    strcpy (_ptr, b->buf);                                           \
-    free (b->buf);                                                   \
-    b->buf = _ptr;                                                   \
+#define buffer_grow(b        ) {                \
+    void* _ptr = calloc((b->size*=2), 1);       \
+    strcpy(_ptr, b->buf);                       \
+    free(b->buf);                               \
+    b->buf = _ptr;                              \
   }
 
 #define buffer_puts(b, str   ) (buffer_putsn(b, str, strlen(str)))
 #define buffer_reset(b       ) (memset(b->buf, 0, b->size), (b->pos = 0))
 #define buffer_resize(b, sz  ) {                \
-    void* _ptr = calloc (b->size=sz, 1);        \
-    strcpy (_ptr, b->buf);                      \
-    free (b->buf);                              \
+    void* _ptr = calloc(b->size=sz, 1);         \
+    strcpy(_ptr, b->buf);                       \
+    free(b->buf);                               \
     b->buf= _ptr;                               \
   }
 

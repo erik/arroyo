@@ -32,7 +32,7 @@ typedef struct parser_state {
   } error;
 } parser_state;
 
-int parse (parser_state* ps);
-expression_node* parse_expression (parser_state* ps);
+int parse(parser_state* ps);
+expression_node* parse_expression(parser_state* ps);
 
 #endif /* _PARSE_H_ */

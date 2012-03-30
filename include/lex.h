@@ -25,7 +25,7 @@ typedef struct lexer_state {
 
   char current; // current character
   int linenum;  // current line
-  int lastline; // last line (for when lookahead is used)
+  int lastline; // last line(for when lookahead is used)
 
   reader* r;    // reader
 
@@ -72,9 +72,9 @@ static const char* tokens[NUM_TOK] = {
 };
 
 // simplistic token to string handling
-char* tok_to_string (int tok);
+char* tok_to_string(int tok);
 
-token lexer_next_token (lexer_state* ls);
+token lexer_next_token(lexer_state* ls);
 token lexer_lookahead  (lexer_state* ls);
 
 void lexer_create      (lexer_state* ls, reader* r);
