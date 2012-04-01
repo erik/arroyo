@@ -29,8 +29,7 @@ expression_node* bool_node_evaluate(bool_node* bool, scope* scope)
 
 expression_node* bool_node_clone(bool_node* bool)
 {
-  // TODO
-  return NULL;
+  return expression_node_create(NODE_BOOL, bool_node_create(bool->bool));
 }
 
 string_node* bool_node_to_string_node(bool_node* bool)

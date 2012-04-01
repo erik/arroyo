@@ -101,6 +101,7 @@ expression_node* binary_node_evaluate(binary_node* binary, scope* scope)
 #define EXPR(type, val) expression_node_create(NODE_##type, val)
 
 #define REAL(expr) (((real_node*)expr->ast_node)->real)
+#define CAST(expr, type) ((type)expr->ast_node)
 
 #define ARITH(op)                                                       \
   TYPE_CHECK(LEFT, NODE_REAL);                                          \
@@ -135,8 +136,30 @@ expression_node* binary_node_evaluate(binary_node* binary, scope* scope)
     COMP(>);
   case OP_GTE:
     COMP(>=);
-  case OP_EQ:
-    COMP(==);
+
+  case OP_EQ: {
+    left = expression_node_evaluate(binary->lhs, scope);
+    right = expression_node_evaluate(binary->rhs, scope);
+
+    // make sure types match
+    TYPE_CHECK(right, left->type);
+
+    switch(left->type) {
+    case NODE_REAL:
+      COMP(==);
+      break;
+    case NODE_BOOL: {
+      bool_node* lb = CAST(left, bool_node*);
+      bool_node* rb = CAST(right, bool_node*);
+      return EXPR(BOOL, bool_node_create(lb->bool == rb->bool));
+    }
+    default:
+      printf("this comparision is not handled yet\n");
+      return expression_node_create(NODE_BOOL, bool_node_create(0));
+    }
+
+    break;
+  }
   case OP_NEQ:
     COMP(!=);
 
