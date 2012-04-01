@@ -215,6 +215,7 @@ static int lex(lexer_state *ls, token_info *info)
 
       default:
         lexer_error(ls, "unrecognized symbol %c", c);
+        next(ls);
       }
     }
     }

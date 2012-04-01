@@ -32,68 +32,89 @@ const char* readline_reader(void* dummy, unsigned* size)
   return ret;
 }
 
-const char* string_reader(void* dummy, unsigned* size)
-{
-  (void)dummy;
+static struct file_struct {
+  FILE* fp;
+  char* buf;
+  int done;
+} file_struct;
 
-  static int read = 0;
-  if(read) {
+const char* file_reader(void* f, unsigned* size)
+{
+  struct file_struct* file = f;
+
+  if(file->buf)
+    free(file->buf);
+
+  if(file->done) {
     *size = 0;
     return NULL;
   }
 
-  read = 1;
-  const char* prgn =
-    "fn main(x:real y z) (\n"                                         \
-    "    longer_name123 <- 1.010 + 3\n"                               \
-    "    a <- [y z \"string\" 4]\n"                                   \
-    "    -- b <- {adder : fn(v) v+1 b:2}\n"                           \
-    "    -- this is a comment\n"                                      \
-    "    c <- true and 2 < 3\n"                                       \
-    "    if 2 < 3 \"sane\" else \"insane\"\n"                         \
-    "    --print(longer_name123))\n)";
+  file->buf = calloc(4096, 1);
 
-  puts(prgn);
+  *size = fread(file->buf, 1, 4096, file->fp);
 
-  *size = strlen(prgn);
-  return prgn;
+  if(*size < 4096)
+    file->done = 1;
+
+  return file->buf;
 }
 
 int main(int argc, char** argv)
 {
   int dorepl = 0;
+  char* filename = NULL;
 
-  for(int i = 1; i < argc; ++i)
-    if(!strcmp(argv[i], "repl")) dorepl = 1;
+  for(int i = 1; i < argc; ++i) {
+    if(!strcmp(argv[i], "--repl"))
+      dorepl = 1;
+    else
+      filename = argv[i];
+  }
 
   reader r;
-  if(dorepl)
-    reader_create(&r, readline_reader, NULL);
-  else
-    reader_create(&r, string_reader, NULL);
-
   lexer_state* ls = calloc(sizeof(lexer_state), 1);
+  parser_state* ps = calloc(sizeof(parser_state), 1);
+
+  scope* scope = scope_create(NULL);
+
+  struct file_struct file;
+
+  if(filename != NULL) {
+    FILE* fp = fopen(filename, "r");
+
+    if(!fp) {
+      printf("can't open file '%s'\n", filename);
+      return 1;
+    }
+
+    file = (struct file_struct) {
+      .fp = fp,
+      .buf = NULL,
+      .done = 0
+    };
+
+    reader_create(&r, file_reader, &file);
+  } else if(dorepl) {
+    reader_create(&r, readline_reader, NULL);
+  } else {
+    printf("need to give me *something* to do!\n");
+    return 1;
+  }
+
   lexer_create(ls, &r);
 
-  parser_state* ps = calloc(sizeof(parser_state), 1);
   ps->ls = ls;
   ps->die_on_error = 0;
   ps->error.max = 20;
   ps->t = lexer_next_token(ps->ls);
 
-  scope* scope = scope_create(NULL);
+  expression_node* program = parse_program(ps);
+  expression_node* eval = expression_node_evaluate(program, scope);
 
-  while(ps->t.type != TK_EOS && ps->t.type != TK_ERROR) {
-    expression_node* node = parse_expression(ps);
-    expression_node* eval = expression_node_evaluate(node, scope);
-    string_node* str = expression_node_to_string_node(eval);
+  puts(expression_node_to_string(eval));
 
-    printf("==> %s\n", str->string);
-
-    string_node_destroy(str);
-    expression_node_destroy(eval);
-    expression_node_destroy(node);
-  }
+  expression_node_destroy(program);
 
   scope_destroy(scope);
   lexer_destroy(ls);

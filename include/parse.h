@@ -34,5 +34,6 @@ typedef struct parser_state {
 
 int parse(parser_state* ps);
 expression_node* parse_expression(parser_state* ps);
+expression_node* parse_program(parser_state* ps);
 
 #endif /* _PARSE_H_ */

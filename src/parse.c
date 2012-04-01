@@ -12,7 +12,6 @@ static fn_node*         parse_function   (parser_state*);
 static hash_node*       parse_hash       (parser_state*);
 static if_node*         parse_if         (parser_state*);
 static loop_node*       parse_loop       (parser_state*);
-static expression_node* parse_program    (parser_state*);
 
 static void next_token(parser_state* ps);
 
@@ -283,12 +282,16 @@ expression_node* parse_expression(parser_state* ps)
       parser_error(ps, "unmatched closing brace");
       break;
 
+    case TK_EOS:
+      longjmp(ps->error.buf, 2);
+      break;
+
     default:
       parser_error(ps, "expected expression, got '%s'",
                     (char*)tok_to_string(ps->ls->t.type));
     }
 
-    return expression_node_create(NODE_NIL, NULL);
+    return nil_node_create();
   }
 
 
@@ -439,15 +442,23 @@ static loop_node* parse_loop(parser_state* ps)
   return loop;
 }
 
-static expression_node* parse_program(parser_state* ps)
+expression_node* parse_program(parser_state* ps)
 {
   block_node* program = block_node_create();
 
   // error handling
-  if(setjmp(ps->error.buf)) {
+  switch(setjmp(ps->error.buf)) {
+  case 0:
+    break;
+
+  case 1:
     fprintf(stderr, "Aborting after %d error%s.\n", ps->error.count,
              ps->error.count > 1 || ps->error.count == 0 ? "s" : "");
-    return expression_node_create(NODE_NIL, NULL);
+    return nil_node_create();
+
+    // on EOF
+  case 2:
+    goto out;
   }
 
   while(ps->t.type != TK_EOS && ps->t.type != TK_ERROR &&
@@ -457,6 +468,7 @@ static expression_node* parse_program(parser_state* ps)
 
   expect(ps, TK_EOS);
 
+  out:
   return expression_node_create(NODE_BLOCK, program);
 }
 

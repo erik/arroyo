@@ -6,7 +6,7 @@
 
 struct expression_node;
 
-static struct hashnode {
+struct hashnode {
   unsigned hash;
   char* key;
   struct expression_node* value;
