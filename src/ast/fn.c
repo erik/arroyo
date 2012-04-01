@@ -16,21 +16,30 @@ fn_node* fn_node_create()
 
 void fn_node_destroy(fn_node* fn)
 {
-  if(fn->id) free(fn->id);
+  if(fn->id)
+    free(fn->id);
 
   for(unsigned i = 0; i < fn->nargs; ++i) {
     free(fn->args[i].id);
   }
-  free(fn->args);
+  if(fn->args)
+    free(fn->args);
 
-  expression_node_destroy(fn->body);
+  if(fn->body)
+    expression_node_destroy(fn->body);
 
   free(fn);
 }
 
-expression_node* fn_node_evaluate(fn_node* fn)
+expression_node* fn_node_evaluate(fn_node* fn, scope* scope)
 {
-  // TODO:
+  // TODO
+  return NULL;
+}
+
+expression_node* fn_node_clone(fn_node* fn)
+{
+  // TODO
   return NULL;
 }
 

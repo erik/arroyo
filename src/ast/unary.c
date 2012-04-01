@@ -19,9 +19,9 @@ void unary_node_destroy(unary_node* node)
   free(node);
 }
 
-expression_node* unary_node_evaluate(unary_node* node)
+expression_node* unary_node_evaluate(unary_node* node, scope* scope)
 {
-  expression_node* expr = expression_node_evaluate(node->expr);
+  expression_node* expr = expression_node_evaluate(node->expr, scope);
 
   switch(node->op) {
   case OP_UNM: {
@@ -48,6 +48,12 @@ expression_node* unary_node_evaluate(unary_node* node)
 
   expression_node_destroy(expr);
   return expression_node_create(NODE_NIL, NULL);
+}
+
+expression_node* unary_node_clone(unary_node* node)
+{
+  // TODO
+  return NULL;
 }
 
 string_node* unary_node_to_string_node(unary_node* node)

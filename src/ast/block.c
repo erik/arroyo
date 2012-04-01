@@ -18,19 +18,28 @@ void block_node_destroy(block_node* block)
   free(block);
 }
 
-expression_node* block_node_evaluate(block_node* block)
+expression_node* block_node_evaluate(block_node* block, scope* s)
 {
+  scope* local = scope_create(s);
+
   expression_node* last = NULL;
 
   for(unsigned i = 0; i < block->nexpressions; ++i) {
-    last = expression_node_evaluate(block->expressions[i]);
+    last = expression_node_evaluate(block->expressions[i], local);
   }
+
+  scope_destroy(local);
 
   if(!last) return nil_node_create();
 
   return last;
 }
 
+expression_node* block_node_clone(block_node* block)
+{
+  // TODO
+  return NULL;
+}
 
 void block_node_push_expression(block_node* block, expression_node* node)
 {

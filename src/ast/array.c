@@ -19,7 +19,13 @@ void array_node_destroy(array_node* array)
   free(array);
 }
 
-expression_node* array_node_evaluate(array_node* array)
+expression_node* array_node_evaluate(array_node* array, scope* scope)
+{
+  // TODO
+  return NULL;
+}
+
+expression_node* array_node_clone(array_node* array)
 {
   // TODO
   return NULL;

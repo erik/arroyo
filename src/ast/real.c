@@ -21,9 +21,14 @@ string_node* real_node_to_string_node(real_node* node)
   return str;
 }
 
-expression_node* real_node_evaluate(real_node* real)
+expression_node* real_node_evaluate(real_node* real, scope* scope)
 {
   return expression_node_create(NODE_REAL, real_node_create(real->real));
+}
+
+expression_node* real_node_clone(real_node* node)
+{
+  return real_node_evaluate(node, NULL);
 }
 
 void real_node_destroy(real_node* node)

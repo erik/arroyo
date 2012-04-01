@@ -1,12 +1,11 @@
 #include "ast.h"
 #include "util.h"
-
+#include <stdio.h>
 id_node* id_node_create(char* name)
 {
   id_node* node = calloc(sizeof(id_node), 1);
 
   node->id = strdup(name);
-  node->value = NULL;
 
   return node;
 }
@@ -14,21 +13,26 @@ id_node* id_node_create(char* name)
 void id_node_destroy(id_node* node)
 {
   free(node->id);
-  if(node->value)
-    expression_node_destroy(node->value);
   free(node);
 }
 
 string_node* id_node_to_string_node(id_node* id)
 {
-  return string_node_create(id->id);;
+  return string_node_create(id->id);
 }
 
-expression_node* id_node_evaluate(id_node* id)
+expression_node* id_node_evaluate(id_node* id, scope* scope)
 {
-  id_node* clone = id_node_create(id->id);
-  // FIXME: weak clone, bound to explode
-  clone->value = id->value;
-  return expression_node_create(NODE_ID, clone);
+  expression_node* value = scope_get(scope, id->id);
+
+  if(value == NULL)
+    return expression_node_create(NODE_NIL, NULL);
+
+  return expression_node_clone(value);
 }
 
+expression_node* id_node_clone(id_node* id)
+{
+  return expression_node_create(NODE_ID,
+                                id_node_create(id->id));
+}

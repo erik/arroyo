@@ -14,9 +14,14 @@ void nil_node_destroy(expression_node* nil)
   free(nil);
 }
 
-expression_node* nil_node_evaluate(void* nil)
+expression_node* nil_node_evaluate(void* nil, scope* scope)
 {
-  return expression_node_create(NODE_NIL, NULL);
+  return nil_node_create();
+}
+
+expression_node* nil_node_clone(void* node)
+{
+  return nil_node_create();
 }
 
 string_node* nil_node_to_string_node(expression_node* nil)

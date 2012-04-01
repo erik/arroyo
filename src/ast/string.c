@@ -16,10 +16,16 @@ void string_node_destroy(string_node* node)
   free(node);
 }
 
-expression_node* string_node_evaluate(string_node* node)
+expression_node* string_node_evaluate(string_node* node, scope* scope)
 {
   return expression_node_create(NODE_STRING,
                                  string_node_create(node->string));
+}
+
+expression_node* string_node_clone(string_node* node)
+{
+  return expression_node_create(NODE_STRING,
+                                string_node_create(node->string));
 }
 
 string_node* string_node_to_string_node(string_node* node)

@@ -22,7 +22,13 @@ void loop_node_destroy(loop_node* loop)
   free(loop);
 }
 
-expression_node* loop_node_evaluate(loop_node* loop)
+expression_node* loop_node_evaluate(loop_node* loop, scope* scope)
+{
+  // TODO
+  return NULL;
+}
+
+expression_node* loop_node_clone(loop_node* node)
 {
   // TODO
   return NULL;

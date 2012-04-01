@@ -1,5 +1,6 @@
 #include "ast.h"
 #include "buffer.h"
+#include "util.h"
 
 #include <math.h>
 #include <stdio.h>
@@ -71,16 +72,22 @@ string_node* binary_node_to_string_node(binary_node* binary)
   return string;
 }
 
-expression_node* binary_node_evaluate(binary_node* binary)
+expression_node* binary_node_clone(binary_node* binary)
+{
+  // TODO
+  return NULL;
+}
+
+expression_node* binary_node_evaluate(binary_node* binary, scope* scope)
 {
   // FIXME: these will all leak memory
 
   expression_node* left  = NULL;
   expression_node* right = NULL;
 
-#define LEFT  (left = expression_node_evaluate(binary->lhs))
+#define LEFT  (left = expression_node_evaluate(binary->lhs, scope))
 
-#define RIGHT (right = expression_node_evaluate(binary->rhs))
+#define RIGHT (right = expression_node_evaluate(binary->rhs, scope))
 
 #define TYPE_CHECK(obj, tpe) {                                  \
     node_type _t = (obj)->type;                                 \
@@ -164,13 +171,23 @@ expression_node* binary_node_evaluate(binary_node* binary)
     return RIGHT;
   }
 
+  case OP_ASSIGN: {
+    TYPE_CHECK(binary->lhs, NODE_ID);
+    id_node* id = binary->lhs->ast_node;
+
+    right = expression_node_evaluate(binary->rhs, scope);
+
+    scope_insert(scope, strdup(id->id), expression_node_clone(right));
+
+    return right;
+  }
+
   case OP_XOR:
   case OP_CONCAT:
   case OP_DOT:
-  case OP_ASSIGN:
   default:
     puts("binary node hit default, not handled yet");
-    return expression_node_create(NODE_NIL, NULL);
+    return nil_node_create();
   }
 
 #undef LEFT

@@ -35,27 +35,27 @@ void if_node_destroy(if_node* node)
   free(node);
 }
 
-expression_node* if_node_evaluate(if_node* node)
+expression_node* if_node_evaluate(if_node* node, scope* scope)
 {
   expression_node* value, *cond;
   bool_node* bool;
 
-  cond = expression_node_evaluate(node->condition);
+  cond = expression_node_evaluate(node->condition, scope);
   bool = bool_node_from_expression(cond);
   if(bool->bool) {
     expression_node_destroy(cond);
     bool_node_destroy(bool);
-    return expression_node_evaluate(node->thenbody);
+    return expression_node_evaluate(node->thenbody, scope);
   }
 
   for(unsigned i = 0; i < node->nelseif; ++i) {
-    cond = expression_node_evaluate(node->elseifcondition[i]);
+    cond = expression_node_evaluate(node->elseifcondition[i], scope);
     bool = bool_node_from_expression(cond);
 
     if(bool->bool) {
       expression_node_destroy(cond);
       bool_node_destroy(bool);
-      return expression_node_evaluate(node->elseifbody[i]);
+      return expression_node_evaluate(node->elseifbody[i], scope);
     }
 
     expression_node_destroy(cond);
@@ -63,9 +63,15 @@ expression_node* if_node_evaluate(if_node* node)
   }
 
   if(node->elsebody)
-    return expression_node_evaluate(node->elsebody);
+    return expression_node_evaluate(node->elsebody, scope);
 
   return expression_node_create(NODE_NIL, NULL);
+}
+
+expression_node* if_node_clone(if_node* node)
+{
+  // TODO
+  return NULL;
 }
 
 string_node* if_node_to_string_node(if_node* node)

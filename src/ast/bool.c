@@ -22,9 +22,15 @@ void bool_node_destroy(bool_node* bool)
   free(bool);
 }
 
-expression_node* bool_node_evaluate(bool_node* bool)
+expression_node* bool_node_evaluate(bool_node* bool, scope* scope)
 {
   return expression_node_create(NODE_BOOL, bool_node_create(bool->bool));
+}
+
+expression_node* bool_node_clone(bool_node* bool)
+{
+  // TODO
+  return NULL;
 }
 
 string_node* bool_node_to_string_node(bool_node* bool)

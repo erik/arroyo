@@ -2,6 +2,7 @@
 #include "reader.h"
 #include "parse.h"
 #include "ast.h"
+#include "scope.h"
 
 #include <stdio.h>
 #include <readline/readline.h>
@@ -43,10 +44,10 @@ const char* string_reader(void* dummy, unsigned* size)
 
   read = 1;
   const char* prgn =
-    "fn main(x:real y z) (\n"                                        \
+    "fn main(x:real y z) (\n"                                         \
     "    longer_name123 <- 1.010 + 3\n"                               \
     "    a <- [y z \"string\" 4]\n"                                   \
-    "    -- b <- {adder : fn(v) v+1 b:2}\n"                          \
+    "    -- b <- {adder : fn(v) v+1 b:2}\n"                           \
     "    -- this is a comment\n"                                      \
     "    c <- true and 2 < 3\n"                                       \
     "    if 2 < 3 \"sane\" else \"insane\"\n"                         \
@@ -80,9 +81,11 @@ int main(int argc, char** argv)
   ps->error.max = 20;
   ps->t = lexer_next_token(ps->ls);
 
+  scope* scope = scope_create(NULL);
+
   while(ps->t.type != TK_EOS && ps->t.type != TK_ERROR) {
     expression_node* node = parse_expression(ps);
-    expression_node* eval = expression_node_evaluate(node);
+    expression_node* eval = expression_node_evaluate(node, scope);
     string_node* str = expression_node_to_string_node(eval);
 
     printf("==> %s\n", str->string);
@@ -92,6 +95,7 @@ int main(int argc, char** argv)
     expression_node_destroy(node);
   }
 
+  scope_destroy(scope);
   lexer_destroy(ls);
   free(ls);
   free(ps);
