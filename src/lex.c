@@ -31,6 +31,8 @@ static void lexer_error(lexer_state* ls, const char* fmt, ...)
   fprintf(stderr, "\n");
   va_end(ap);
 
+  next(ls);
+
   longjmp(ls->error.buf, 1);
 }
 
@@ -215,7 +217,6 @@ static int lex(lexer_state *ls, token_info *info)
 
       default:
         lexer_error(ls, "unrecognized symbol %c", c);
-        next(ls);
       }
     }
     }

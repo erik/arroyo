@@ -114,12 +114,27 @@ int main(int argc, char** argv)
   ps->error.max = 20;
   ps->t = lexer_next_token(ps->ls);
 
-  expression_node* program = parse_program(ps);
-  expression_node* eval = expression_node_evaluate(program, scope);
+  if(dorepl) {
+    while(ps->t.type != TK_EOS && ps->t.type != TK_ERROR) {
+      expression_node* node = parse_expression(ps);
+      expression_node* eval = expression_node_evaluate(node, scope);
+      string_node* str = expression_node_to_string_node(eval);
 
-  puts(expression_node_to_string(eval));
+      printf("==> %s\n", str->string);
 
-  expression_node_destroy(program);
+      string_node_destroy(str);
+      expression_node_destroy(eval);
+      expression_node_destroy(node);
+    }
+  }
+  else {
+    expression_node* program = parse_program(ps);
+    expression_node* eval = expression_node_evaluate(program, scope);
+
+    puts(expression_node_to_string(eval));
+
+    expression_node_destroy(program);
+  }
 
   scope_destroy(scope);
   lexer_destroy(ls);
