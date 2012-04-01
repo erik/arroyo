@@ -10,8 +10,8 @@ bool_node* bool_node_create(int val)
 bool_node* bool_node_from_expression(expression_node* expression)
 {
   if(expression->type == NODE_NIL ||
-      expression->type == NODE_BOOL &&
-      ((bool_node*)expression->ast_node)->bool != 1)
+     (expression->type == NODE_BOOL &&
+      ((bool_node*)expression->ast_node)->bool != 1))
     return bool_node_create(0);
 
   return bool_node_create(1);

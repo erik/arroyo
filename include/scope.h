@@ -13,7 +13,7 @@ static struct hashnode {
 
   // XXX: linked list is unacceptable for this
   struct hashnode* next;
-};
+} hashnode;
 
 typedef struct scope {
   struct hashnode* root;

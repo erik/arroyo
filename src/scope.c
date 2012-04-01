@@ -76,12 +76,13 @@ void scope_insert(scope* scope, char* key, expression_node* value)
 
 expression_node* scope_get(scope* scope, char* key)
 {
-  if(scope->root == NULL)
+  if(scope->root == NULL) {
     if(scope->parent)
       return scope_get(scope->parent, key);
     else
       return NULL;
 
+  }
   unsigned hashed = hash(key, strlen(key));
   struct hashnode* node = scope->root;
 
