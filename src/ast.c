@@ -44,7 +44,8 @@ expression_node* expression_node_evaluate(expression_node* node, scope* scope)
   expression_node* evaluated = NULL;
   NODE_TYPE_FUNCTION(node->type, evaluated=, evaluate(node->ast_node, scope));
 
-  if(!evaluated) return nil_node_create();
+  if(!evaluated)
+    return nil_node_create();
 
   return evaluated;
 }

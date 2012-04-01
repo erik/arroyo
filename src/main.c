@@ -1,12 +1,13 @@
 #include "lex.h"
 #include "reader.h"
-#include "parse.h"
 #include "ast.h"
+#include "parse.h"
 #include "scope.h"
 
 #include <stdio.h>
 #include <readline/readline.h>
 #include <readline/history.h>
+#include <getopt.h>
 
 const char* readline_reader(void* dummy, unsigned* size)
 {
@@ -65,47 +66,13 @@ const char* file_reader(void* f, unsigned* size)
   return file->buf;
 }
 
-int main(int argc, char** argv)
+int run_repl(scope* scope)
 {
-  int dorepl = 0;
-  char* filename = NULL;
-
-  for(int i = 1; i < argc; ++i) {
-    if(!strcmp(argv[i], "--repl"))
-      dorepl = 1;
-    else
-      filename = argv[i];
-  }
-
   reader r;
   lexer_state* ls = calloc(sizeof(lexer_state), 1);
   parser_state* ps = calloc(sizeof(parser_state), 1);
 
-  scope* scope = scope_create(NULL);
-
-  struct file_struct file;
-
-  if(filename != NULL) {
-    FILE* fp = fopen(filename, "r");
-
-    if(!fp) {
-      printf("can't open file '%s'\n", filename);
-      return 1;
-    }
-
-    file = (struct file_struct) {
-      .fp = fp,
-      .buf = NULL,
-      .done = 0
-    };
-
-    reader_create(&r, file_reader, &file);
-  } else if(dorepl) {
-    reader_create(&r, readline_reader, NULL);
-  } else {
-    printf("need to give me *something* to do!\n");
-    return 1;
-  }
+  reader_create(&r, readline_reader, NULL);
 
   lexer_create(ls, &r);
 
@@ -114,40 +81,135 @@ int main(int argc, char** argv)
   ps->error.max = 20;
   ps->t = lexer_next_token(ps->ls);
 
-  if(dorepl) {
-    switch(setjmp(ps->error.buf)) {
-    case 1: // an error occurred, non fatal, so jump back into loop
-      ps->t = lexer_next_token(ps->ls);
-    case 0: // no error
-      while(ps->t.type != TK_EOS) {
-        expression_node* node = parse_expression(ps);
-        expression_node* eval = expression_node_evaluate(node, scope);
-        string_node* str = expression_node_to_string_node(eval);
+  switch(setjmp(ps->error.buf)) {
+  case 1: // an error occurred, non fatal, so jump back into loop
+    ps->t = lexer_next_token(ps->ls);
+  case 0: // no error
+    while(ps->t.type != TK_EOS) {
+      expression_node* node = parse_expression(ps);
+      expression_node* eval = expression_node_evaluate(node, scope);
+      char* str = expression_node_to_string(eval);
 
-        printf("==> %s\n", str->string);
+      printf("==> %s\n", str);
 
-        string_node_destroy(str);
-        expression_node_destroy(eval);
-        expression_node_destroy(node);
-      }
-      break;
-    case 2: // EOS, break out
-      break;
+      free(str);
+      expression_node_destroy(eval);
+      expression_node_destroy(node);
     }
-  }
-  else {
-    expression_node* program = parse_program(ps);
-    expression_node* eval = expression_node_evaluate(program, scope);
-
-    puts(expression_node_to_string(eval));
-
-    expression_node_destroy(program);
+    break;
+  case 2: // EOS, break out
+    break;
   }
 
-  scope_destroy(scope);
   lexer_destroy(ls);
   free(ls);
   free(ps);
 
+  return 0;
+}
+
+int run_file(const char* filename, scope* scope)
+{
+  struct file_struct file;
+  reader r;
+
+  lexer_state* ls = calloc(sizeof(lexer_state), 1);
+  parser_state* ps = calloc(sizeof(parser_state), 1);
+
+  FILE* fp = fopen(filename, "r");
+
+  if(!fp) {
+    printf("Error: can't open file '%s'\n", filename);
+    return 1;
+  }
+
+  file = (struct file_struct) {
+    .fp = fp,
+    .buf = NULL,
+    .done = 0
+  };
+
+  reader_create(&r, file_reader, &file);
+  lexer_create(ls, &r);
+
+  ps->ls = ls;
+  ps->die_on_error = 0;
+  ps->error.max = 20;
+  ps->t = lexer_next_token(ps->ls);
+
+  expression_node* program = parse_program(ps);
+  expression_node* eval = expression_node_evaluate(program, scope);
+
+  // print the last expression
+  char* str = expression_node_to_string(eval);
+  puts(str);
+  free(str);
+
+  expression_node_destroy(eval);
+  expression_node_destroy(program);
+
+  lexer_destroy(ls);
+  free(ls);
+  free(ps);
+
+  fclose(fp);
+
+  return 0;
+}
+
+int usage(void)
+{
+  fprintf(stderr,
+          "Usage: arroyo [switches] [file]\n"           \
+          "  -r, --repl\tStart a REPL\n"                \
+          "  -h, --help\tPrint this help text\n"
+    );
+  return 1;
+}
+
+int main(int argc, char** argv)
+{
+  char* filename = NULL;
+  int repl_flag=0, help_flag=0;
+
+  struct option long_opts[] = {
+    {"help", no_argument, &help_flag, 1},
+    {"repl", no_argument, &repl_flag, 1},
+    {0,      0,           0,          0}
+  };
+
+  int cont = 1;
+  while(cont) {
+    int opt_index = 0;
+    switch(getopt_long(argc, argv, "hr", long_opts, &opt_index)) {
+    case -1:
+      cont = 0;
+      break;
+
+    case 'r':
+      repl_flag = 1;
+      break;
+
+    case '?':
+    case 'h':
+      return usage();
+    }
+  }
+
+  if(optind < argc)
+    filename = argv[optind++];
+
+  if((!filename && !repl_flag) || help_flag)
+    return usage();
+
+  scope* scope = scope_create(NULL);
+
+  if(filename)
+    run_file(filename, scope);
+
+  if(repl_flag)
+    run_repl(scope);
+
+  scope_destroy(scope);
   return 0;
 }
