@@ -59,12 +59,22 @@ void scope_destroy(scope* scope)
   free(scope);
 }
 
+// XXX: linked lists are bad and you should feel bad
 void scope_insert(scope* scope, char* key, expression_node* value)
 {
   unsigned hashed = hash(key, strlen(key));
 
-  // XXX: inserting at the front creates duplicates each time
-  // something is assigned, and is terrible form
+  // replace value if it already exists
+  struct hashnode* ptr = scope->root;
+  while(ptr) {
+    if(ptr->hash == hashed) {
+      expression_node_destroy(ptr->value);
+      ptr->value = value;
+      return;
+    }
+    ptr = ptr->next;
+  }
+
   struct hashnode* node = calloc(sizeof(struct hashnode), 1);
   node->hash = hashed;
   node->value = value;

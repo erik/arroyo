@@ -331,7 +331,6 @@ static fn_node* parse_function(parser_state* ps)
       int type = -1;
 
       expect(ps, TK_ID);
-      printf("got typed argument of %s\n", ps->info.string);
 
       for(unsigned i = 0; i < MAX_NODE_TYPE; ++i) {
         if(!strcmp(ps->info.string, node_type_string[i])) {

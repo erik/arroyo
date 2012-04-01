@@ -18,11 +18,11 @@ const char* readline_reader(void* dummy, unsigned* size)
     *size = 0;
     return NULL;
   }
-  
+
   if((strcmp(input, "exit") == 0) || (strcmp(input, "quit") == 0)) {
     exit(0);
   }
-  
+
   add_history(input);
 
   static char* ret = NULL;
@@ -115,16 +115,24 @@ int main(int argc, char** argv)
   ps->t = lexer_next_token(ps->ls);
 
   if(dorepl) {
-    while(ps->t.type != TK_EOS && ps->t.type != TK_ERROR) {
-      expression_node* node = parse_expression(ps);
-      expression_node* eval = expression_node_evaluate(node, scope);
-      string_node* str = expression_node_to_string_node(eval);
+    switch(setjmp(ps->error.buf)) {
+    case 1: // an error occurred, non fatal, so jump back into loop
+      ps->t = lexer_next_token(ps->ls);
+    case 0: // no error
+      while(ps->t.type != TK_EOS) {
+        expression_node* node = parse_expression(ps);
+        expression_node* eval = expression_node_evaluate(node, scope);
+        string_node* str = expression_node_to_string_node(eval);
 
-      printf("==> %s\n", str->string);
+        printf("==> %s\n", str->string);
 
-      string_node_destroy(str);
-      expression_node_destroy(eval);
-      expression_node_destroy(node);
+        string_node_destroy(str);
+        expression_node_destroy(eval);
+        expression_node_destroy(node);
+      }
+      break;
+    case 2: // EOS, break out
+      break;
     }
   }
   else {
