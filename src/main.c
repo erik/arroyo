@@ -18,6 +18,11 @@ const char* readline_reader(void* dummy, unsigned* size)
     *size = 0;
     return NULL;
   }
+  
+  if((strcmp(input, "exit") == 0) || (strcmp(input, "quit") == 0)) {
+    exit(0);
+  }
+  
   add_history(input);
 
   static char* ret = NULL;
