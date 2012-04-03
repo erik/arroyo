@@ -133,8 +133,13 @@ typedef struct {
 } if_node;
 
 typedef struct {
-  unsigned nexpressions;
-  struct expression_node** expressions;
+  struct expression_list {
+    struct expression_node* expression;
+    struct expression_list* next;
+  } expression_list;
+
+  struct expression_list* list, *last;
+
   scope* scope;
 } block_node;
 

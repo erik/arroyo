@@ -4,18 +4,20 @@
 block_node* block_node_create(void)
 {
   block_node* node = malloc(sizeof(block_node));
-  node->nexpressions = 0;
-  node->expressions = malloc(sizeof(expression_node*));
+  node->list = NULL;
+  node->last = NULL;
   return node;
 }
 
 void block_node_destroy(block_node* block)
 {
+  for(struct expression_list* ptr = block->list; ptr;) {
+    expression_node_destroy(ptr->expression);
+    struct expression_list* next = ptr->next;
+    free(ptr);
+    ptr = next;
+  }
 
-  for(unsigned i = 0; i < block->nexpressions; ++i)
-    expression_node_destroy(block->expressions[i]);
-
-  free(block->expressions);
   free(block);
 }
 
@@ -25,10 +27,9 @@ expression_node* block_node_evaluate(block_node* block, scope* s)
 
   expression_node* last = NULL;
 
-  for(unsigned i = 0; i < block->nexpressions; ++i) {
-    last = expression_node_evaluate(block->expressions[i], local);
-
-    if(i != block->nexpressions - 1)
+  for(struct expression_list* ptr = block->list; ptr; ptr = ptr->next) {
+    last = expression_node_evaluate(ptr->expression, s);
+    if(ptr->next)
       expression_node_destroy(last);
   }
 
@@ -48,10 +49,15 @@ expression_node* block_node_clone(block_node* block)
 
 void block_node_push_expression(block_node* block, expression_node* node)
 {
-  block->expressions = realloc(block->expressions,
-                                ++block->nexpressions * sizeof(expression_node*));
+  struct expression_list* new = malloc(sizeof(struct expression_list));
+  new->expression = node;
+  new->next = NULL;
 
-  block->expressions[block->nexpressions - 1] = node;
+  if(!block->list)
+    block->list = block->last = new;
+  else
+    block->last = block->last->next = new;
+
 }
 
 string_node* block_node_to_string_node(block_node* block)
@@ -61,10 +67,11 @@ string_node* block_node_to_string_node(block_node* block)
   buffer_create(&b, 10);
   buffer_putc(&b, '(');
 
-  for(unsigned i = 0; i < block->nexpressions; ++i) {
-    char *str = expression_node_to_string(block->expressions[i]);
+  for(struct expression_list* ptr = block->list; ptr; ptr = ptr->next) {
+    char *str = expression_node_to_string(ptr->expression);
     buffer_puts(&b, str);
-    if(i != block->nexpressions - 1) buffer_putc(&b, ' ');
+    if(ptr->next)
+      buffer_putc(&b, ' ');
     free(str);
   }
 
