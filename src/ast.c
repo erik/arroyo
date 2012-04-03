@@ -25,7 +25,6 @@
 expression_node* expression_node_create(node_type type, void* node_struct)
 {
   expression_node* node = calloc(sizeof(expression_node), 1);
-
   node->type = type;
   node->ast_node = node_struct;
   return node;
@@ -55,7 +54,8 @@ expression_node* expression_node_clone(expression_node* node)
   expression_node* cloned = NULL;
   NODE_TYPE_FUNCTION(node->type, cloned=, clone(node->ast_node));
 
-  if(!cloned) return nil_node_create();
+  if(!cloned)
+    return nil_node_create();
 
   return cloned;
 }
@@ -64,7 +64,9 @@ string_node* expression_node_to_string_node(expression_node* node)
 {
   string_node* string = NULL;
   NODE_TYPE_FUNCTION(node->type, string=, to_string_node(node->ast_node));
-  if(!string) return NULL;
+
+  if(!string)
+    return NULL;
 
   return string;
 }
@@ -73,7 +75,8 @@ char* expression_node_to_string(expression_node* node)
 {
   string_node* string = expression_node_to_string_node(node);
 
-  if(!string) return NULL;
+  if(!string)
+    return NULL;
 
   char* str = strdup(string->string);
   string_node_destroy(string);

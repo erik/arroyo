@@ -3,20 +3,17 @@
 #ifndef _SCOPE_H_
 #define _SCOPE_H_
 
-
 struct expression_node;
 
-struct hashnode {
-  unsigned hash;
+typedef struct bucket {
   char* key;
   struct expression_node* value;
 
-  // XXX: linked list is unacceptable for this
-  struct hashnode* next;
-} hashnode;
+  struct bucket* next;
+} bucket;
 
 typedef struct scope {
-  struct hashnode* root;
+  struct bucket* buckets[256];
 
   struct scope* parent;
 } scope;
@@ -25,6 +22,7 @@ typedef struct scope {
 scope* scope_create(scope* parent);
 void scope_destroy(scope* scope);
 void scope_insert(scope* scope, char* key, struct expression_node* value);
+bucket* scope_get_bucket(scope* s, char* key);
 struct expression_node* scope_get(scope* scope, char* key);
 
 #endif /* _SCOPE_H_ */

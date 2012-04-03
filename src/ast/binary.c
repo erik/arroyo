@@ -1,3 +1,4 @@
+#include "scope.h"
 #include "ast.h"
 #include "buffer.h"
 #include "util.h"
@@ -103,16 +104,23 @@ expression_node* binary_node_evaluate(binary_node* binary, scope* scope)
 #define REAL(expr) (((real_node*)expr->ast_node)->real)
 #define CAST(expr, type) ((type)expr->ast_node)
 
-#define ARITH(op)                                                       \
-  TYPE_CHECK(LEFT, NODE_REAL);                                          \
-  TYPE_CHECK(RIGHT, NODE_REAL);                                         \
-  return EXPR(REAL, real_node_create(REAL(left) op REAL(right)));
+#define ARITH(op) {                                                     \
+    TYPE_CHECK(LEFT, NODE_REAL);                                        \
+    TYPE_CHECK(RIGHT, NODE_REAL);                                       \
+    real_node* real = real_node_create(REAL(left) op REAL(right));      \
+    expression_node_destroy(left);                                      \
+    expression_node_destroy(right);                                     \
+    return expression_node_create(NODE_REAL, real);                     \
+  }
 
-#define COMP(op)                                                        \
-  TYPE_CHECK(LEFT, NODE_REAL);                                          \
-  TYPE_CHECK(RIGHT, NODE_REAL);                                         \
-  return expression_node_create(NODE_BOOL,                              \
-                                bool_node_create(REAL(left) op REAL(right) ? 1 : 0));
+#define COMP(op) {                                                      \
+    TYPE_CHECK(LEFT, NODE_REAL);                                        \
+    TYPE_CHECK(RIGHT, NODE_REAL);                                       \
+    bool_node* b = bool_node_create(REAL(left) op REAL(right) ? 1 : 0); \
+    expression_node_destroy(left);                                      \
+    expression_node_destroy(right);                                     \
+    return expression_node_create(NODE_BOOL, b);                        \
+  }
 
   switch(binary->op) {
   case OP_ADD:
@@ -123,11 +131,15 @@ expression_node* binary_node_evaluate(binary_node* binary, scope* scope)
     ARITH(*);
   case OP_DIV:
     ARITH(/);
-  case OP_MOD:
+  case OP_MOD: {
     TYPE_CHECK(LEFT, NODE_REAL);
     TYPE_CHECK(RIGHT, NODE_REAL);
-    return EXPR(REAL, real_node_create((long)REAL(left) %
-                                       (long)REAL(right)));
+    real_node* real = real_node_create((long)REAL(left) %
+                                       (long)REAL(right));
+    expression_node_destroy(left);
+    expression_node_destroy(right);
+    return EXPR(REAL, real);
+  }
   case OP_LT:
     COMP(<);
   case OP_LTE:
@@ -151,7 +163,13 @@ expression_node* binary_node_evaluate(binary_node* binary, scope* scope)
     case NODE_BOOL: {
       bool_node* lb = CAST(left, bool_node*);
       bool_node* rb = CAST(right, bool_node*);
-      return EXPR(BOOL, bool_node_create(lb->bool == rb->bool));
+
+      bool_node* b = bool_node_create(lb->bool == rb->bool);
+
+      expression_node_destroy(right);
+      expression_node_destroy(left);
+
+      return EXPR(BOOL, b);
     }
     default:
       printf("this comparision is not handled yet\n");
@@ -199,6 +217,15 @@ expression_node* binary_node_evaluate(binary_node* binary, scope* scope)
     id_node* id = binary->lhs->ast_node;
 
     right = expression_node_evaluate(binary->rhs, scope);
+
+    // remove old binding if it exists
+    bucket* existing = scope_get_bucket(scope, id->id);
+    if(existing) {
+      expression_node_destroy(existing->value);
+      existing->value = expression_node_clone(right);
+
+      return right;
+    }
 
     scope_insert(scope, strdup(id->id), expression_node_clone(right));
 

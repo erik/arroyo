@@ -11,6 +11,7 @@ block_node* block_node_create(void)
 
 void block_node_destroy(block_node* block)
 {
+
   for(unsigned i = 0; i < block->nexpressions; ++i)
     expression_node_destroy(block->expressions[i]);
 
@@ -26,11 +27,15 @@ expression_node* block_node_evaluate(block_node* block, scope* s)
 
   for(unsigned i = 0; i < block->nexpressions; ++i) {
     last = expression_node_evaluate(block->expressions[i], local);
+
+    if(i != block->nexpressions - 1)
+      expression_node_destroy(last);
   }
 
   scope_destroy(local);
 
-  if(!last) return nil_node_create();
+  if(!last)
+    return nil_node_create();
 
   return last;
 }

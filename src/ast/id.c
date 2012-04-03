@@ -1,12 +1,11 @@
 #include "ast.h"
 #include "util.h"
 #include <stdio.h>
+
 id_node* id_node_create(char* name)
 {
   id_node* node = calloc(sizeof(id_node), 1);
-
   node->id = strdup(name);
-
   return node;
 }
 
@@ -25,8 +24,8 @@ expression_node* id_node_evaluate(id_node* id, scope* scope)
 {
   expression_node* value = scope_get(scope, id->id);
 
-  if(value == NULL)
-    return expression_node_create(NODE_NIL, NULL);
+  if(!value)
+    return nil_node_create();
 
   return expression_node_clone(value);
 }

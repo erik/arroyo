@@ -160,8 +160,8 @@ int run_file(const char* filename, scope* scope)
 int usage(void)
 {
   fprintf(stderr,
-          "Usage: arroyo [switches] [file]\n"           \
-          "  -r, --repl\tStart a REPL\n"                \
+          "Usage: arroyo [switches] [file]\n"
+          "  -r, --repl\tStart a REPL (after file is evaluated, if given)\n"
           "  -h, --help\tPrint this help text\n"
     );
   return 1;
