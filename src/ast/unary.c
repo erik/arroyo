@@ -44,7 +44,6 @@ expression_node* unary_node_evaluate(unary_node* node, scope* scope)
   }
 
   case OP_PRINT: {
-    expression_node* expr = expression_node_evaluate(node->expr, scope);
     char* str = expression_node_to_string(expr);
     expression_node_destroy(expr);
 
