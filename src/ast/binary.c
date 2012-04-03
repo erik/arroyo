@@ -8,7 +8,7 @@
 
 binary_node* binary_node_create(enum binary_op op)
 {
-  binary_node* binary = calloc(sizeof(binary_node), 1);
+  binary_node* binary = malloc(sizeof(binary_node));
   binary->lhs = NULL;
   binary->rhs = NULL;
 

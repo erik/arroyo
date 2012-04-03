@@ -24,7 +24,7 @@
 
 inline expression_node* expression_node_create(node_type type, void* node_struct)
 {
-  expression_node* node = calloc(sizeof(expression_node), 1);
+  expression_node* node = malloc(sizeof(expression_node));
   node->type = type;
   node->ast_node = node_struct;
   return node;

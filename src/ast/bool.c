@@ -2,7 +2,7 @@
 
 bool_node* bool_node_create(int val)
 {
-  bool_node* bool = calloc(sizeof(bool_node), 1);
+  bool_node* bool = malloc(sizeof(bool_node));
   bool->bool = val;
   return bool;
 }

@@ -3,7 +3,7 @@
 #include <stdio.h>
 real_node* real_node_create(long double value)
 {
-  real_node* node = calloc(sizeof(real_node), 1);
+  real_node* node = malloc(sizeof(real_node));
   node->real = value;
   return node;
 }

@@ -3,7 +3,7 @@
 
 loop_node* loop_node_create(void)
 {
-  loop_node* loop = calloc(sizeof(loop_node), 1);
+  loop_node* loop = malloc(sizeof(loop_node));
 
   loop->type = LOOP_DO;
   loop->init = NULL;

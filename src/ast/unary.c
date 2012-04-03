@@ -5,7 +5,7 @@
 
 unary_node* unary_node_create(enum unary_op op)
 {
-  unary_node* node = calloc(sizeof(unary_node), 1);
+  unary_node* node = malloc(sizeof(unary_node));
 
   node->op = op;
   node->expr = NULL;

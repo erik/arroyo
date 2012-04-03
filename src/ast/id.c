@@ -4,7 +4,7 @@
 
 id_node* id_node_create(char* name)
 {
-  id_node* node = calloc(sizeof(id_node), 1);
+  id_node* node = malloc(sizeof(id_node));
   node->id = strdup(name);
   return node;
 }

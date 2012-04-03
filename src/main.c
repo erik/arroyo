@@ -55,7 +55,7 @@ const char* file_reader(void* f, unsigned* size)
     return NULL;
   }
 
-  file->buf = calloc(4096, 1);
+  file->buf = malloc(4096);
 
   *size = fread(file->buf, 1, 4096, file->fp);
 

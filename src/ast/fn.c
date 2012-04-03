@@ -4,7 +4,7 @@
 
 fn_node* fn_node_create()
 {
-  fn_node* fn = calloc(sizeof(fn_node), 1);
+  fn_node* fn = malloc(sizeof(fn_node));
   fn->id = NULL;
 
   fn->nargs = 0;

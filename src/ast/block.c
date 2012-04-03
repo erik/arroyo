@@ -3,7 +3,7 @@
 
 block_node* block_node_create(void)
 {
-  block_node* node = calloc(sizeof(block_node), 1);
+  block_node* node = malloc(sizeof(block_node));
   node->nexpressions = 0;
   node->expressions = malloc(sizeof(expression_node*));
   return node;

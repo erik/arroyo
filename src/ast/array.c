@@ -3,7 +3,7 @@
 
 array_node* array_node_create()
 {
-  array_node* array = calloc(sizeof(array_node), 1);
+  array_node* array = malloc(sizeof(array_node));
 
   array->nelements = 0;
   array->elements  = malloc(0);

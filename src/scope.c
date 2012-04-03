@@ -77,7 +77,8 @@ void scope_insert(scope* scope, char* key, expression_node* value)
 
   // if bucket doesn't exist, create it
   if(!b) {
-    b = calloc(sizeof(bucket), 1);
+    b = malloc(sizeof(bucket));
+    b->next = NULL;
     b->key = key;
     b->value = value;
     scope->buckets[hashed] = b;
@@ -85,7 +86,7 @@ void scope_insert(scope* scope, char* key, expression_node* value)
   }
 
   // otherwise insert at head of list
-  bucket* head = calloc(sizeof(bucket), 1);
+  bucket* head = malloc(sizeof(bucket));
   head->key = key;
   head->value = value;
   head->next = b;

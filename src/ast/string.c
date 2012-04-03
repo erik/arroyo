@@ -8,7 +8,7 @@
 
 string_node* string_node_create(const char* string)
 {
-  string_node* node = calloc(sizeof(string_node), 1);
+  string_node* node = malloc(sizeof(string_node));
   node->string = strdup(string);
   return node;
 }

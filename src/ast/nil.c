@@ -2,7 +2,7 @@
 
 expression_node* nil_node_create()
 {
-  expression_node* node = calloc(sizeof(expression_node), 1);
+  expression_node* node = malloc(sizeof(expression_node));
 
   node->type = NODE_NIL;
   node->ast_node = NULL;

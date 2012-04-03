@@ -3,7 +3,7 @@
 
 if_node* if_node_create(void)
 {
-  if_node* node = calloc(sizeof(if_node), 1);
+  if_node* node = malloc(sizeof(if_node));
   node->condition = NULL;
   node->thenbody = NULL;
 
