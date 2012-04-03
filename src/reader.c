@@ -9,7 +9,6 @@ void reader_create(reader* r, reader_fn fn, void* data)
   r->available = 0;
   r->ptr = NULL;
 }
-#include <stdio.h>
 
 int reader_fillbuf(reader* r)
 {

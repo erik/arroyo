@@ -13,26 +13,25 @@ const char* readline_reader(void* dummy, unsigned* size)
 {
   (void)dummy;
 
-  const char* input = readline(">> ");
+  char* input = readline(">> ");
 
   if(input == NULL) {
     *size = 0;
     return NULL;
   }
 
-  if((strcmp(input, "exit") == 0) || (strcmp(input, "quit") == 0)) {
-    exit(0);
-  }
-
   add_history(input);
 
   static char* ret = NULL;
 
-  if(ret != NULL) free(ret);
+  if(ret != NULL)
+    free(ret);
 
   ret = malloc(strlen(input) + 3);
   strcpy(ret, input);
   strcat(ret, ",\n");
+
+  free(input);
 
   *size = strlen(ret);
   return ret;

@@ -43,10 +43,7 @@ static inline unsigned char hash(const char* key)
 scope* scope_create(scope* parent)
 {
   scope* s = calloc(sizeof(scope), 1);
-
-  if(parent)
-    s->parent = parent;
-
+  s->parent = parent;
   return s;
 }
 
@@ -83,7 +80,6 @@ void scope_insert(scope* scope, char* key, expression_node* value)
     b = calloc(sizeof(bucket), 1);
     b->key = key;
     b->value = value;
-    b->next = NULL;
     scope->buckets[hashed] = b;
     return;
   }
@@ -97,13 +93,13 @@ void scope_insert(scope* scope, char* key, expression_node* value)
   scope->buckets[hashed] = head;
 }
 
-bucket* scope_get_bucket(scope* scope, char* key)
+// helper function to prevent key from being hashed multiple times
+static bucket* scope_get_bucket_(scope* scope, char* key, unsigned char hashed)
 {
-  unsigned char hashed = hash(key);
   bucket* b = scope->buckets[hashed];
 
   if(!b)
-    return scope->parent ? scope_get_bucket(scope->parent, key) : NULL;
+    return scope->parent ? scope_get_bucket_(scope->parent, key, hashed) : NULL;
 
   while(b) {
     if(!strcmp(b->key, key)) {
@@ -112,6 +108,13 @@ bucket* scope_get_bucket(scope* scope, char* key)
     b = b->next;
   }
   return NULL;
+}
+
+bucket* scope_get_bucket(scope* scope, char* key)
+{
+  unsigned char hashed = hash(key);
+
+  return scope_get_bucket_(scope, key, hashed);
 }
 
 expression_node* scope_get(scope* scope, char* key)
