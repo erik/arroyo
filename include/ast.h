@@ -48,7 +48,8 @@ enum loop_type {
 
 enum unary_op {
   OP_NOTUNOP = 0,
-  OP_UNM, OP_NOT
+  OP_UNM, OP_NOT,
+  OP_PRINT
 };
 
 enum binary_op {

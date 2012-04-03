@@ -53,6 +53,9 @@ enum token_type {
   TK_AND, TK_OR, TK_XOR,
   TK_LOOP, TK_WHILE, TK_UNTIL, TK_DO,
 
+  // temporary
+  TK_PRINT,
+
   LAST_TOK
 };
 
@@ -68,7 +71,9 @@ static const char* tokens[NUM_TOK] = {
   "<=", ">=", "/=",
   "true", "false", "nil",
   "and", "or", "xor",
-  "loop", "while", "until", "do"
+  "loop", "while", "until", "do",
+
+  "print"
 };
 
 // simplistic token to string handling

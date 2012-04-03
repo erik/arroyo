@@ -42,6 +42,19 @@ expression_node* unary_node_evaluate(unary_node* node, scope* scope)
     expression_node_destroy(expr);
     return expression_node_create(NODE_BOOL, bool);
   }
+
+  case OP_PRINT: {
+    expression_node* expr = expression_node_evaluate(node->expr, scope);
+    char* str = expression_node_to_string(expr);
+    expression_node_destroy(expr);
+
+    printf("%s\n", str);
+
+    free(str);
+
+    return  nil_node_create();
+  }
+
   default:
     printf("not handled / not unary operator\n");
   }

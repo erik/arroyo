@@ -81,6 +81,7 @@ static enum unary_op get_unaryop(parser_state* ps)
   switch(ps->t.type) {
   case '-' : return OP_UNM;
   case '!' : return OP_NOT;
+  case TK_PRINT: return OP_PRINT;
   default  : return OP_NOTUNOP;
   }
 }
@@ -186,16 +187,8 @@ expression_node* parse_expression(parser_state* ps)
   void* node = NULL;
 
   if(accept(ps, TK_ID)) {
-    // function call
-    if(accept(ps, '(')) {
-      parse_block(ps);
-    }
-
-    // just an id
-    else {
-      type = NODE_ID;
-      node = id_node_create(ps->info.string);
-    }
+    type = NODE_ID;
+    node = id_node_create(ps->info.string);
   }
   else if(accept(ps, TK_FN)) {
     type = NODE_FN;
