@@ -1,4 +1,4 @@
 *.o
 arroyo
 nul
-docsrc.c
+gmon.out

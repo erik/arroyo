@@ -13,7 +13,7 @@ static hash_node*       parse_hash       (parser_state*);
 static if_node*         parse_if         (parser_state*);
 static loop_node*       parse_loop       (parser_state*);
 
-static void next_token(parser_state* ps);
+static inline void next_token(parser_state* ps);
 
 static void parser_error(parser_state* ps, const char* fmt, ...)
 {
@@ -32,7 +32,7 @@ static void parser_error(parser_state* ps, const char* fmt, ...)
   next_token(ps);
 }
 
-static void next_token(parser_state* ps)
+static inline void next_token(parser_state* ps)
 {
   ps->t = lexer_next_token(ps->ls);
 
@@ -44,12 +44,8 @@ static void next_token(parser_state* ps)
 static int accept(parser_state* ps, int type)
 {
   if(type == ps->t.type) {
-    /* const char* info = ps->t.info.string == NULL ? "" : ps->t.info.string; */
-    /* char* str = tok_to_string(type); */
-    /* printf("accepting =>\t%-10s\t%s\n", str, info); */
-    /* free(str); */
-
-    if(ps->info.string != NULL) free(ps->info.string);
+    if(ps->info.string != NULL)
+      free(ps->info.string);
 
     ps->info = (struct token_info){
       .string = strdup(ps->t.info.string),
@@ -66,7 +62,8 @@ static int accept(parser_state* ps, int type)
 
 static int expect(parser_state* ps, int type)
 {
-  if(accept(ps, type)) return 1;
+  if(accept(ps, type))
+    return 1;
 
   char* want = tok_to_string(type);
   char* got  = tok_to_string(ps->t.type);
@@ -118,7 +115,7 @@ static enum binary_op get_binop(parser_state* ps)
 
 // return binary/unary operator precedence(arbitrary values, higher
 // precedence is higher number)
-static int op_precedence(int op)
+static int op_precedence(unsigned op)
 {
   switch(op) {
     // unary operators
@@ -167,14 +164,6 @@ static array_node* parse_array(parser_state* ps)
   expect(ps, ']');
 
   return array;
-}
-
-/* ID "<-" EXPRESSION */
-static binary_node* parse_assignment(parser_state* ps)
-{
-  // TODO
-  parse_expression(ps);
-  return NULL;
 }
 
 /* '(' EXPRESSION* ')' */
@@ -297,8 +286,9 @@ expression_node* parse_expression(parser_state* ps)
 
   // TODO: this approach currently evaluates left to right and makes
   // precendence difficult to implement, should be refactored
-  if(get_binop(ps)) {
-    binary_node* binary = binary_node_create(get_binop(ps));
+  enum binary_op binop;
+  if((binop = get_binop(ps))) {
+    binary_node* binary = binary_node_create(binop);
     binary->lhs = expression_node_create(type, node);
 
     // skip operator

@@ -22,7 +22,7 @@
   }
 
 
-expression_node* expression_node_create(node_type type, void* node_struct)
+inline expression_node* expression_node_create(node_type type, void* node_struct)
 {
   expression_node* node = calloc(sizeof(expression_node), 1);
   node->type = type;
@@ -30,7 +30,7 @@ expression_node* expression_node_create(node_type type, void* node_struct)
   return node;
 }
 
-void expression_node_destroy(expression_node* node)
+inline void expression_node_destroy(expression_node* node)
 {
   NODE_TYPE_FUNCTION(node->type, /* NONE */, destroy(node->ast_node));
 
@@ -38,7 +38,7 @@ void expression_node_destroy(expression_node* node)
   node = NULL;
 }
 
-expression_node* expression_node_evaluate(expression_node* node, scope* scope)
+inline expression_node* expression_node_evaluate(expression_node* node, scope* scope)
 {
   expression_node* evaluated = NULL;
   NODE_TYPE_FUNCTION(node->type, evaluated=, evaluate(node->ast_node, scope));
@@ -49,7 +49,7 @@ expression_node* expression_node_evaluate(expression_node* node, scope* scope)
   return evaluated;
 }
 
-expression_node* expression_node_clone(expression_node* node)
+inline expression_node* expression_node_clone(expression_node* node)
 {
   expression_node* cloned = NULL;
   NODE_TYPE_FUNCTION(node->type, cloned=, clone(node->ast_node));
@@ -60,7 +60,7 @@ expression_node* expression_node_clone(expression_node* node)
   return cloned;
 }
 
-string_node* expression_node_to_string_node(expression_node* node)
+inline string_node* expression_node_to_string_node(expression_node* node)
 {
   string_node* string = NULL;
   NODE_TYPE_FUNCTION(node->type, string=, to_string_node(node->ast_node));
@@ -71,7 +71,7 @@ string_node* expression_node_to_string_node(expression_node* node)
   return string;
 }
 
-char* expression_node_to_string(expression_node* node)
+inline char* expression_node_to_string(expression_node* node)
 {
   string_node* string = expression_node_to_string_node(node);
 

@@ -44,9 +44,6 @@ scope* scope_create(scope* parent)
 {
   scope* s = calloc(sizeof(scope), 1);
 
-  for(int i = 0; i < 256; ++i)
-    s->buckets[i] = NULL;
-
   if(parent)
     s->parent = parent;
 
@@ -55,8 +52,7 @@ scope* scope_create(scope* parent)
 
 void scope_destroy(scope* scope)
 {
-
-  for(int i = 0; i < 256; ++i) {
+  for(unsigned i = 0; i < 256; ++i) {
     if(!scope->buckets[i])
       continue;
 
@@ -72,6 +68,7 @@ void scope_destroy(scope* scope)
       ptr = next;
     }
   }
+
   free(scope);
 }
 
