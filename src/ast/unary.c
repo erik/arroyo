@@ -52,7 +52,7 @@ expression_node* unary_node_evaluate(unary_node* node, scope* scope)
   }
   case OP_NOT: {
     expression_node* expr = expression_node_evaluate(node->expr, scope);
-  bool_node* bool = bool_node_from_expression(expr);
+    bool_node* bool = bool_node_from_expression(expr);
     bool->bool = !bool->bool;
 
     expression_node_destroy(expr);
@@ -76,7 +76,7 @@ expression_node* unary_node_evaluate(unary_node* node, scope* scope)
       break;
     }
 
-    real_node* inc = real_node_create(((real_node*)expr->ast_node)->real+1);
+    real_node* inc = real_node_create(((real_node*)expr->ast_node)->real + 1);
     expression_node_destroy(expr);
 
     if(bucket)

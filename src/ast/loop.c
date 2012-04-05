@@ -24,7 +24,7 @@ void loop_node_destroy(loop_node* loop)
 
 expression_node* loop_node_evaluate(loop_node* loop, scope* s)
 {
-  expression_node* value = NULL;
+  expression_node* value = nil_node_create();
   scope* local = scope_create(s);
 
   if(loop->init) {
@@ -32,8 +32,6 @@ expression_node* loop_node_evaluate(loop_node* loop, scope* s)
   }
 
   for(;;) {
-    value = expression_node_evaluate(loop->body, local);
-
     expression_node* cond = expression_node_evaluate(loop->cond, local);
     bool_node* bool = bool_node_from_expression(cond);
 
@@ -42,22 +40,18 @@ expression_node* loop_node_evaluate(loop_node* loop, scope* s)
     expression_node_destroy(cond);
     bool_node_destroy(bool);
 
-
     if(loop->type == LOOP_DO) {
       // TODO: currently no way to break from do loop
     }
 
-    else if(loop->type == LOOP_WHILE) {
-      if(!bool_val)
-        break;
-    }
+    else if(loop->type == LOOP_WHILE && !bool_val)
+      break;
 
-    else if(loop->type == LOOP_UNTIL) {
-      if(bool_val)
-        break;
-    }
+    else if(loop->type == LOOP_UNTIL && bool_val)
+      break;
 
     expression_node_destroy(value);
+    value = expression_node_evaluate(loop->body, local);
   }
   scope_destroy(local);
 
