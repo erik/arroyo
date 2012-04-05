@@ -75,6 +75,36 @@ string_node* fn_node_to_string_node(fn_node* fn)
   return string;
 }
 
+char* fn_node_inspect(fn_node* fn)
+{
+  buffer b;
+  buffer_create(&b, 10);
+
+  buffer_puts(&b, "fn ");
+  buffer_puts(&b, fn->id ? fn->id : "<fn>");
+
+  buffer_puts(&b, " (");
+  for(unsigned i = 0; i < fn->nargs; ++i) {
+    buffer_puts(&b, fn->args[i].id);
+    if(fn->args[i].arg_type != -1) {
+      buffer_putc(&b, ':');
+      buffer_puts(&b, node_type_string[fn->args[i].arg_type]);
+    }
+    if(i != fn->nargs - 1)
+      buffer_putc(&b, ' ');
+  }
+  buffer_puts(&b, ") ");
+
+  char* body = expression_node_inspect(fn->body);
+  buffer_puts(&b, body);
+  free(body);
+
+  buffer_putc(&b, '\0');
+
+  return b.buf;
+}
+
+
 void fn_node_add_argument(fn_node* fn, char* name, int type)
 {
   fn->args = realloc(fn->args, sizeof(struct typed_id) * ++fn->nargs);

@@ -24,12 +24,12 @@ int asprintf(char** out, const char* fmt, ...)
 }
 
 
-char* strdup(const char* string)
+inline char* strdup(const char* string)
 {
   if(!string) return NULL;
 
-  unsigned len = strlen(string);
-  char* dup = calloc(len + 1, 1);
+  unsigned len = strlen(string) + 1;
+  char* dup = malloc(len);
 
   memcpy(dup, string, len);
   return dup;

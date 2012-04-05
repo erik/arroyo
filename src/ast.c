@@ -83,3 +83,14 @@ inline char* expression_node_to_string(expression_node* node)
 
   return str;
 }
+
+inline char* expression_node_inspect(expression_node* node)
+{
+  char* string = NULL;
+  NODE_TYPE_FUNCTION(node->type, string=, inspect(node->ast_node));
+
+  if(!string)
+    return expression_node_to_string(node);
+
+  return string;
+}

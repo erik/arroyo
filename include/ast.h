@@ -157,6 +157,7 @@ expression_node* expression_node_evaluate(expression_node*, scope*);
 expression_node* expression_node_clone(expression_node*);
 string_node*     expression_node_to_string_node(expression_node*);
 char*            expression_node_to_string(expression_node*);
+char*            expression_node_inspect(expression_node*);
 
 // nil
 expression_node* nil_node_create(void);
@@ -164,6 +165,7 @@ void             nil_node_destroy(expression_node*);
 expression_node* nil_node_evaluate(void*, scope*);
 expression_node* nil_node_clone(void*);
 string_node*     nil_node_to_string_node(expression_node*);
+char*            nil_node_inspect(expression_node*);
 
 // real
 real_node*       real_node_create(long double);
@@ -171,6 +173,7 @@ void             real_node_destroy(real_node*);
 expression_node* real_node_evaluate(real_node*, scope*);
 expression_node* real_node_clone(real_node*);
 string_node*     real_node_to_string_node(real_node*);
+char*            real_node_inspect(real_node*);
 
 // string node
 string_node*     string_node_create(const char* string);
@@ -178,6 +181,7 @@ void             string_node_destroy(string_node*);
 expression_node* string_node_evaluate(string_node*, scope*);
 expression_node* string_node_clone(string_node*);
 string_node*     string_node_to_string_node(string_node*);
+char*            string_node_inspect(string_node*);
 
 // bool node
 bool_node*       bool_node_create(int);
@@ -186,6 +190,7 @@ expression_node* bool_node_evaluate(bool_node*, scope*);
 expression_node* bool_node_clone(bool_node*);
 string_node*     bool_node_to_string_node(bool_node*);
 bool_node*       bool_node_from_expression(expression_node*);
+char*            bool_node_inspect(bool_node*);
 
 // id node
 id_node*         id_node_create(char*);
@@ -193,6 +198,7 @@ void             id_node_destroy(id_node*);
 expression_node* id_node_evaluate(id_node*, scope*);
 expression_node* id_node_clone(id_node*);
 string_node*     id_node_to_string_node(id_node*);
+char*            id_node_inspect(id_node*);
 
 // fn node
 fn_node*         fn_node_create();
@@ -201,6 +207,7 @@ expression_node* fn_node_evaluate(fn_node*, scope*);
 expression_node* fn_node_clone(fn_node*);
 string_node*     fn_node_to_string_node(fn_node*);
 void             fn_node_add_argument(fn_node*, char* name, int type);
+char*            fn_node_inspect(fn_node*);
 
 // array node
 array_node*      array_node_create();
@@ -209,6 +216,7 @@ expression_node* array_node_evaluate(array_node*, scope*);
 expression_node* array_node_clone(array_node*);
 string_node*     array_node_to_string_node(array_node*);
 void             array_node_push_expression(array_node*, expression_node*);
+char*            array_node_inspect(array_node*);
 
 // block node
 block_node*      block_node_create(void);
@@ -217,6 +225,7 @@ expression_node* block_node_evaluate(block_node*, scope*);
 expression_node* block_node_clone(block_node*);
 string_node*     block_node_to_string_node(block_node*);
 void             block_node_push_expression(block_node*, expression_node*);
+char*            block_node_inspect(block_node*);
 
 // if node
 if_node*         if_node_create(void);
@@ -225,6 +234,7 @@ expression_node* if_node_evaluate(if_node*, scope*);
 expression_node* if_node_clone(if_node*);
 string_node*     if_node_to_string_node(if_node*);
 void             if_node_add_elseif(if_node*, expression_node*, expression_node*);
+char*            if_node_inspect(if_node*);
 
 // loop node
 loop_node*       loop_node_create(void);
@@ -232,6 +242,7 @@ void             loop_node_destroy(loop_node*);
 expression_node* loop_node_evaluate(loop_node*, scope*);
 expression_node* loop_node_clone(loop_node*);
 string_node*     loop_node_to_string_node(loop_node*);
+char*            loop_node_inspect(loop_node*);
 
 // binary
 binary_node*     binary_node_create(enum binary_op);
@@ -239,6 +250,7 @@ void             binary_node_destroy(binary_node*);
 expression_node* binary_node_evaluate(binary_node*, scope*);
 expression_node* binary_node_clone(binary_node*);
 string_node*     binary_node_to_string_node(binary_node*);
+char*            binary_node_inspect(binary_node*);
 
 // unary
 unary_node*      unary_node_create(enum unary_op);
@@ -246,6 +258,7 @@ void             unary_node_destroy(unary_node*);
 expression_node* unary_node_evaluate(unary_node*, scope*);
 expression_node* unary_node_clone(unary_node*);
 string_node*     unary_node_to_string_node(unary_node*);
+char*            unary_node_inspect(unary_node*);
 
 // TODO: finish
 // ... etc

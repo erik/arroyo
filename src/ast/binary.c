@@ -6,6 +6,51 @@
 #include <math.h>
 #include <stdio.h>
 
+static inline char* get_binop_str(enum binary_op op)
+{
+  switch(op) {
+  case OP_ADD:
+    return "+";
+  case OP_SUB:
+    return "-";
+  case OP_MUL:
+    return "*";
+  case OP_DIV:
+    return "/";
+  case OP_MOD:
+    return "%";
+
+  case OP_LT:
+    return "<";
+  case OP_LTE:
+    return "<=";
+  case OP_GT:
+    return ">";
+  case OP_GTE:
+    return ">=";
+  case OP_EQ:
+    return "=";
+  case OP_NEQ:
+    return "/=";
+
+  case OP_AND:
+    return "and";
+  case OP_OR:
+    return "or";
+  case OP_XOR:
+    return "xor";
+
+  case OP_CONCAT:
+    return "CONCAT";
+  case OP_DOT:
+    return ".";
+  case OP_ASSIGN:
+    return "<-";
+  default:
+    return "BADOP";
+  }
+}
+
 binary_node* binary_node_create(enum binary_op op)
 {
   binary_node* binary = malloc(sizeof(binary_node));
@@ -33,32 +78,8 @@ string_node* binary_node_to_string_node(binary_node* binary)
   buffer_puts(&b, tmp);
   free(tmp);
 
-  switch(binary->op) {
-  case OP_ADD:    tmp = "+";      break;
-  case OP_SUB:    tmp = "-";      break;
-  case OP_MUL:    tmp = "*";      break;
-  case OP_DIV:    tmp = "/";      break;
-  case OP_MOD:    tmp = "%";      break;
-
-  case OP_LT:     tmp = "<";      break;
-  case OP_LTE:    tmp = "<=";     break;
-  case OP_GT:     tmp = ">";      break;
-  case OP_GTE:    tmp = ">=";     break;
-  case OP_EQ:     tmp = "=";      break;
-  case OP_NEQ:    tmp = "/=";     break;
-
-  case OP_AND:    tmp = "and";    break;
-  case OP_OR:     tmp = "or";     break;
-  case OP_XOR:    tmp = "xor";    break;
-
-  case OP_CONCAT: tmp = "CONCAT"; break;
-  case OP_DOT:    tmp = ".";      break;
-  case OP_ASSIGN: tmp = "<-";     break;
-  default:        tmp = "BADOP";
-  }
-
   buffer_putc(&b, ' ');
-  buffer_puts(&b, tmp);
+  buffer_puts(&b, get_binop_str(binary->op));
   buffer_putc(&b, ' ');
 
   tmp = expression_node_to_string(binary->rhs);
@@ -71,6 +92,28 @@ string_node* binary_node_to_string_node(binary_node* binary)
   buffer_destroy(&b);
 
   return string;
+}
+
+char* binary_node_inspect(binary_node* binary)
+{
+  buffer b;
+  buffer_create(&b, 10);
+
+  char* tmp = expression_node_inspect(binary->lhs);
+  buffer_puts(&b, tmp);
+  free(tmp);
+
+  buffer_putc(&b, ' ');
+  buffer_puts(&b, get_binop_str(binary->op));
+  buffer_putc(&b, ' ');
+
+  tmp = expression_node_inspect(binary->rhs);
+  buffer_puts(&b, tmp);
+  free(tmp);
+
+  buffer_putc(&b, '\0');
+
+  return b.buf;
 }
 
 expression_node* binary_node_clone(binary_node* binary)

@@ -44,10 +44,10 @@ static inline void next_token(parser_state* ps)
 static int accept(parser_state* ps, int type)
 {
   if(type == ps->t.type) {
-    if(ps->info.string != NULL)
+    if(ps->info.string)
       free(ps->info.string);
 
-    ps->info = (struct token_info){
+    ps->info = (struct token_info) {
       .string = strdup(ps->t.info.string),
       .number = ps->t.info.number
     };

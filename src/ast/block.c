@@ -84,3 +84,23 @@ string_node* block_node_to_string_node(block_node* block)
 
   return node;
 }
+
+char* block_node_inspect(block_node* block)
+{
+  buffer b;
+  buffer_create(&b, 10);
+  buffer_putc(&b, '(');
+
+  for(struct expression_list* ptr = block->list; ptr; ptr = ptr->next) {
+    char *str = expression_node_inspect(ptr->expression);
+    buffer_puts(&b, str);
+    if(ptr->next)
+      buffer_putc(&b, ' ');
+    free(str);
+  }
+
+  buffer_putc(&b, ')');
+  buffer_putc(&b, '\0');
+
+  return b.buf;
+}

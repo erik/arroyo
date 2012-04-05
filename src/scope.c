@@ -53,9 +53,7 @@ void scope_destroy(scope* scope)
     if(!scope->buckets[i])
       continue;
 
-    bucket* ptr = scope->buckets[i];
-
-    while(ptr) {
+    for(bucket* ptr = scope->buckets[i]; ptr; ) {
       bucket* next = ptr->next;
 
       expression_node_destroy(ptr->value);

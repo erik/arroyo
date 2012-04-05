@@ -27,7 +27,8 @@ int reader_fillbuf(reader* r)
 
 int reader_getchar(reader* r)
 {
-  if(r->available-- > 0) return *(r->ptr++);
+  if(r->available-- > 0)
+    return *(r->ptr++);
 
   return reader_fillbuf(r);
 }

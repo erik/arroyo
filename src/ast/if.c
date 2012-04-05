@@ -125,6 +125,52 @@ string_node* if_node_to_string_node(if_node* node)
   return string;
 }
 
+char* if_node_inspect(if_node* node)
+{
+  char* tmp;
+  buffer b;
+  buffer_create(&b, 10);
+
+  buffer_puts(&b, "if ");
+
+  // condition
+  tmp = expression_node_inspect(node->condition);
+  buffer_puts(&b, tmp);
+  buffer_putc(&b, ' ');
+  free((char*)tmp);
+
+  // then
+  tmp = expression_node_inspect(node->thenbody);
+  buffer_puts(&b, tmp);
+  free((char*)tmp);
+
+
+  for(unsigned i = 0; i < node->nelseif; ++i) {
+    buffer_puts(&b, " elseif ");
+    // else if cond
+    tmp = expression_node_inspect(node->elseifcondition[i]);
+    buffer_puts(&b, tmp);
+    buffer_putc(&b, ' ');
+    free((char*)tmp);
+
+    // else if body
+    tmp = expression_node_inspect(node->elseifbody[i]);
+    buffer_puts(&b, tmp);
+    buffer_putc(&b, ' ');
+    free((char*)tmp);
+  }
+
+  if(node->elsebody) {
+    buffer_puts(&b, " else ");
+    tmp = expression_node_inspect(node->elsebody);
+    buffer_puts(&b, tmp);
+    buffer_putc(&b, ' ');
+    free((char*)tmp);
+  }
+
+  return b.buf;
+}
+
 void if_node_add_elseif(if_node* node, expression_node* cond, expression_node* body)
 {
   node->elseifcondition = realloc(node->elseifcondition, node->nelseif + 1);

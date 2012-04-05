@@ -1,4 +1,5 @@
 #include "ast.h"
+#include "util.h"
 
 expression_node* nil_node_create()
 {
@@ -27,4 +28,9 @@ expression_node* nil_node_clone(void* node)
 string_node* nil_node_to_string_node(expression_node* nil)
 {
   return string_node_create("nil");
+}
+
+char* nil_node_inspect(expression_node* nil)
+{
+  return strdup("nil");
 }

@@ -3,6 +3,20 @@
 
 #include <stdio.h>
 
+static inline char* get_unary_str(enum unary_op op)
+{
+  switch(op) {
+  case OP_UNM:
+    return "-";
+  case OP_NOT:
+    return "!";
+  case OP_PRINT:
+    return "print";
+  default:
+    return "BADUNARY";
+  }
+}
+
 unary_node* unary_node_create(enum unary_op op)
 {
   unary_node* node = malloc(sizeof(unary_node));
@@ -58,7 +72,7 @@ expression_node* unary_node_evaluate(unary_node* node, scope* scope)
     printf("not handled / not unary operator\n");
   }
 
-  expression_node_destroy(expr);
+ expression_node_destroy(expr);
   return expression_node_create(NODE_NIL, NULL);
 }
 
@@ -73,16 +87,7 @@ string_node* unary_node_to_string_node(unary_node* node)
   buffer b;
   buffer_create(&b, 10);
 
-  switch(node->op) {
-  case OP_UNM:
-    buffer_puts(&b, "-");
-    break;
-  case OP_NOT:
-    buffer_puts(&b, "!");
-    break;
-  default:
-    buffer_puts(&b, "BADUNARY");
-  }
+  buffer_puts(&b, get_unary_str(node->op));
 
   char* tmp = expression_node_to_string(node->expr);
   buffer_puts(&b, tmp);
@@ -92,3 +97,18 @@ string_node* unary_node_to_string_node(unary_node* node)
   buffer_destroy(&b);
   return string;
 }
+
+char* unary_node_inspect(unary_node* node)
+{
+  buffer b;
+  buffer_create(&b, 10);
+
+  buffer_puts(&b, get_unary_str(node->op));
+
+  char* tmp = expression_node_inspect(node->expr);
+  buffer_puts(&b, tmp);
+  free(tmp);
+
+  return b.buf;
+}
+

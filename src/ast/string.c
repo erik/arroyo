@@ -73,15 +73,16 @@ expression_node* string_node_clone(string_node* node)
 
 string_node* string_node_to_string_node(string_node* node)
 {
+  return string_node_create(node->string);
+}
+
+char* string_node_inspect(string_node* node)
+{
   buffer b;
   buffer_create(&b, strlen(node->string) + 2);
-
   buffer_putc(&b, '"');
   buffer_puts(&b, node->string);
   buffer_putc(&b, '"');
 
-  string_node* string = string_node_create(b.buf);
-
-  buffer_destroy(&b);
-  return string;
+  return b.buf;
 }

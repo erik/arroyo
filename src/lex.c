@@ -114,7 +114,6 @@ static void read_numeric(lexer_state *ls, token_info *info)
 
   long double number = strtold(ls->buf->buf, NULL);
 
-  info->string = strdup(ls->buf->buf);
   info->number = number;
 }
 

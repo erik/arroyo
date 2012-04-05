@@ -1,4 +1,5 @@
 #include "ast.h"
+#include "util.h"
 
 bool_node* bool_node_create(int val)
 {
@@ -35,4 +36,9 @@ expression_node* bool_node_clone(bool_node* bool)
 string_node* bool_node_to_string_node(bool_node* bool)
 {
   return string_node_create(bool->bool ? "true" : "false");
+}
+
+char* bool_node_inspect(bool_node* bool)
+{
+  return strdup(bool->bool ? "true" : "false");
 }

@@ -20,6 +20,13 @@ string_node* id_node_to_string_node(id_node* id)
   return string_node_create(id->id);
 }
 
+
+char* id_node_inspect(id_node* id)
+{
+  return strdup(id->id);
+}
+
+
 expression_node* id_node_evaluate(id_node* id, scope* scope)
 {
   expression_node* value = scope_get(scope, id->id);

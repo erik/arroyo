@@ -87,7 +87,7 @@ int run_repl(scope* scope)
     while(ps->t.type != TK_EOS) {
       expression_node* node = parse_expression(ps);
       expression_node* eval = expression_node_evaluate(node, scope);
-      char* str = expression_node_to_string(eval);
+      char* str = expression_node_inspect(eval);
 
       printf("==> %s\n", str);
 
@@ -138,12 +138,6 @@ int run_file(const char* filename, scope* scope)
 
   expression_node* program = parse_program(ps);
   expression_node* eval = expression_node_evaluate(program, scope);
-
-  // print the last expression
-  char* str = expression_node_to_string(eval);
-  puts(str);
-  free(str);
-
   expression_node_destroy(eval);
   expression_node_destroy(program);
 

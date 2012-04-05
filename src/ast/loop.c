@@ -77,3 +77,45 @@ string_node* loop_node_to_string_node(loop_node* loop)
 
   return string;
 }
+
+
+char* loop_node_inspect(loop_node* loop)
+{
+  char* tmp;
+  buffer b;
+  buffer_create(&b, 10);
+
+  buffer_puts(&b, "loop ");
+  if(loop->init) {
+    tmp = expression_node_inspect(loop->init);
+    buffer_puts(&b, tmp);
+    buffer_putc(&b, ' ');
+    free(tmp);
+  }
+
+  switch(loop->type) {
+  case LOOP_DO:
+    buffer_puts(&b, "do");
+    break;
+  case LOOP_UNTIL:
+    buffer_puts(&b, "until ");
+    tmp = expression_node_inspect(loop->cond);
+    buffer_puts(&b, tmp);
+    free(tmp);
+    break;
+  case LOOP_WHILE:
+    buffer_puts(&b, "while ");
+    tmp = expression_node_inspect(loop->cond);
+    buffer_puts(&b, tmp);
+    free(tmp);
+    break;
+  }
+
+  buffer_putc(&b, ' ');
+
+  tmp = expression_node_inspect(loop->body);
+  buffer_puts(&b, tmp);
+  buffer_putc(&b, '\0');
+
+  return b.buf;
+}

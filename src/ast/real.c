@@ -20,6 +20,13 @@ string_node* real_node_to_string_node(real_node* node)
   return str;
 }
 
+char* real_node_inspect(real_node* node)
+{
+  char* string;
+  asprintf(&string, "%Lf", node->real);
+  return string;
+}
+
 expression_node* real_node_evaluate(real_node* real, scope* scope)
 {
   return real_node_clone(real);

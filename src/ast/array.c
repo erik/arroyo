@@ -21,14 +21,46 @@ void array_node_destroy(array_node* array)
 
 expression_node* array_node_evaluate(array_node* array, scope* scope)
 {
-  // TODO
-  return NULL;
+  array_node* new = array_node_create();
+
+  for(unsigned i = 0; i < array->nelements; ++i) {
+    expression_node* eval = expression_node_evaluate(array->elements[i], scope);
+    array_node_push_expression(new, eval);
+  }
+
+  return expression_node_create(NODE_ARRAY, new);
 }
 
 expression_node* array_node_clone(array_node* array)
 {
-  // TODO
-  return NULL;
+  array_node* new = array_node_create();
+
+  for(unsigned i = 0; i < array->nelements; ++i) {
+    expression_node* clone = expression_node_clone(array->elements[i]);
+    array_node_push_expression(new, clone);
+  }
+
+  return expression_node_create(NODE_ARRAY, new);
+}
+
+char* array_node_inspect(array_node* array)
+{
+  buffer b;
+  buffer_create(&b, array->nelements * 10);
+
+  buffer_putc(&b, '[');
+
+  for(unsigned i = 0; i < array->nelements; ++i) {
+    char* str = expression_node_inspect(array->elements[i]);
+    buffer_puts(&b, str);
+    if(i != array->nelements - 1)
+      buffer_putc(&b, ' ');
+    free(str);
+  }
+
+  buffer_putc(&b, ']');
+
+  return b.buf;
 }
 
 string_node* array_node_to_string_node(array_node* array)
@@ -41,7 +73,8 @@ string_node* array_node_to_string_node(array_node* array)
   for(unsigned i = 0; i < array->nelements; ++i) {
     char* str = expression_node_to_string(array->elements[i]);
     buffer_puts(&b, str);
-    if(i != array->nelements - 1) buffer_putc(&b, ' ');
+    if(i != array->nelements - 1)
+      buffer_putc(&b, ' ');
     free(str);
   }
 
