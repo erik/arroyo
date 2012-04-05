@@ -39,33 +39,36 @@ expression_node* if_node_evaluate(if_node* node, scope* scope)
 {
   expression_node* value, *cond;
   bool_node* bool;
+  int bool_value;
 
   cond = expression_node_evaluate(node->condition, scope);
   bool = bool_node_from_expression(cond);
-  if(bool->bool) {
-    expression_node_destroy(cond);
-    bool_node_destroy(bool);
+
+  bool_value = bool->bool;
+
+  expression_node_destroy(cond);
+  bool_node_destroy(bool);
+
+  if(bool_value)
     return expression_node_evaluate(node->thenbody, scope);
-  }
 
   for(unsigned i = 0; i < node->nelseif; ++i) {
     cond = expression_node_evaluate(node->elseifcondition[i], scope);
     bool = bool_node_from_expression(cond);
 
-    if(bool->bool) {
-      expression_node_destroy(cond);
-      bool_node_destroy(bool);
-      return expression_node_evaluate(node->elseifbody[i], scope);
-    }
+    bool_value = bool->bool;
 
     expression_node_destroy(cond);
     bool_node_destroy(bool);
+
+    if(bool_value)
+      return expression_node_evaluate(node->elseifbody[i], scope);
   }
 
   if(node->elsebody)
     return expression_node_evaluate(node->elsebody, scope);
 
-  return expression_node_create(NODE_NIL, NULL);
+  return nil_node_create();
 }
 
 expression_node* if_node_clone(if_node* node)
