@@ -146,6 +146,13 @@ static int lex(lexer_state *ls, token_info *info)
       break;
     }
 
+    case '+': { // increment or '+'
+      if(next(ls) != '+') return '+';
+
+      next(ls);
+      return TK_INC;
+    }
+
     case '=': { // EQ
       next(ls);
       return '=';

@@ -12,6 +12,8 @@ static inline char* get_unary_str(enum unary_op op)
     return "!";
   case OP_PRINT:
     return "print";
+  case OP_INC:
+    return "++";
   default:
     return "BADUNARY";
   }
@@ -35,10 +37,9 @@ void unary_node_destroy(unary_node* node)
 
 expression_node* unary_node_evaluate(unary_node* node, scope* scope)
 {
-  expression_node* expr = expression_node_evaluate(node->expr, scope);
-
   switch(node->op) {
   case OP_UNM: {
+    expression_node* expr = expression_node_evaluate(node->expr, scope);
     if(expr->type != NODE_REAL) {
       printf("unary not: expected real, not %s\n", node_type_string[expr->type]);
       break;
@@ -50,14 +51,42 @@ expression_node* unary_node_evaluate(unary_node* node, scope* scope)
     return expression_node_create(NODE_REAL, inverted);
   }
   case OP_NOT: {
-    bool_node* bool = bool_node_from_expression(expr);
+    expression_node* expr = expression_node_evaluate(node->expr, scope);
+  bool_node* bool = bool_node_from_expression(expr);
     bool->bool = !bool->bool;
 
     expression_node_destroy(expr);
     return expression_node_create(NODE_BOOL, bool);
   }
 
+  case OP_INC: {
+    expression_node* expr = NULL;
+    bucket* bucket = NULL;
+
+    if(node->expr->type == NODE_ID) {
+      id_node* id = node->expr->ast_node;
+      bucket = scope_get_bucket(scope, id->id);
+      expr = bucket->value;
+    } else {
+      expr = expression_node_evaluate(node->expr, scope);
+    }
+
+    if(expr->type != NODE_REAL) {
+      printf("unary inc: expected real, not %s\n", node_type_string[expr->type]);
+      break;
+    }
+
+    real_node* inc = real_node_create(((real_node*)expr->ast_node)->real+1);
+    expression_node_destroy(expr);
+
+    if(bucket)
+      bucket->value = real_node_clone(inc);
+
+    return expression_node_create(NODE_REAL, inc);
+  }
+
   case OP_PRINT: {
+    expression_node* expr = expression_node_evaluate(node->expr, scope);
     char* str = expression_node_to_string(expr);
     expression_node_destroy(expr);
 
@@ -65,15 +94,14 @@ expression_node* unary_node_evaluate(unary_node* node, scope* scope)
 
     free(str);
 
-    return  nil_node_create();
+    return nil_node_create();
   }
 
   default:
     printf("not handled / not unary operator\n");
   }
 
- expression_node_destroy(expr);
-  return expression_node_create(NODE_NIL, NULL);
+  return nil_node_create();
 }
 
 expression_node* unary_node_clone(unary_node* node)
