@@ -25,12 +25,10 @@ void loop_node_destroy(loop_node* loop)
 expression_node* loop_node_evaluate(loop_node* loop, scope* s)
 {
   expression_node* value = NULL;
-
   scope* local = scope_create(s);
 
   if(loop->init) {
-    value = expression_node_evaluate(loop->init, local);
-    expression_node_destroy(value);
+    expression_node_destroy(expression_node_evaluate(loop->init, local));
   }
 
   for(;;) {
@@ -60,7 +58,6 @@ expression_node* loop_node_evaluate(loop_node* loop, scope* s)
     }
 
     expression_node_destroy(value);
-
   }
   scope_destroy(local);
 

@@ -200,9 +200,17 @@ expression_node* binary_node_evaluate(binary_node* binary, scope* scope)
     TYPE_CHECK(right, left->type);
 
     switch(left->type) {
-    case NODE_REAL:
-      COMP(==);
-      break;
+    case NODE_REAL: {
+      real_node* lr = CAST(left, real_node*);
+      real_node* rr = CAST(right, real_node*);
+
+      int eq = lr->real == rr->real;
+
+      expression_node_destroy(right);
+      expression_node_destroy(left);
+
+      return EXPR(BOOL, bool_node_create(eq));
+    }
     case NODE_BOOL: {
       bool_node* lb = CAST(left, bool_node*);
       bool_node* rb = CAST(right, bool_node*);
