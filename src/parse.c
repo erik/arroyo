@@ -109,22 +109,20 @@ static enum binary_op get_binop(parser_state* ps)
   case TK_OR  : return OP_OR;
   case TK_XOR : return OP_XOR;
 
+  case TK_CONCAT : return OP_CONCAT;
+
   case TK_ASSIGN : return OP_ASSIGN;
 
   default     : return OP_NOTBINOP;
   }
 }
 
-// return binary/unary operator precedence(arbitrary values, higher
-// precedence is higher number)
+// return binaryoperator precedence (arbitrary values, higher
+// precedence is higher number). Unary values are always highest
+// precedence
 static int op_precedence(unsigned op)
 {
   switch(op) {
-    // unary operators
-  case '-':
-  case '!':
-    return 100;
-
     // binary operators
   case OP_DOT:
     return 90;

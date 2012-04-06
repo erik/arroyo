@@ -153,6 +153,13 @@ static int lex(lexer_state *ls, token_info *info)
       return TK_INC;
     }
 
+    case '.': { // concat or '.'
+      if(next(ls) != '.') return '.';
+
+      next(ls);
+      return TK_CONCAT;
+    }
+
     case '=': { // EQ
       next(ls);
       return '=';

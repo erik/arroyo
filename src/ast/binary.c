@@ -41,7 +41,7 @@ static inline char* get_binop_str(enum binary_op op)
     return "xor";
 
   case OP_CONCAT:
-    return "CONCAT";
+    return "..";
   case OP_DOT:
     return ".";
   case OP_ASSIGN:
@@ -283,8 +283,30 @@ expression_node* binary_node_evaluate(binary_node* binary, scope* scope)
     return right;
   }
 
+  case OP_CONCAT: {
+    TYPE_CHECK(LEFT, NODE_STRING);
+    right = expression_node_evaluate(binary->rhs, scope);
+
+    string_node* ls = left->ast_node;
+
+    char* right_str = expression_node_to_string(right);
+
+    buffer b;
+    buffer_create(&b, strlen(ls->string));
+
+    buffer_puts(&b, ls->string);
+    buffer_puts(&b, right_str);
+
+    free(right_str);
+    expression_node_destroy(left);
+    expression_node_destroy(right);
+
+    string_node* string = string_node_create(b.buf);
+    buffer_destroy(&b);
+    return expression_node_create(NODE_STRING, string);
+  }
+
   case OP_XOR:
-  case OP_CONCAT:
   case OP_DOT:
   default:
     puts("binary node hit default, not handled yet");

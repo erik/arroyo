@@ -10,12 +10,6 @@
 
 struct lexer_state;
 
-enum expression_type {
-  EXP_REAL, EXP_STRING, EXP_BLOCK, EXP_ID, EXP_ASSIGN,
-
-  LAST_EXP
-};
-
 typedef struct parser_state {
   lexer_state* ls;
   token t;
