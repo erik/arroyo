@@ -118,8 +118,12 @@ char* binary_node_inspect(binary_node* binary)
 
 expression_node* binary_node_clone(binary_node* binary)
 {
-  // TODO
-  return NULL;
+  binary_node* new = binary_node_create(binary->op);
+
+  new->lhs = expression_node_clone(binary->lhs);
+  new->rhs = expression_node_clone(binary->rhs);
+
+  return expression_node_create(NODE_BINARY, new);
 }
 
 expression_node* binary_node_evaluate(binary_node* binary, scope* scope)

@@ -50,7 +50,8 @@ enum unary_op {
   OP_NOTUNOP = 0,
   OP_UNM, OP_NOT,
   OP_INC,
-  OP_PRINT
+  OP_PRINT,
+  OP_QUOTE
 };
 
 enum binary_op {
@@ -261,7 +262,6 @@ expression_node* unary_node_clone(unary_node*);
 string_node*     unary_node_to_string_node(unary_node*);
 char*            unary_node_inspect(unary_node*);
 
-// TODO: finish
-// ... etc
+// TODO: hash_node
 
 #endif /* _AST_H_ */

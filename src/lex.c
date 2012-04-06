@@ -224,7 +224,7 @@ static int lex(lexer_state *ls, token_info *info)
       case '!': case '>': case '<': case '=':
       case '(': case ')': case '[': case ']':
       case '{': case '}': case ':': case '.':
-      case ',':
+      case ',': case '#':
         next(ls);
         return c;
 

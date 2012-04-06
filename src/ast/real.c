@@ -1,6 +1,7 @@
 #include "ast.h"
 #include "util.h"
 #include <stdio.h>
+
 real_node* real_node_create(long double value)
 {
   real_node* node = malloc(sizeof(real_node));

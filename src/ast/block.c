@@ -43,8 +43,12 @@ expression_node* block_node_evaluate(block_node* block, scope* s)
 
 expression_node* block_node_clone(block_node* block)
 {
-  // TODO
-  return NULL;
+  block_node* new = block_node_create();
+
+  for(struct expression_list* ptr = block->list; ptr; ptr = ptr->next)
+    block_node_push_expression(new, expression_node_clone(ptr->expression));
+
+  return expression_node_create(NODE_BLOCK, new);
 }
 
 void block_node_push_expression(block_node* block, expression_node* node)

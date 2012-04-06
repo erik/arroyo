@@ -27,35 +27,36 @@ expression_node* loop_node_evaluate(loop_node* loop, scope* s)
   expression_node* value = nil_node_create();
   scope* local = scope_create(s);
 
-  if(loop->init) {
+  if(loop->init)
     expression_node_destroy(expression_node_evaluate(loop->init, local));
-  }
 
   for(;;) {
     expression_node* cond = expression_node_evaluate(loop->cond, local);
-    bool_node* bool = bool_node_from_expression(cond);
 
-    int bool_val = bool->bool;
+    // this is very ugly, but doesn't require branching, so it may
+    // speed up evaluation ever so slightly for some loops
+
+    const int bool_val =
+      (cond->type == NODE_BOOL && ((bool_node*)cond->ast_node)->bool)
+      || cond->type == NODE_NIL;
+
+    const int do_break =
+      (loop->type == LOOP_WHILE && !bool_val)
+      || (loop->type == LOOP_UNTIL && bool_val)
+      || 0;
 
     expression_node_destroy(cond);
-    bool_node_destroy(bool);
 
-    if(loop->type == LOOP_DO) {
-      // TODO: currently no way to break from do loop
-    }
-
-    else if(loop->type == LOOP_WHILE && !bool_val)
-      break;
-
-    else if(loop->type == LOOP_UNTIL && bool_val)
+    if(do_break)
       break;
 
     expression_node_destroy(value);
     value = expression_node_evaluate(loop->body, local);
   }
+
   scope_destroy(local);
 
-  return value ? value : nil_node_create();
+  return value;
 }
 
 expression_node* loop_node_clone(loop_node* node)

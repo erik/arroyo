@@ -14,6 +14,8 @@ static inline char* get_unary_str(enum unary_op op)
     return "print";
   case OP_INC:
     return "++";
+  case OP_QUOTE:
+    return "#";
   default:
     return "BADUNARY";
   }
@@ -97,6 +99,10 @@ expression_node* unary_node_evaluate(unary_node* node, scope* scope)
     return nil_node_create();
   }
 
+  case OP_QUOTE: {
+    return expression_node_clone(node->expr);
+  }
+
   default:
     printf("not handled / not unary operator\n");
   }
@@ -106,8 +112,9 @@ expression_node* unary_node_evaluate(unary_node* node, scope* scope)
 
 expression_node* unary_node_clone(unary_node* node)
 {
-  // TODO
-  return NULL;
+  unary_node* new = unary_node_create(node->op);
+  new->expr = expression_node_clone(node->expr);
+  return expression_node_create(NODE_UNARY, new);
 }
 
 string_node* unary_node_to_string_node(unary_node* node)
