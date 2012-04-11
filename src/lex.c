@@ -160,9 +160,11 @@ static int lex(lexer_state *ls, token_info *info)
       return TK_CONCAT;
     }
 
-    case '=': { // EQ
+    case '=': { // EQ or '=>'
+      if(next(ls) != '>') return '=';
+
       next(ls);
-      return '=';
+      return TK_RARROW;
     }
 
     case '<': { // LT, LTE, ASSIGN

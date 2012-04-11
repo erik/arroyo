@@ -54,7 +54,7 @@ enum token_type {
   TK_LOOP, TK_WHILE, TK_UNTIL, TK_DO,
   TK_INC,
   TK_CONCAT,
-  TK_CASE, TK_OF, TK_DEFAULT,
+  TK_CASE, TK_OF, TK_RARROW, TK_DEFAULT,
   // temporary
   TK_PRINT,
 
@@ -76,7 +76,7 @@ static const char* tokens[NUM_TOK] = {
   "loop", "while", "until", "do",
   "++",
   "..",
-  "case", "of", "default",
+  "case", "of", "=>", "default",
   "print"
 };
 

@@ -181,7 +181,7 @@ static block_node* parse_block(parser_state* ps)
   return block;
 }
 
-/* "case" EXPRESSION "of" '(' (EXPRESSION EXPRESSION)* ("else" EXPRESSION)? ')' */
+/* "case" EXPRESSION "of" "(" (EXPRESSION "=>" EXPRESSION)* ("default" "=>" EXPRESSION)? ")" */
 static case_node* parse_case(parser_state* ps)
 {
   case_node* node = case_node_create();
@@ -193,22 +193,27 @@ static case_node* parse_case(parser_state* ps)
 
   int seen_default = 0;
 
-  while(ps->t.type != ')') {
+  for(;;) {
     if(accept(ps, TK_DEFAULT)) {
       if(seen_default)
         parser_error(ps, "only single 'default' case allowed");
 
       seen_default = 1;
+
+      expect(ps, TK_RARROW);
+
       node->default_case = parse_expression(ps);
     }
     else {
+      if(accept(ps, ')'))
+        break;
+
       expression_node* cond = parse_expression(ps);
-      expression_node* body = parse_expression(ps);
-      case_node_add_case(node, cond, body);
+      expect(ps, TK_RARROW);
+        expression_node* body = parse_expression(ps);
+        case_node_add_case(node, cond, body);
     }
   }
-
-  expect(ps, ')');
 
   return node;
 }

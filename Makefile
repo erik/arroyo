@@ -24,9 +24,7 @@ clean:
 	rm -f $(OBJ)
 
 todo:
-	@ack 'XXX'
-	@ack 'TODO'
-	@ack 'FIXME'
+	@ack 'XXX|TODO|FIXME'
 
 loc:
 	@ack --type=cc -f | xargs wc -l | sort -h
