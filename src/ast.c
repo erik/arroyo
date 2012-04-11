@@ -4,38 +4,56 @@
 #include <stdio.h>
 #include <string.h>
 
-#define WHEN_NODE(node, body) case NODE_##node: { body; break; }
-#define NODE_TYPE_FUNCTION(type, var, func) switch(type) {      \
-    /* WHEN_NODE(HASH, var hash_node_##func);     */            \
-    WHEN_NODE(ARRAY,   var array_node_##func);                  \
-    WHEN_NODE(BINARY,  var binary_node_##func);                 \
-    WHEN_NODE(BLOCK,   var block_node_##func);                  \
-    WHEN_NODE(BOOL,    var bool_node_##func);                   \
-    WHEN_NODE(CASE,    var case_node_##func);                   \
-    WHEN_NODE(FN,      var fn_node_##func);                     \
-    WHEN_NODE(ID,      var id_node_##func);                     \
-    WHEN_NODE(IF,      var if_node_##func);                     \
-    WHEN_NODE(LOOP,    var loop_node_##func);                   \
-    WHEN_NODE(NIL,     var nil_node_##func);                    \
-    WHEN_NODE(REAL,    var real_node_##func);                   \
-    WHEN_NODE(STRING,  var string_node_##func);                 \
-    WHEN_NODE(UNARY,   var unary_node_##func);                  \
-  default:                                                      \
-    printf(#func " hit default: %s\n", node_type_string[type]); \
-  }
-
-
-inline expression_node* expression_node_create(node_type type, void* node_struct)
+inline expression_node* expression_node_create(node_type type, ast_node n)
 {
   expression_node* node = malloc(sizeof(expression_node));
   node->type = type;
-  node->ast_node = node_struct;
+  node->node = n;
   return node;
 }
 
 inline void expression_node_destroy(expression_node* node)
 {
-  NODE_TYPE_FUNCTION(node->type, /* NONE */, destroy(node->ast_node));
+  switch (node->type) {
+  case NODE_NIL:
+  case NODE_REAL:
+  case NODE_BOOL:
+    // nothing to free
+    break;
+
+  case NODE_STRING:
+  case NODE_ID:
+    free(node->node.string);
+    break;
+
+  case NODE_ARRAY:
+    array_node_destroy(node->node.array);
+    break;
+  case NODE_BINARY:
+    binary_node_destroy(node->node.binary);
+    break;
+  case NODE_BLOCK:
+    block_node_destroy(node->node.block);
+    break;
+  case NODE_CASE:
+    case_node_destroy(node->node.case_);
+    break;
+  case NODE_FN:
+    fn_node_destroy(node->node.fn);
+    break;
+  case NODE_IF:
+    if_node_destroy(node->node.if_);
+    break;
+  case NODE_LOOP:
+    loop_node_destroy(node->node.loop);
+    break;
+  case NODE_UNARY:
+    unary_node_destroy(node->node.unary);
+    break;
+
+  default:
+    printf("BUG: destroy hit default for %s\n", node_type_string[node->type]);
+  }
 
   free(node);
   node = NULL;
@@ -43,92 +61,193 @@ inline void expression_node_destroy(expression_node* node)
 
 inline expression_node* expression_node_evaluate(expression_node* node, scope* scope)
 {
-  expression_node* evaluated = NULL;
-  NODE_TYPE_FUNCTION(node->type, evaluated=, evaluate(node->ast_node, scope));
+  switch (node->type) {
+  case NODE_NIL:
+  case NODE_REAL:
+  case NODE_BOOL: {
+    // evaluate to self
+    return expression_node_create(node->type, node->node);
+  }
+  case NODE_STRING:
+    return string_node_evaluate(node, scope);
+  case NODE_ID:
+    return id_node_evaluate(node, scope);
+  case NODE_ARRAY:
+    return array_node_evaluate(node->node.array, scope);
+  case NODE_BINARY:
+    return binary_node_evaluate(node->node.binary, scope);
+  case NODE_BLOCK:
+    return block_node_evaluate(node->node.block, scope);
+  case NODE_CASE:
+    return case_node_evaluate(node->node.case_, scope);
+  case NODE_FN:
+    return fn_node_evaluate(node->node.fn, scope);
+  case NODE_IF:
+    return if_node_evaluate(node->node.if_, scope);
+  case NODE_LOOP:
+    return loop_node_evaluate(node->node.loop, scope);
+  case NODE_UNARY:
+    return unary_node_evaluate(node->node.unary, scope);
 
-  if(!evaluated)
-    return nil_node_create();
+  default:
+    printf("BUG: evaluate hit default for %s\n", node_type_string[node->type]);
+  }
 
-  return evaluated;
+  return nil_node_create();
 }
 
 inline expression_node* expression_node_clone(expression_node* node)
 {
-  expression_node* cloned = NULL;
-  NODE_TYPE_FUNCTION(node->type, cloned=, clone(node->ast_node));
+  expression_node* cloned = expression_node_create(node->type, (ast_node) { .real = 0 });
 
-  if(!cloned)
-    return nil_node_create();
+  switch (node->type) {
+  case NODE_NIL:
+  case NODE_REAL:
+  case NODE_BOOL: {
+    // evaluate to self
+    cloned->node = node->node;
+    break;
+  }
+  case NODE_STRING:
+  case NODE_ID: {
+    cloned->node.string = strdup(node->node.string);
+    break;
+  }
+  case NODE_ARRAY:
+    cloned->node.array = array_node_clone(node->node.array);
+    break;
+  case NODE_BINARY:
+    cloned->node.binary = binary_node_clone(node->node.binary);
+    break;
+  case NODE_BLOCK:
+    cloned->node.block = block_node_clone(node->node.block);
+    break;
+  case NODE_CASE:
+    cloned->node.case_ = case_node_clone(node->node.case_);
+    break;
+  case NODE_FN:
+    cloned->node.fn = fn_node_clone(node->node.fn);
+    break;
+  case NODE_IF:
+    cloned->node.if_ = if_node_clone(node->node.if_);
+    break;
+  case NODE_LOOP:
+    cloned->node.loop = loop_node_clone(node->node.loop);
+    break;
+  case NODE_UNARY:
+    cloned->node.unary = unary_node_clone(node->node.unary);
+    break;
+
+  default:
+    printf("BUG: clone hit default for %s\n", node_type_string[node->type]);
+  }
 
   return cloned;
 }
 
-inline string_node* expression_node_to_string_node(expression_node* node)
+inline expression_node* expression_node_to_string_node(expression_node* node)
 {
-  string_node* string = NULL;
-  NODE_TYPE_FUNCTION(node->type, string=, to_string_node(node->ast_node));
+  char* string = expression_node_to_string(node);
 
   if(!string)
     return NULL;
 
-  return string;
+  return expression_node_create(NODE_STRING, (ast_node){.string = string});
 }
 
 inline char* expression_node_to_string(expression_node* node)
 {
-  string_node* string = expression_node_to_string_node(node);
+  switch (node->type) {
+  case NODE_NIL:
+    return nil_node_to_string(node);
+  case NODE_REAL:
+    return real_node_to_string(node);
+  case NODE_BOOL:
+    return bool_node_to_string(node);
 
-  if(!string)
+  case NODE_STRING:
+  case NODE_ID:
+    return strdup(node->node.string);
+
+  case NODE_ARRAY:
+    return array_node_to_string(node->node.array);
+  case NODE_BINARY:
+    return binary_node_to_string(node->node.binary);
+  case NODE_BLOCK:
+    return block_node_to_string(node->node.block);
+  case NODE_CASE:
+    return case_node_to_string(node->node.case_);
+  case NODE_FN:
+    return fn_node_to_string(node->node.fn);
+  case NODE_IF:
+    return if_node_to_string(node->node.if_);
+  case NODE_LOOP:
+    return loop_node_to_string(node->node.loop);
+  case NODE_UNARY:
+    return unary_node_to_string(node->node.unary);
+
+  default:
+    printf("BUG: to_string hit default for %s\n", node_type_string[node->type]);
     return NULL;
-
-  char* str = strdup(string->string);
-  string_node_destroy(string);
-
-  return str;
+  }
 }
 
 inline char* expression_node_inspect(expression_node* node)
 {
-  char* string = NULL;
-  NODE_TYPE_FUNCTION(node->type, string=, inspect(node->ast_node));
+  switch (node->type) {
+  case NODE_NIL:
+    return nil_node_inspect(node);
+  case NODE_REAL:
+    return real_node_inspect(node);
+  case NODE_BOOL:
+    return bool_node_inspect(node);
 
-  if(!string)
-    return expression_node_to_string(node);
+  case NODE_STRING:
+    return string_node_inspect(node);
+  case NODE_ID:
+    return id_node_inspect(node);
+  case NODE_ARRAY:
+    return array_node_inspect(node->node.array);
+  case NODE_BINARY:
+    return binary_node_inspect(node->node.binary);
+  case NODE_BLOCK:
+    return block_node_inspect(node->node.block);
+  case NODE_CASE:
+    return case_node_inspect(node->node.case_);
+  case NODE_FN:
+    return fn_node_inspect(node->node.fn);
+  case NODE_IF:
+    return if_node_inspect(node->node.if_);
+  case NODE_LOOP:
+    return loop_node_inspect(node->node.loop);
+  case NODE_UNARY:
+    return unary_node_inspect(node->node.unary);
 
-  return string;
+  default:
+    printf("BUG: inspect hit default for %s\n", node_type_string[node->type]);
+    return NULL;
+  }
 }
 
 // 0 is false, 1 is true
 int expression_node_equal(expression_node* left, expression_node* right)
 {
-#define CAST(expr, type) ((type)expr->ast_node)
-
   if(left->type != right->type)
     return 0;
 
   switch(left->type) {
   case NODE_REAL: {
-    real_node* lr = CAST(left, real_node*);
-    real_node* rr = CAST(right, real_node*);
-
-    return lr->real == rr->real;
+    return left->node.real == right->node.real;
   }
   case NODE_BOOL: {
-    bool_node* lb = CAST(left, bool_node*);
-    bool_node* rb = CAST(right, bool_node*);
-
-    return lb->bool == rb->bool;
+    return left->node.bool == right->node.bool;
   }
   case NODE_STRING: {
-    string_node* ls = CAST(left, string_node*);
-    string_node* rs = CAST(right, string_node*);
-
-    return !strcmp(ls->string, rs->string);
+    return !strcmp(left->node.string, right->node.string);
   }
   default:
     printf("this comparision is not handled yet\n");
   }
 
   return 0;
-#undef CAST
 }

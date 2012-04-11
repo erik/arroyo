@@ -37,13 +37,13 @@ expression_node* fn_node_evaluate(fn_node* fn, scope* scope)
   return NULL;
 }
 
-expression_node* fn_node_clone(fn_node* fn)
+fn_node* fn_node_clone(fn_node* fn)
 {
   // TODO
   return NULL;
 }
 
-string_node* fn_node_to_string_node(fn_node* fn)
+char* fn_node_to_string(fn_node* fn)
 {
   buffer b;
   buffer_create(&b, 10);
@@ -68,11 +68,7 @@ string_node* fn_node_to_string_node(fn_node* fn)
 
   buffer_putc(&b, '\0');
 
-  string_node* string = string_node_create(b.buf);
-
-  buffer_destroy(&b);
-
-  return string;
+  return b.buf;
 }
 
 char* fn_node_inspect(fn_node* fn)

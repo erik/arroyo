@@ -28,10 +28,10 @@ expression_node* array_node_evaluate(array_node* array, scope* scope)
     array_node_push_expression(new, eval);
   }
 
-  return expression_node_create(NODE_ARRAY, new);
+  return expression_node_create(NODE_ARRAY, (ast_node){.array = new});
 }
 
-expression_node* array_node_clone(array_node* array)
+array_node* array_node_clone(array_node* array)
 {
   array_node* new = array_node_create();
 
@@ -40,7 +40,7 @@ expression_node* array_node_clone(array_node* array)
     array_node_push_expression(new, clone);
   }
 
-  return expression_node_create(NODE_ARRAY, new);
+  return new;
 }
 
 char* array_node_inspect(array_node* array)
@@ -63,7 +63,7 @@ char* array_node_inspect(array_node* array)
   return b.buf;
 }
 
-string_node* array_node_to_string_node(array_node* array)
+char* array_node_to_string(array_node* array)
 {
   buffer b;
   buffer_create(&b, 10);
@@ -80,9 +80,7 @@ string_node* array_node_to_string_node(array_node* array)
 
   buffer_putc(&b, ']');
 
-  string_node* string = string_node_create(b.buf);
-  buffer_destroy(&b);
-  return string;
+  return b.buf;
 }
 
 void array_node_push_expression(array_node* array, expression_node* expr)

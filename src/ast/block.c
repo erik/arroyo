@@ -41,14 +41,14 @@ expression_node* block_node_evaluate(block_node* block, scope* s)
   return last;
 }
 
-expression_node* block_node_clone(block_node* block)
+block_node* block_node_clone(block_node* block)
 {
   block_node* new = block_node_create();
 
   for(struct expression_list* ptr = block->list; ptr; ptr = ptr->next)
     block_node_push_expression(new, expression_node_clone(ptr->expression));
 
-  return expression_node_create(NODE_BLOCK, new);
+  return new;
 }
 
 void block_node_push_expression(block_node* block, expression_node* node)
@@ -64,7 +64,7 @@ void block_node_push_expression(block_node* block, expression_node* node)
 
 }
 
-string_node* block_node_to_string_node(block_node* block)
+char* block_node_to_string(block_node* block)
 {
   buffer b;
 
@@ -82,11 +82,7 @@ string_node* block_node_to_string_node(block_node* block)
   buffer_putc(&b, ')');
   buffer_putc(&b, '\0');
 
-  string_node* node = string_node_create(b.buf);
-
-  buffer_destroy(&b);
-
-  return node;
+  return b.buf;
 }
 
 char* block_node_inspect(block_node* block)

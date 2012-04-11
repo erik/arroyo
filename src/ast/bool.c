@@ -1,44 +1,29 @@
 #include "ast.h"
 #include "util.h"
 
-bool_node* bool_node_create(int val)
+inline int bool_node_value_of(expression_node* node)
 {
-  bool_node* bool = malloc(sizeof(bool_node));
-  bool->bool = val;
-  return bool;
+  if(node->type == NODE_NIL ||
+     (node->type == NODE_BOOL &&
+      node->node.bool != 1))
+    return 0;
+
+  return 1;
 }
 
-bool_node* bool_node_from_expression(expression_node* expression)
+expression_node* bool_node_from_expression(expression_node* node)
 {
-  if(expression->type == NODE_NIL ||
-     (expression->type == NODE_BOOL &&
-      ((bool_node*)expression->ast_node)->bool != 1))
-    return bool_node_create(0);
-
-  return bool_node_create(1);
+  return expression_node_create(NODE_BOOL, (ast_node)
+                                {.bool = bool_node_value_of(node)});
 }
 
-void bool_node_destroy(bool_node* bool)
+
+char* bool_node_to_string(expression_node* bool)
 {
-  free(bool);
+  return strdup(bool->node.bool ? "true" : "false");
 }
 
-expression_node* bool_node_evaluate(bool_node* bool, scope* scope)
+char* bool_node_inspect(expression_node* bool)
 {
-  return expression_node_create(NODE_BOOL, bool_node_create(bool->bool));
-}
-
-expression_node* bool_node_clone(bool_node* bool)
-{
-  return expression_node_create(NODE_BOOL, bool_node_create(bool->bool));
-}
-
-string_node* bool_node_to_string_node(bool_node* bool)
-{
-  return string_node_create(bool->bool ? "true" : "false");
-}
-
-char* bool_node_inspect(bool_node* bool)
-{
-  return strdup(bool->bool ? "true" : "false");
+  return strdup(bool->node.bool ? "true" : "false");
 }

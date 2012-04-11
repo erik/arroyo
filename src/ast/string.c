@@ -6,39 +6,28 @@
 #include "util.h"
 #include "buffer.h"
 
-string_node* string_node_create(const char* string)
-{
-  string_node* node = malloc(sizeof(string_node));
-  node->string = strdup(string);
-  return node;
-}
 
-void string_node_destroy(string_node* node)
+expression_node* string_node_evaluate(expression_node* node, scope* scope)
 {
-  free(node->string);
-  free(node);
-}
-
-expression_node* string_node_evaluate(string_node* node, scope* scope)
-{
-  unsigned len = strlen(node->string);
+  const char* string = node->node.string;
+  unsigned len = strlen(string);
 
   buffer b;
   buffer_create(&b, len);
 
   for(unsigned i = 0; i < len; ++i) {
-    if(node->string[i] == '$') {
-      if(node->string[i+1] == '$') {
+    if(string[i] == '$') {
+      if(string[i+1] == '$') {
         buffer_putc(&b, '$');
         i++;
       }
       else {
         unsigned begin = ++i;
-        while(isalnum(node->string[i]) && ++i < len);
+        while(isalnum(string[i]) && ++i < len);
 
         buffer var;
         buffer_create(&var, i - begin);
-        buffer_putsn(&var, (node->string+begin), i - begin);
+        buffer_putsn(&var, (string+begin), i - begin);
         buffer_putc(&var, '\0');
 
         expression_node* expr = scope_get(scope, var.buf);
@@ -55,33 +44,24 @@ expression_node* string_node_evaluate(string_node* node, scope* scope)
       }
     }
     else
-      buffer_putc(&b, node->string[i]);
+      buffer_putc(&b, string[i]);
   }
 
-  string_node* string = string_node_create(b.buf);
-
-  buffer_destroy(&b);
-
-  return expression_node_create(NODE_STRING, string);
+  return expression_node_create(NODE_STRING, (ast_node){.string = b.buf });
 }
 
-expression_node* string_node_clone(string_node* node)
+
+char* string_node_to_string(expression_node* node)
 {
-  return expression_node_create(
-    NODE_STRING, string_node_create(node->string));
+  return strdup(node->node.string);
 }
 
-string_node* string_node_to_string_node(string_node* node)
-{
-  return string_node_create(node->string);
-}
-
-char* string_node_inspect(string_node* node)
+char* string_node_inspect(expression_node* node)
 {
   buffer b;
-  buffer_create(&b, strlen(node->string) + 2);
+  buffer_create(&b, strlen(node->node.string) + 2);
   buffer_putc(&b, '"');
-  buffer_puts(&b, node->string);
+  buffer_puts(&b, node->node.string);
   buffer_putc(&b, '"');
 
   return b.buf;

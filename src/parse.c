@@ -222,35 +222,35 @@ static case_node* parse_case(parser_state* ps)
 expression_node* parse_expression(parser_state* ps)
 {
   node_type type = NODE_NIL;
-  void* node = NULL;
+  ast_node node;
 
   if(accept(ps, TK_ID)) {
     type = NODE_ID;
-    node = id_node_create(ps->info.string);
+    node.string = strdup(ps->info.string);
   }
   else if(accept(ps, TK_FN)) {
     type = NODE_FN;
-    node = parse_function(ps);
+    node.fn = parse_function(ps);
   }
 
   else if(accept(ps, TK_REAL)) {
     type = NODE_REAL;
-    node = real_node_create(ps->info.number);
+    node.real = ps->info.number;
   }
 
   else if(accept(ps, TK_STRING)) {
     type = NODE_STRING;
-    node = string_node_create(ps->info.string);
+    node.string = strdup(ps->info.string);
   }
 
   else if(accept(ps, TK_TRUE)) {
     type = NODE_BOOL;
-    node = bool_node_create(1);
+    node.bool = 1;
   }
 
   else if(accept(ps, TK_FALSE)) {
     type = NODE_BOOL;
-    node = bool_node_create(0);
+    node.bool = 0;
   }
 
   else if(accept(ps, TK_NIL))
@@ -258,39 +258,39 @@ expression_node* parse_expression(parser_state* ps)
 
   else if(accept(ps, '(')) {
     type = NODE_BLOCK;
-    node = parse_block(ps);
+    node.block = parse_block(ps);
   }
 
   else if(accept(ps, '{')) {
     type = NODE_HASH;
-    node = parse_hash(ps);
+    // node = parse_hash(ps);
   }
 
   else if(accept(ps, '[')) {
     type = NODE_ARRAY;
-    node = parse_array(ps);
+    node = (ast_node){.array = parse_array(ps)};
   }
 
   else if(get_unaryop(ps)) {
     type = NODE_UNARY;
-    node = unary_node_create(get_unaryop(ps));
+    node = (ast_node){.unary = unary_node_create(get_unaryop(ps))};
     next_token(ps);
-    ((unary_node*)node)->expr = parse_expression(ps);
+    node.unary->expr = parse_expression(ps);
   }
 
   else if(accept(ps, TK_IF)) {
     type = NODE_IF;
-    node = parse_if(ps);
+    node.if_ = parse_if(ps);
   }
 
   else if(accept(ps, TK_LOOP)) {
     type = NODE_LOOP;
-    node = parse_loop(ps);
+    node.loop = parse_loop(ps);
   }
 
   else if(accept(ps, TK_CASE)) {
     type = NODE_CASE;
-    node = parse_case(ps);
+    node.case_ = parse_case(ps);
   }
 
   else if(accept(ps, ','))
@@ -331,7 +331,7 @@ expression_node* parse_expression(parser_state* ps)
     next_token(ps);
     binary->rhs = parse_expression(ps);
 
-    return expression_node_create(NODE_BINARY, binary);
+    return expression_node_create(NODE_BINARY, (ast_node){.binary = binary});
   }
 
   return expression_node_create(type, node);
@@ -494,7 +494,7 @@ expression_node* parse_program(parser_state* ps)
   expect(ps, TK_EOS);
 
   out:
-  return expression_node_create(NODE_BLOCK, program);
+  return expression_node_create(NODE_BLOCK, (ast_node){.block = program});
 }
 
 int parse(parser_state* ps)

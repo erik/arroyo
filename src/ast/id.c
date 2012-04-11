@@ -2,43 +2,22 @@
 #include "util.h"
 #include <stdio.h>
 
-id_node* id_node_create(char* name)
+char* id_node_to_string(expression_node* id)
 {
-  id_node* node = malloc(sizeof(id_node));
-  node->id = strdup(name);
-  return node;
+  return strdup(id->node.string);
 }
 
-void id_node_destroy(id_node* node)
+char* id_node_inspect(expression_node* id)
 {
-  free(node->id);
-  free(node);
+  return strdup(id->node.string);
 }
 
-string_node* id_node_to_string_node(id_node* id)
+expression_node* id_node_evaluate(expression_node* id, scope* scope)
 {
-  return string_node_create(id->id);
-}
-
-
-char* id_node_inspect(id_node* id)
-{
-  return strdup(id->id);
-}
-
-
-expression_node* id_node_evaluate(id_node* id, scope* scope)
-{
-  expression_node* value = scope_get(scope, id->id);
+  expression_node* value = scope_get(scope, id->node.string);
 
   if(!value)
     return nil_node_create();
 
   return expression_node_clone(value);
-}
-
-expression_node* id_node_clone(id_node* id)
-{
-  return expression_node_create(NODE_ID,
-                                id_node_create(id->id));
 }

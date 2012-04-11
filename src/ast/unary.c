@@ -47,18 +47,17 @@ expression_node* unary_node_evaluate(unary_node* node, scope* scope)
       break;
     }
 
-    real_node* inverted = real_node_create(-((real_node*)expr->ast_node)->real);
+    double inverted = -expr->node.real;
 
     expression_node_destroy(expr);
-    return expression_node_create(NODE_REAL, inverted);
+    return expression_node_create(NODE_REAL, (ast_node){.real = inverted});
   }
   case OP_NOT: {
     expression_node* expr = expression_node_evaluate(node->expr, scope);
-    bool_node* bool = bool_node_from_expression(expr);
-    bool->bool = !bool->bool;
+    int bool = bool_node_value_of(expr);
 
     expression_node_destroy(expr);
-    return expression_node_create(NODE_BOOL, bool);
+    return expression_node_create(NODE_BOOL, (ast_node){.bool = !bool});
   }
 
   case OP_INC: {
@@ -66,8 +65,7 @@ expression_node* unary_node_evaluate(unary_node* node, scope* scope)
     bucket* bucket = NULL;
 
     if(node->expr->type == NODE_ID) {
-      id_node* id = node->expr->ast_node;
-      bucket = scope_get_bucket(scope, id->id);
+      bucket = scope_get_bucket(scope, node->expr->node.string);
       expr = bucket->value;
     } else {
       expr = expression_node_evaluate(node->expr, scope);
@@ -78,13 +76,15 @@ expression_node* unary_node_evaluate(unary_node* node, scope* scope)
       break;
     }
 
-    real_node* inc = real_node_create(((real_node*)expr->ast_node)->real + 1);
-    expression_node_destroy(expr);
+    double inc = expr->node.real + 1;
 
-    if(bucket)
-      bucket->value = real_node_clone(inc);
+    if(bucket) {
+      bucket->value->node.real = inc;
+    } else {
+      expression_node_destroy(expr);
+    }
 
-    return expression_node_create(NODE_REAL, inc);
+    return expression_node_create(NODE_REAL, (ast_node){.real = inc });
   }
 
   case OP_PRINT: {
@@ -110,14 +110,14 @@ expression_node* unary_node_evaluate(unary_node* node, scope* scope)
   return nil_node_create();
 }
 
-expression_node* unary_node_clone(unary_node* node)
+unary_node* unary_node_clone(unary_node* node)
 {
   unary_node* new = unary_node_create(node->op);
   new->expr = expression_node_clone(node->expr);
-  return expression_node_create(NODE_UNARY, new);
+  return new;
 }
 
-string_node* unary_node_to_string_node(unary_node* node)
+char* unary_node_to_string(unary_node* node)
 {
   buffer b;
   buffer_create(&b, 10);
@@ -128,9 +128,7 @@ string_node* unary_node_to_string_node(unary_node* node)
   buffer_puts(&b, tmp);
   free(tmp);
 
-  string_node* string = string_node_create(b.buf);
-  buffer_destroy(&b);
-  return string;
+  return b.buf;
 }
 
 char* unary_node_inspect(unary_node* node)

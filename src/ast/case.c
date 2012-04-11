@@ -58,13 +58,13 @@ expression_node* case_node_evaluate(case_node* node, scope* s)
   return result ? result : nil_node_create();
 }
 
-expression_node* case_node_clone(case_node* node)
+case_node* case_node_clone(case_node* node)
 {
   // TODO
   return NULL;
 }
 
-string_node* case_node_to_string_node(case_node* node)
+char* case_node_to_string(case_node* node)
 {
   // TODO
   return NULL;

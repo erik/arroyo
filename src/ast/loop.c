@@ -37,7 +37,7 @@ expression_node* loop_node_evaluate(loop_node* loop, scope* s)
     // speed up evaluation ever so slightly for some loops
 
     const int bool_val =
-      (cond->type == NODE_BOOL && ((bool_node*)cond->ast_node)->bool)
+      (cond->type == NODE_BOOL && cond->node.bool)
       || cond->type == NODE_NIL;
 
     const int do_break =
@@ -59,13 +59,13 @@ expression_node* loop_node_evaluate(loop_node* loop, scope* s)
   return value;
 }
 
-expression_node* loop_node_clone(loop_node* node)
+loop_node* loop_node_clone(loop_node* node)
 {
   // TODO
   return NULL;
 }
 
-string_node* loop_node_to_string_node(loop_node* loop)
+char* loop_node_to_string(loop_node* loop)
 {
   char* tmp;
   buffer b;
@@ -103,10 +103,7 @@ string_node* loop_node_to_string_node(loop_node* loop)
   buffer_puts(&b, tmp);
   buffer_putc(&b, '\0');
 
-  string_node* string = string_node_create(b.buf);
-  buffer_destroy(&b);
-
-  return string;
+  return b.buf;
 }
 
 

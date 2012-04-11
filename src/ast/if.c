@@ -38,30 +38,22 @@ void if_node_destroy(if_node* node)
 expression_node* if_node_evaluate(if_node* node, scope* scope)
 {
   expression_node* value, *cond;
-  bool_node* bool;
-  int bool_value;
+  int bool;
 
   cond = expression_node_evaluate(node->condition, scope);
-  bool = bool_node_from_expression(cond);
-
-  bool_value = bool->bool;
+  bool = bool_node_value_of(cond);
 
   expression_node_destroy(cond);
-  bool_node_destroy(bool);
 
-  if(bool_value)
+  if(bool)
     return expression_node_evaluate(node->thenbody, scope);
 
   for(unsigned i = 0; i < node->nelseif; ++i) {
     cond = expression_node_evaluate(node->elseifcondition[i], scope);
-    bool = bool_node_from_expression(cond);
-
-    bool_value = bool->bool;
+    bool = bool_node_value_of(cond);
 
     expression_node_destroy(cond);
-    bool_node_destroy(bool);
-
-    if(bool_value)
+    if(bool)
       return expression_node_evaluate(node->elseifbody[i], scope);
   }
 
@@ -71,15 +63,14 @@ expression_node* if_node_evaluate(if_node* node, scope* scope)
   return nil_node_create();
 }
 
-expression_node* if_node_clone(if_node* node)
+if_node* if_node_clone(if_node* node)
 {
   // TODO
   return NULL;
 }
 
-string_node* if_node_to_string_node(if_node* node)
+char* if_node_to_string(if_node* node)
 {
-  string_node* string;
   const char* tmp;
 
   buffer b;
@@ -122,10 +113,7 @@ string_node* if_node_to_string_node(if_node* node)
     free((char*)tmp);
   }
 
-  string = string_node_create(b.buf);
-  buffer_destroy(&b);
-
-  return string;
+  return b.buf;
 }
 
 char* if_node_inspect(if_node* node)
@@ -181,5 +169,4 @@ void if_node_add_elseif(if_node* node, expression_node* cond, expression_node* b
 
   node->elseifcondition[node->nelseif] = cond;
   node->elseifbody[node->nelseif++] = body;
-
 }
