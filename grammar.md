@@ -1,8 +1,8 @@
 # Grammar
 In progress grammar for the language (not finalized).
 
-**Warning** this is completely out of date. Will be rewritten when
-  syntax and interpreter are more stable.
+**Warning** this grammar is based on the syntax as of git commit
+  92c1398d4, and will probably be out of date quickly.
 
 *written in pseudo BNF form*
 
@@ -12,26 +12,24 @@ PRIMARY        := FUNCTION | STRING | REAL | BOOLEAN | ARRAY | HASH | ID | NIL
 
 BOOLEAN        := "true" | "false"
 ARRAY          := "[" EXPRESSION* "]"
-HASH           := "{" (STRING | ID ":" EXPRESSION)* "}"
 NIL            := "nil"
-
 FUNCTION       := "fn" ID? "(" (ID (":" ID)? )* ")" EXPRESSION
-
 STRING         := "\"" [^"\n]* "\""
 REAL           := [0-9]+(\.[0-9]+)?
 
 LOOP           := "loop" EXPRESSION? "while" | "until" | "do" EXPRESSION
-
 IF             := "if" EXPRESSION EXPRESSION ("elseif" EXPRESSION EXPRESSION)* ("else" EXPRESSION)?
-WHEN           := "when" EXPRESSION EXPRESSION
+CASE           := "case" EXPRESSION "of" "(" (EXPRESSION "=>" EXPRESSION)* ("default" "=>" EXPRESSION)? ")"
 
-CONDITIONAL    := ">" | "<" | ">=" | "<=" | "=" | "/="
+BINARY         := "+" | "-" | "*" | "/" | ">" | "<" | ">=" | "<=" | "=" | "/="
+UNARY          := "-" | "++" | "print" | "!" | "#"
 
-CONDITIONALEXP := EXPRESSION CONDITIONAL EXPRESSION
+UNARYEXP       := UNARY EXPRESSION
+BINARYEXP      := EXPRESSION BINARY EXPRESSION
 BLOCK          := "(" EXPRESSION* ")"
 ASSIGNMENT     := ID "<-" EXPRESSION
 
-EXPRESSION     := PRIMARY | CONDITIONALEXP | LOOP | BLOCK | ASSIGNMENT
+EXPRESSION     := PRIMARY | BINARYEXP | UNARYEXP | LOOP | IF | CASE | BLOCK | ASSIGNMENT
 
 PROGRAM        := EXPRESSION* EOS
 ```
