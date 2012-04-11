@@ -200,41 +200,24 @@ expression_node* binary_node_evaluate(binary_node* binary, scope* scope)
     left = expression_node_evaluate(binary->lhs, scope);
     right = expression_node_evaluate(binary->rhs, scope);
 
-    // make sure types match
-    TYPE_CHECK(right, left->type);
+    bool_node* bool = bool_node_create(expression_node_equal(left, right));
 
-    switch(left->type) {
-    case NODE_REAL: {
-      real_node* lr = CAST(left, real_node*);
-      real_node* rr = CAST(right, real_node*);
+    expression_node_destroy(left);
+    expression_node_destroy(right);
 
-      int eq = lr->real == rr->real;
-
-      expression_node_destroy(right);
-      expression_node_destroy(left);
-
-      return EXPR(BOOL, bool_node_create(eq));
-    }
-    case NODE_BOOL: {
-      bool_node* lb = CAST(left, bool_node*);
-      bool_node* rb = CAST(right, bool_node*);
-
-      bool_node* b = bool_node_create(lb->bool == rb->bool);
-
-      expression_node_destroy(right);
-      expression_node_destroy(left);
-
-      return EXPR(BOOL, b);
-    }
-    default:
-      printf("this comparision is not handled yet\n");
-      return expression_node_create(NODE_BOOL, bool_node_create(0));
-    }
-
-    break;
+    return EXPR(BOOL, bool);
   }
-  case OP_NEQ:
-    COMP(!=);
+  case OP_NEQ: {
+    left = expression_node_evaluate(binary->lhs, scope);
+    right = expression_node_evaluate(binary->rhs, scope);
+
+    bool_node* bool = bool_node_create(!expression_node_equal(left, right));
+
+    expression_node_destroy(left);
+    expression_node_destroy(right);
+
+    return EXPR(BOOL, bool);
+  }
 
   case OP_AND: {
     bool_node* left_bool = bool_node_from_expression(LEFT);

@@ -8,6 +8,7 @@
 static array_node*      parse_array      (parser_state*);
 static binary_node*     parse_assignment (parser_state*);
 static block_node*      parse_block      (parser_state*);
+static case_node*       parse_case       (parser_state*);
 static fn_node*         parse_function   (parser_state*);
 static hash_node*       parse_hash       (parser_state*);
 static if_node*         parse_if         (parser_state*);
@@ -180,6 +181,38 @@ static block_node* parse_block(parser_state* ps)
   return block;
 }
 
+/* "case" EXPRESSION "of" '(' (EXPRESSION EXPRESSION)* ("else" EXPRESSION)? ')' */
+static case_node* parse_case(parser_state* ps)
+{
+  case_node* node = case_node_create();
+
+  node->expression = parse_expression(ps);
+
+  expect(ps, TK_OF);
+  expect(ps, '(');
+
+  int seen_default = 0;
+
+  while(ps->t.type != ')') {
+    if(accept(ps, TK_DEFAULT)) {
+      if(seen_default)
+        parser_error(ps, "only single 'default' case allowed");
+
+      seen_default = 1;
+      node->default_case = parse_expression(ps);
+    }
+    else {
+      expression_node* cond = parse_expression(ps);
+      expression_node* body = parse_expression(ps);
+      case_node_add_case(node, cond, body);
+    }
+  }
+
+  expect(ps, ')');
+
+  return node;
+}
+
 /* ID | PRIMITIVE | BLOCK | ASSIGNMENT | CONDITIONAL | FUNCCALL */
 expression_node* parse_expression(parser_state* ps)
 {
@@ -248,6 +281,11 @@ expression_node* parse_expression(parser_state* ps)
   else if(accept(ps, TK_LOOP)) {
     type = NODE_LOOP;
     node = parse_loop(ps);
+  }
+
+  else if(accept(ps, TK_CASE)) {
+    type = NODE_CASE;
+    node = parse_case(ps);
   }
 
   else if(accept(ps, ','))

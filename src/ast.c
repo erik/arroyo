@@ -1,6 +1,8 @@
 #include "ast.h"
 #include "util.h"
+
 #include <stdio.h>
+#include <string.h>
 
 #define WHEN_NODE(node, body) case NODE_##node: { body; break; }
 #define NODE_TYPE_FUNCTION(type, var, func) switch(type) {      \
@@ -9,6 +11,7 @@
     WHEN_NODE(BINARY,  var binary_node_##func);                 \
     WHEN_NODE(BLOCK,   var block_node_##func);                  \
     WHEN_NODE(BOOL,    var bool_node_##func);                   \
+    WHEN_NODE(CASE,    var case_node_##func);                   \
     WHEN_NODE(FN,      var fn_node_##func);                     \
     WHEN_NODE(ID,      var id_node_##func);                     \
     WHEN_NODE(IF,      var if_node_##func);                     \
@@ -93,4 +96,39 @@ inline char* expression_node_inspect(expression_node* node)
     return expression_node_to_string(node);
 
   return string;
+}
+
+// 0 is false, 1 is true
+int expression_node_equal(expression_node* left, expression_node* right)
+{
+#define CAST(expr, type) ((type)expr->ast_node)
+
+  if(left->type != right->type)
+    return 0;
+
+  switch(left->type) {
+  case NODE_REAL: {
+    real_node* lr = CAST(left, real_node*);
+    real_node* rr = CAST(right, real_node*);
+
+    return lr->real == rr->real;
+  }
+  case NODE_BOOL: {
+    bool_node* lb = CAST(left, bool_node*);
+    bool_node* rb = CAST(right, bool_node*);
+
+    return lb->bool == rb->bool;
+  }
+  case NODE_STRING: {
+    string_node* ls = CAST(left, string_node*);
+    string_node* rs = CAST(right, string_node*);
+
+    return !strcmp(ls->string, rs->string);
+  }
+  default:
+    printf("this comparision is not handled yet\n");
+  }
+
+  return 0;
+#undef CAST
 }

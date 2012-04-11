@@ -23,6 +23,7 @@ typedef enum {
 
   NODE_LOOP,
   NODE_IF,
+  NODE_CASE,
 
   NODE_BLOCK,
 
@@ -32,7 +33,7 @@ typedef enum {
 static const char* node_type_string[MAX_NODE_TYPE] = {
   "string", "real", "bool", "id", "nil",
   "function", "array", "hash", "binary", "unary",
-  "loop", "_if", "block"
+  "loop", "if", "case", "block"
 };
 
 struct typed_id {
@@ -70,6 +71,19 @@ enum binary_op {
 };
 
 struct expression_node;
+
+typedef struct {
+
+  struct case_list {
+    struct expression_node* cond;
+    struct expression_node* body;
+    struct case_list* next;
+  } *cases, *last;
+
+  struct expression_node* expression;
+
+  struct expression_node* default_case;
+} case_node;
 
 typedef struct {
   long double real;
@@ -160,6 +174,8 @@ expression_node* expression_node_clone(expression_node*);
 string_node*     expression_node_to_string_node(expression_node*);
 char*            expression_node_to_string(expression_node*);
 char*            expression_node_inspect(expression_node*);
+int              expression_node_equal(expression_node*, expression_node*);
+
 
 // nil
 expression_node* nil_node_create(void);
@@ -212,7 +228,7 @@ void             fn_node_add_argument(fn_node*, char* name, int type);
 char*            fn_node_inspect(fn_node*);
 
 // array node
-array_node*      array_node_create();
+array_node*      array_node_create(void);
 void             array_node_destroy(array_node*);
 expression_node* array_node_evaluate(array_node*, scope*);
 expression_node* array_node_clone(array_node*);
@@ -261,6 +277,15 @@ expression_node* unary_node_evaluate(unary_node*, scope*);
 expression_node* unary_node_clone(unary_node*);
 string_node*     unary_node_to_string_node(unary_node*);
 char*            unary_node_inspect(unary_node*);
+
+// case
+case_node*       case_node_create(void);
+void             case_node_destroy(case_node*);
+expression_node* case_node_evaluate(case_node*, scope*);
+expression_node* case_node_clone(case_node*);
+string_node*     case_node_to_string_node(case_node*);
+char*            case_node_inspect(case_node*);
+void             case_node_add_case(case_node* node, expression_node* of, expression_node* body);
 
 // TODO: hash_node
 
