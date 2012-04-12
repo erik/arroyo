@@ -236,14 +236,23 @@ int expression_node_equal(expression_node* left, expression_node* right)
     return 0;
 
   switch(left->type) {
-  case NODE_REAL: {
+  case NODE_NIL:
+    return 1;
+  case NODE_REAL:
     return left->node.real == right->node.real;
-  }
-  case NODE_BOOL: {
+  case NODE_BOOL:
     return left->node.bool == right->node.bool;
-  }
-  case NODE_STRING: {
+  case NODE_ID:
+  case NODE_STRING:
     return !strcmp(left->node.string, right->node.string);
+  case NODE_ARRAY: {
+    if(left->node.array->nelements != right->node.array->nelements)
+      return 0;
+    for(unsigned i = 0; i < left->node.array->nelements; ++i) {
+      if(!expression_node_equal(left->node.array->elements[i], right->node.array->elements[i]))
+        return 0;
+    }
+    return 1;
   }
   default:
     printf("this comparision is not handled yet\n");
