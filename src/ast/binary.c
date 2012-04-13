@@ -6,7 +6,7 @@
 #include <math.h>
 #include <stdio.h>
 
-static inline char* get_binop_str(enum binary_op op)
+inline char* get_binop_str(enum binary_op op)
 {
   switch(op) {
   case OP_ADD:
@@ -206,7 +206,7 @@ expression_node* binary_node_evaluate(binary_node* binary, scope* scope)
     left = expression_node_evaluate(binary->lhs, scope);
     right = expression_node_evaluate(binary->rhs, scope);
 
-    ast_node bool = {.bool = expression_node_equal(left, right)};
+    ast_node bool = {.bool = !expression_node_equal(left, right)};
 
     expression_node_destroy(left);
     expression_node_destroy(right);
@@ -219,7 +219,7 @@ expression_node* binary_node_evaluate(binary_node* binary, scope* scope)
 
     if(!left_bool) {
       expression_node_destroy(left);
-      return EXPR(BOOL, (ast_node){.bool=0});
+      return EXPR(BOOL, (ast_node){.bool = 0});
     }
 
     int right_bool = bool_node_value_of(RIGHT);
@@ -227,6 +227,7 @@ expression_node* binary_node_evaluate(binary_node* binary, scope* scope)
     if(!right_bool) {
       expression_node_destroy(left);
       expression_node_destroy(right);
+
       return EXPR(BOOL, (ast_node){.bool = 0});
     }
 
@@ -239,6 +240,8 @@ expression_node* binary_node_evaluate(binary_node* binary, scope* scope)
 
     if(left_bool)
       return left;
+
+    expression_node_destroy(left);
 
     return RIGHT;
   }

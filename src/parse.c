@@ -5,14 +5,16 @@
 #include "lex.h"
 #include "util.h"
 
-static array_node*      parse_array      (parser_state*);
-static binary_node*     parse_assignment (parser_state*);
-static block_node*      parse_block      (parser_state*);
-static case_node*       parse_case       (parser_state*);
-static fn_node*         parse_function   (parser_state*);
-static hash_node*       parse_hash       (parser_state*);
-static if_node*         parse_if         (parser_state*);
-static loop_node*       parse_loop       (parser_state*);
+static array_node*      parse_array       (parser_state*);
+static binary_node*     parse_assignment  (parser_state*);
+static block_node*      parse_block       (parser_state*);
+static case_node*       parse_case        (parser_state*);
+static fn_node*         parse_function    (parser_state*);
+static hash_node*       parse_hash        (parser_state*);
+static if_node*         parse_if          (parser_state*);
+static loop_node*       parse_loop        (parser_state*);
+static expression_node* parse_primary     (parser_state*);
+static expression_node* parse_expression_ (parser_state*, expression_node*, int);
 
 static inline void next_token(parser_state* ps);
 
@@ -218,8 +220,49 @@ static case_node* parse_case(parser_state* ps)
   return node;
 }
 
-/* ID | PRIMITIVE | BLOCK | ASSIGNMENT | CONDITIONAL | FUNCCALL */
+static expression_node* parse_expression_(parser_state* ps, expression_node* left, int prec)
+{
+  expression_node *lhs = left,
+    *rhs = NULL;
+
+  enum binary_op op = get_binop(ps);
+
+  while(op != OP_NOTBINOP && op_precedence(op) >= prec) {
+    next_token(ps);
+    rhs = parse_primary(ps);
+
+    // group higher precedence operators first
+    enum binary_op next = get_binop(ps);
+    while(next != OP_NOTBINOP && op_precedence(next) > op_precedence(op)) {
+      next_token(ps);
+
+      expression_node* bin = expression_node_create(NODE_BINARY, (ast_node){.binary = binary_node_create(next)});
+      bin->node.binary->lhs = rhs;
+      bin->node.binary->rhs = parse_primary(ps);
+
+      rhs = bin;
+      rhs = parse_expression_(ps, bin, op_precedence(next));
+      next = get_binop(ps);
+    }
+
+    expression_node* bin = expression_node_create(NODE_BINARY, (ast_node){.binary = binary_node_create(op)});
+    bin->node.binary->lhs = lhs;
+    bin->node.binary->rhs = rhs;
+
+    lhs = bin;
+    op = get_binop(ps);
+  }
+
+  return lhs;
+}
+
 expression_node* parse_expression(parser_state* ps)
+{
+  return parse_expression_(ps, parse_primary(ps), 0);
+}
+
+/* ID | PRIMITIVE | BLOCK | ASSIGNMENT | CONDITIONAL | FUNCCALL */
+static expression_node* parse_primary(parser_state* ps)
 {
   node_type type = NODE_NIL;
   ast_node node;
@@ -273,9 +316,16 @@ expression_node* parse_expression(parser_state* ps)
 
   else if(get_unaryop(ps)) {
     type = NODE_UNARY;
-    node = (ast_node){.unary = unary_node_create(get_unaryop(ps))};
+    enum unary_op op = get_unaryop(ps);
+    node = (ast_node){.unary = unary_node_create(op)};
     next_token(ps);
-    node.unary->expr = parse_expression(ps);
+
+    // only the print unary should wrap around binary expressions
+    if(op != OP_PRINT)
+      node.unary->expr = parse_primary(ps);
+    else
+      node.unary->expr = parse_expression(ps);
+
   }
 
   else if(accept(ps, TK_IF)) {
@@ -317,21 +367,6 @@ expression_node* parse_expression(parser_state* ps)
     }
 
     return nil_node_create();
-  }
-
-
-  // TODO: this approach currently evaluates left to right and makes
-  // precendence difficult to implement, should be refactored
-  enum binary_op binop;
-  if((binop = get_binop(ps))) {
-    binary_node* binary = binary_node_create(binop);
-    binary->lhs = expression_node_create(type, node);
-
-    // skip operator
-    next_token(ps);
-    binary->rhs = parse_expression(ps);
-
-    return expression_node_create(NODE_BINARY, (ast_node){.binary = binary});
   }
 
   return expression_node_create(type, node);

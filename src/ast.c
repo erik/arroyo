@@ -201,7 +201,6 @@ inline char* expression_node_inspect(expression_node* node)
     return real_node_inspect(node);
   case NODE_BOOL:
     return bool_node_inspect(node);
-
   case NODE_STRING:
     return string_node_inspect(node);
   case NODE_ID:

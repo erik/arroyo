@@ -247,9 +247,10 @@ char*            loop_node_inspect(loop_node*);
 binary_node*     binary_node_create(enum binary_op);
 void             binary_node_destroy(binary_node*);
 expression_node* binary_node_evaluate(binary_node*, scope*);
-binary_node*      binary_node_clone(binary_node*);
+binary_node*     binary_node_clone(binary_node*);
 char*            binary_node_to_string(binary_node*);
 char*            binary_node_inspect(binary_node*);
+char*            get_binop_str(enum binary_op);
 
 // unary
 unary_node*      unary_node_create(enum unary_op);
