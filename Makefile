@@ -5,7 +5,7 @@ CC  := gcc
 
 DFLAGS := -ggdb -O0
 LFLAGS := -lreadline -lm
-CFLAGS := -Wall -Wextra -Werror -pedantic -std=c99 -Wno-unused -Wno-unused-parameter -Iinclude/
+CFLAGS := -Wall -Wextra -pedantic -std=c99 -Wno-unused -Wno-unused-parameter -Iinclude/
 
 all: $(OBJ)
 	$(CC) $(OBJ) $(LFLAGS) -o arroyo

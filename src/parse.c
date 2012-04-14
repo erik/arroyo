@@ -212,8 +212,8 @@ static case_node* parse_case(parser_state* ps)
 
       expression_node* cond = parse_expression(ps);
       expect(ps, TK_RARROW);
-        expression_node* body = parse_expression(ps);
-        case_node_add_case(node, cond, body);
+      expression_node* body = parse_expression(ps);
+      case_node_add_case(node, cond, body);
     }
   }
 
@@ -363,7 +363,7 @@ static expression_node* parse_primary(parser_state* ps)
 
     default:
       parser_error(ps, "expected expression, got '%s'",
-                    (char*)tok_to_string(ps->ls->t.type));
+                   (char*)tok_to_string(ps->ls->t.type));
     }
 
     return nil_node_create();
@@ -513,7 +513,7 @@ expression_node* parse_program(parser_state* ps)
 
   case 1:
     fprintf(stderr, "Aborting after %d error%s.\n", ps->error.count,
-             ps->error.count > 1 || ps->error.count == 0 ? "s" : "");
+            ps->error.count > 1 || ps->error.count == 0 ? "s" : "");
     return nil_node_create();
 
     // on EOF
@@ -522,7 +522,7 @@ expression_node* parse_program(parser_state* ps)
   }
 
   while(ps->t.type != TK_EOS && ps->t.type != TK_ERROR &&
-         ps->error.count < ps->error.max) {
+        ps->error.count < ps->error.max) {
     block_node_push_expression(program, parse_expression(ps));
   }
 
