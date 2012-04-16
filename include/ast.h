@@ -8,6 +8,7 @@
 #include <stdlib.h>
 
 typedef enum {
+  NODE_LITERAL_STRING,
   NODE_STRING,
   NODE_REAL,
   NODE_BOOL,
@@ -31,7 +32,7 @@ typedef enum {
 } node_type;
 
 static const char* node_type_string[MAX_NODE_TYPE] = {
-  "string", "real", "bool", "id", "nil",
+  "literal_string", "string", "real", "bool", "id", "nil",
   "function", "array", "hash", "binary", "unary",
   "loop", "if", "case", "block"
 };
@@ -187,6 +188,9 @@ char*            real_node_inspect(expression_node*);
 expression_node* string_node_evaluate(expression_node*, scope*);
 char*            string_node_to_string(expression_node*);
 char*            string_node_inspect(expression_node*);
+
+// literal string node
+char*            literal_string_node_inspect(expression_node*); // in ast/string.c
 
 // bool node
 char*            bool_node_to_string(expression_node*);

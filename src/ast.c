@@ -21,6 +21,7 @@ inline void expression_node_destroy(expression_node* node)
     // nothing to free
     break;
 
+  case NODE_LITERAL_STRING:
   case NODE_STRING:
   case NODE_ID:
     free(node->node.string);
@@ -68,6 +69,11 @@ inline expression_node* expression_node_evaluate(expression_node* node, scope* s
     // evaluate to self
     return expression_node_create(node->type, node->node);
   }
+
+  case NODE_LITERAL_STRING: {
+    return expression_node_create(NODE_LITERAL_STRING, (ast_node){.string = strdup(node->node.string)});
+  }
+
   case NODE_STRING:
     return string_node_evaluate(node, scope);
   case NODE_ID:
@@ -109,7 +115,8 @@ inline expression_node* expression_node_clone(expression_node* node)
     break;
   }
   case NODE_STRING:
-  case NODE_ID: {
+  case NODE_ID:
+  case NODE_LITERAL_STRING: {
     cloned->node.string = strdup(node->node.string);
     break;
   }
@@ -167,6 +174,7 @@ inline char* expression_node_to_string(expression_node* node)
 
   case NODE_STRING:
   case NODE_ID:
+  case NODE_LITERAL_STRING:
     return strdup(node->node.string);
 
   case NODE_ARRAY:
@@ -203,6 +211,8 @@ inline char* expression_node_inspect(expression_node* node)
     return bool_node_inspect(node);
   case NODE_STRING:
     return string_node_inspect(node);
+  case NODE_LITERAL_STRING:
+    return literal_string_node_inspect(node);
   case NODE_ID:
     return id_node_inspect(node);
   case NODE_ARRAY:

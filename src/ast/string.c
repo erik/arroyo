@@ -6,7 +6,6 @@
 #include "util.h"
 #include "buffer.h"
 
-
 expression_node* string_node_evaluate(expression_node* node, scope* scope)
 {
   const char* string = node->node.string;
@@ -66,3 +65,20 @@ char* string_node_inspect(expression_node* node)
 
   return b.buf;
 }
+
+char* literal_string_node_inspect(expression_node* node)
+{
+  char* tmp = string_node_inspect(node);
+
+  buffer b;
+  buffer_create(&b, strlen(node->node.string) + 2);
+
+  buffer_puts(&b, "\"\"");
+  buffer_puts(&b, tmp);
+  buffer_puts(&b, "\"\"");
+
+  free(tmp);
+
+  return b.buf;
+}
+

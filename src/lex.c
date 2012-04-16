@@ -49,9 +49,6 @@ static void inc_line(lexer_state *ls)
 
 static void read_string(lexer_state *ls, token_info *info)
 {
-  // skip leading "
-  next(ls);
-
   int cont = 1;
 
   while(cont) {
@@ -97,6 +94,37 @@ static void read_string(lexer_state *ls, token_info *info)
   info->string = strdup(ls->buf->buf);
 
   // skip trailing "
+  next(ls);
+}
+
+static void read_literal_string(lexer_state* ls, token_info* info)
+{
+  // skip leading "
+  next(ls);
+
+  for(;;) {
+    if(ls->current == EOS) {
+      lexer_error(ls, "unexpected eof in string");
+      return;
+    }
+
+    else if(ls->current == '"') {
+      if(next(ls) == '"') {
+        if(next(ls) == '"') {
+          break;
+        }
+        save(ls, '"');
+      }
+      save(ls, '"');
+    }
+
+    else {
+      save_and_next(ls);
+    }
+
+  }
+
+  info->string = strdup(ls->buf->buf);
   next(ls);
 }
 
@@ -227,7 +255,18 @@ static int lex(lexer_state *ls, token_info *info)
     }
 
     case '"': { // STRING
-      read_string(ls, info);
+      // literal string
+      if(next(ls) == '"') {
+        if(next(ls) == '"') {
+          read_literal_string(ls, info);
+          return TK_LIT_STRING;
+        }
+        else
+          info->string = strdup("");
+      }
+      else
+        read_string(ls, info);
+
       return TK_STRING;
     }
 

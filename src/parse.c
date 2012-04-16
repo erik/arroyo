@@ -286,6 +286,11 @@ static expression_node* parse_primary(parser_state* ps)
     node.string = strdup(ps->info.string);
   }
 
+  else if(accept(ps, TK_LIT_STRING)) {
+    type = NODE_LITERAL_STRING;
+    node.string = strdup(ps->info.string);
+  }
+
   else if(accept(ps, TK_TRUE)) {
     type = NODE_BOOL;
     node.bool = 1;
