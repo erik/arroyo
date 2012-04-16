@@ -62,6 +62,33 @@ static void read_string(lexer_state *ls, token_info *info)
     case '\n': case '\r':
       lexer_error(ls, "unexpected new line in string");
       return;
+    case '\\': {
+      switch(next(ls)) {
+      case 'b':
+        save(ls, '\b');
+        break;
+      case 't':
+        save(ls, '\t');
+        break;
+      case 'n':
+        save(ls, '\n');
+        break;
+      case 'r':
+        save(ls, '\r');
+        break;
+      case '\\':
+        save(ls, '\\');
+        break;
+      case '\"':
+        save(ls, '\"');
+        break;
+      default:
+        lexer_error(ls, "Unrecognized escape sequence in string: \\%c", ls->current);
+        return;
+      }
+      next(ls);
+      break;
+    }
     case '"': cont = 0; break;
     default: save_and_next(ls);
     }
