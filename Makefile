@@ -25,6 +25,7 @@ clean:
 
 todo:
 	@ack 'XXX|TODO|FIXME'
+	@cat TODO
 
 loc:
 	@ack --type=cc -f | xargs wc -l | sort -h
