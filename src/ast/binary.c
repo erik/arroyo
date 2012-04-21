@@ -125,8 +125,6 @@ binary_node* binary_node_clone(binary_node* binary)
 
 expression_node* binary_node_evaluate(binary_node* binary, scope* scope)
 {
-  // FIXME: these will all leak memory
-
   expression_node* left  = NULL;
   expression_node* right = NULL;
 

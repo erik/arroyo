@@ -124,6 +124,9 @@ char* unary_node_to_string(unary_node* node)
 
   buffer_puts(&b, get_unary_str(node->op));
 
+  if(node->op == OP_PRINT)
+    buffer_putc(&b, ' ');
+
   char* tmp = expression_node_to_string(node->expr);
   buffer_puts(&b, tmp);
   free(tmp);

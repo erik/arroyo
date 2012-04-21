@@ -60,20 +60,103 @@ expression_node* case_node_evaluate(case_node* node, scope* s)
 
 case_node* case_node_clone(case_node* node)
 {
-  // TODO
-  return NULL;
+  case_node* new = case_node_create();
+
+  new->expression = expression_node_clone(node->expression);
+
+  for(struct case_list* c = node->cases; c; c = c->next) {
+    case_node_add_case(new, expression_node_clone(c->cond),
+                       expression_node_clone(c->body));
+  }
+
+  if(node->default_case)
+    new->default_case = expression_node_clone(node->default_case);
+
+  return new;
 }
 
 char* case_node_to_string(case_node* node)
 {
-  // TODO
-  return NULL;
+  buffer b;
+  buffer_create(&b, 20);
+
+  char* tmp;
+
+  buffer_puts(&b, "case ");
+
+  tmp = expression_node_to_string(node->expression);
+  buffer_puts(&b, tmp);
+  free(tmp);
+
+  buffer_puts(&b, " of (");
+
+  for(struct case_list* c = node->cases; c; c = c->next) {
+    tmp = expression_node_to_string(c->cond);
+    buffer_puts(&b, tmp);
+    free(tmp);
+
+    buffer_puts(&b, " => ");
+
+    tmp = expression_node_to_string(c->body);
+    buffer_puts(&b, tmp);
+    free(tmp);
+
+    if(c->next)
+      buffer_puts(&b, ", ");
+  }
+
+  if(node->default_case) {
+    buffer_puts(&b, "default => ");
+    tmp = expression_node_to_string(node->default_case);
+    buffer_puts(&b, tmp);
+    free(tmp);
+  }
+
+  buffer_putc(&b, ')');
+
+  return b.buf;
 }
 
 char* case_node_inspect(case_node* node)
 {
-  // TODO
-  return NULL;
+  buffer b;
+  buffer_create(&b, 20);
+
+  char* tmp;
+
+  buffer_puts(&b, "case ");
+
+  tmp = expression_node_inspect(node->expression);
+  buffer_puts(&b, tmp);
+  free(tmp);
+
+  buffer_puts(&b, " of (");
+
+  for(struct case_list* c = node->cases; c; c = c->next) {
+    tmp = expression_node_inspect(c->cond);
+    buffer_puts(&b, tmp);
+    free(tmp);
+
+    buffer_puts(&b, " => ");
+
+    tmp = expression_node_inspect(c->body);
+    buffer_puts(&b, tmp);
+    free(tmp);
+
+    if(c->next)
+      buffer_puts(&b, ", ");
+  }
+
+  if(node->default_case) {
+    buffer_puts(&b, "default => ");
+    tmp = expression_node_inspect(node->default_case);
+    buffer_puts(&b, tmp);
+    free(tmp);
+  }
+
+  buffer_putc(&b, ')');
+
+  return b.buf;
 }
 
 void case_node_add_case(case_node* node, expression_node* of, expression_node* body)

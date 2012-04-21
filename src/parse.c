@@ -321,8 +321,10 @@ static expression_node* parse_primary(parser_state* ps)
 
   else if(get_unaryop(ps)) {
     type = NODE_UNARY;
+
     enum unary_op op = get_unaryop(ps);
-    node = (ast_node){.unary = unary_node_create(op)};
+    node.unary = unary_node_create(op);
+
     next_token(ps);
 
     // only the print unary should wrap around binary expressions

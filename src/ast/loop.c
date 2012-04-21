@@ -61,8 +61,14 @@ expression_node* loop_node_evaluate(loop_node* loop, scope* s)
 
 loop_node* loop_node_clone(loop_node* node)
 {
-  // TODO
-  return NULL;
+  loop_node* new = loop_node_create();
+
+  new->type = node->type;
+  new->init = expression_node_clone(node->init);
+  new->cond = expression_node_clone(node->cond);
+  new->body = expression_node_clone(node->body);
+
+  return new;
 }
 
 char* loop_node_to_string(loop_node* loop)
@@ -101,6 +107,8 @@ char* loop_node_to_string(loop_node* loop)
 
   tmp = expression_node_to_string(loop->body);
   buffer_puts(&b, tmp);
+  free(tmp);
+
   buffer_putc(&b, '\0');
 
   return b.buf;

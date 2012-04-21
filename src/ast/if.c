@@ -65,13 +65,21 @@ expression_node* if_node_evaluate(if_node* node, scope* scope)
 
 if_node* if_node_clone(if_node* node)
 {
-  // TODO
-  return NULL;
+  if_node* new = if_node_create();
+
+  new->condition = expression_node_clone(node->condition);
+  new->thenbody  = expression_node_clone(node->thenbody);
+
+  for(unsigned i = 0; i < node->nelseif; ++i)
+    if_node_add_elseif(new, node->elseifcondition[i], node->elseifbody[i]);
+
+  new->elsebody  = node->elsebody;
+  return new;
 }
 
 char* if_node_to_string(if_node* node)
 {
-  const char* tmp;
+  char* tmp;
 
   buffer b;
   buffer_create(&b, 10);
@@ -82,12 +90,12 @@ char* if_node_to_string(if_node* node)
   tmp = expression_node_to_string(node->condition);
   buffer_puts(&b, tmp);
   buffer_putc(&b, ' ');
-  free((char*)tmp);
+  free(tmp);
 
   // then
   tmp = expression_node_to_string(node->thenbody);
   buffer_puts(&b, tmp);
-  free((char*)tmp);
+  free(tmp);
 
 
   for(unsigned i = 0; i < node->nelseif; ++i) {
@@ -96,13 +104,13 @@ char* if_node_to_string(if_node* node)
     tmp = expression_node_to_string(node->elseifcondition[i]);
     buffer_puts(&b, tmp);
     buffer_putc(&b, ' ');
-    free((char*)tmp);
+    free(tmp);
 
     // else if body
     tmp = expression_node_to_string(node->elseifbody[i]);
     buffer_puts(&b, tmp);
     buffer_putc(&b, ' ');
-    free((char*)tmp);
+    free(tmp);
   }
 
   if(node->elsebody) {
@@ -110,7 +118,7 @@ char* if_node_to_string(if_node* node)
     tmp = expression_node_to_string(node->elsebody);
     buffer_puts(&b, tmp);
     buffer_putc(&b, ' ');
-    free((char*)tmp);
+    free(tmp);
   }
 
   return b.buf;
