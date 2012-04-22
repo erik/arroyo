@@ -192,6 +192,33 @@ static int lex(lexer_state *ls, token_info *info)
       break;
     }
 
+    case '!': { // not
+      next(ls);
+      return TK_NOT;
+    }
+
+    case '&': { // and
+      if(next(ls) != '&')
+        lexer_error(ls, "unrecognized symbol: '&%c'", ls->current);
+
+      next(ls);
+      return TK_AND;
+    }
+
+    case '|': { // or
+      if(next(ls) != '|')
+        lexer_error(ls, "unrecognized symbol: '|%c'", ls->current);
+
+      next(ls);
+      return TK_OR;
+    }
+
+
+    case '^': { // xor
+      next(ls);
+      return TK_XOR;
+    }
+
     case '-': { // comment or minus
       // minus
       if(next(ls) != '-') return '-';
@@ -289,10 +316,10 @@ static int lex(lexer_state *ls, token_info *info)
       // valid operators, single character tokens, etc.
       switch(ls->current) {
       case '+': case '-': case '*': case '/':
-      case '!': case '>': case '<': case '=':
-      case '(': case ')': case '[': case ']':
-      case '{': case '}': case ':': case '.':
-      case ',': case '#':
+      case '>': case '<': case '=': case '(':
+      case ')': case '[': case ']': case '{':
+      case '}': case ':': case '.': case ',':
+      case '#':
         next(ls);
         return c;
 

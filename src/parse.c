@@ -83,7 +83,7 @@ static enum unary_op get_unaryop(parser_state* ps)
 {
   switch(ps->t.type) {
   case '-'      : return OP_UNM;
-  case '!'      : return OP_NOT;
+  case TK_NOT   : return OP_NOT;
   case '#'      : return OP_QUOTE;
   case TK_INC   : return OP_INC;
   case TK_PRINT : return OP_PRINT;

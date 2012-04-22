@@ -1,6 +1,5 @@
 #include "reader.h"
 
-
 void reader_create(reader* r, reader_fn fn, void* data)
 {
   r->fn = fn;
