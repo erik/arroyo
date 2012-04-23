@@ -21,7 +21,14 @@ typedef struct reader {
 
 void reader_create(reader* r, reader_fn fn, void* data);
 int reader_fillbuf(reader* r);
-
 int reader_getchar(reader* r);
+
+typedef struct string_reader_data {
+  const char* string;
+  int read;
+} string_reader_data;
+
+void string_reader_create(reader* r, char* string);
+const char* string_reader_read(void* data, unsigned* size);
 
 #endif /* _READER_H_ */

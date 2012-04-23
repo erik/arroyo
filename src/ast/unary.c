@@ -1,5 +1,8 @@
 #include "ast.h"
 #include "buffer.h"
+#include "reader.h"
+#include "parse.h"
+#include "lex.h"
 
 #include <stdio.h>
 
@@ -97,6 +100,38 @@ expression_node* unary_node_evaluate(unary_node* node, scope* scope)
     free(str);
 
     return nil_node_create();
+  }
+
+  case OP_EVAL: {
+    expression_node* expr = expression_node_evaluate(node->expr, scope);
+
+    if(expr->type != NODE_STRING) {
+      printf("eval: expected string, not %s\n", node_type_string[expr->type]);
+      break;
+    }
+
+    lexer_state* ls = calloc(sizeof(lexer_state), 1);
+    parser_state* ps = calloc(sizeof(parser_state), 1);
+    reader r;
+    string_reader_create(&r, expr->node.string);
+    lexer_create(ls, &r);
+
+    ps->ls = ls;
+    ps->die_on_error = 1;
+    ps->error.max = 1;
+    ps->t = lexer_next_token(ps->ls);
+
+    expression_node* program = parse_program(ps);
+    expression_node* eval = expression_node_evaluate(program, scope);
+    expression_node_destroy(program);
+
+    expression_node_destroy(expr);
+    lexer_destroy(ls);
+    free(ls);
+    free(ps);
+    free(r.fn_data);
+
+    return eval;
   }
 
   case OP_QUOTE: {

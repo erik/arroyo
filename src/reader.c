@@ -1,4 +1,5 @@
 #include "reader.h"
+#include <string.h>
 
 void reader_create(reader* r, reader_fn fn, void* data)
 {
@@ -30,4 +31,31 @@ int reader_getchar(reader* r)
     return *(r->ptr++);
 
   return reader_fillbuf(r);
+}
+
+// the reader's fn_data must be freed manually
+void string_reader_create(reader* r, char* string)
+{
+  r->fn = string_reader_read;
+
+  string_reader_data* dat = malloc(sizeof(string_reader_data));
+  dat->string = string;
+  dat->read = 0;
+
+  r->fn_data = dat;
+  r->available = 0;
+  r->ptr = NULL;
+}
+
+const char* string_reader_read(void* data, unsigned* size)
+{
+  string_reader_data* dat = data;
+
+  if(dat->read) {
+    *size = 0;
+    return NULL;
+  }
+  dat->read = 1;
+  *size = strlen(dat->string);
+  return dat->string;
 }
