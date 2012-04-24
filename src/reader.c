@@ -38,11 +38,11 @@ void string_reader_create(reader* r, char* string)
 {
   r->fn = string_reader_read;
 
-  string_reader_data* dat = malloc(sizeof(string_reader_data));
+  string_reader_data* dat = calloc(sizeof(string_reader_data), 1);
   dat->string = string;
-  dat->read = 0;
 
   r->fn_data = dat;
+
   r->available = 0;
   r->ptr = NULL;
 }
@@ -55,6 +55,7 @@ const char* string_reader_read(void* data, unsigned* size)
     *size = 0;
     return NULL;
   }
+
   dat->read = 1;
   *size = strlen(dat->string);
   return dat->string;

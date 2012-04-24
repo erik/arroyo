@@ -5,6 +5,9 @@
 #include "ast.h"
 #include "util.h"
 #include "buffer.h"
+#include "lex.h"
+#include "parse.h"
+#include "reader.h"
 
 expression_node* string_node_evaluate(expression_node* node, scope* scope)
 {
@@ -16,11 +19,62 @@ expression_node* string_node_evaluate(expression_node* node, scope* scope)
 
   for(unsigned i = 0; i < len; ++i) {
     if(string[i] == '$') {
-      if(string[i+1] == '$') {
+      if(string[i+1] == '$') { // literal $
         buffer_putc(&b, '$');
         i++;
       }
-      else {
+      else if(string[i+1] == '{') { // string interpolation
+        unsigned begin = (i += 2);
+
+        // XXX: doing simple parsing by counting braces here.
+        // this means that other uses of '}' (in strings, for example)
+        // will erroneously trigger the end of whole expression
+        int brace_level = 0;
+
+        for(char c = 0; (c = string[i]) && i < len && brace_level >= 0; ++i) {
+          if(c == '{')
+            brace_level++;
+          if(c == '}')
+            brace_level--;
+        }
+
+        i -= 1;
+
+        // do nothing for zero length strings
+        if(i - begin <= 0)
+          break;
+
+        char* src = calloc(i - begin + 1, 1);
+        memcpy(src, string + begin, i - begin);
+
+        lexer_state* ls = calloc(sizeof(lexer_state), 1);
+        parser_state* ps = calloc(sizeof(parser_state), 1);
+        reader r;
+        string_reader_create(&r, src);
+        lexer_create(ls, &r);
+
+        ps->ls = ls;
+        ps->die_on_error = 1;
+        ps->error.max = 1;
+        ps->t = lexer_next_token(ps->ls);
+
+        expression_node* program = parse_program(ps);
+        expression_node* eval = expression_node_evaluate(program, scope);
+
+        char* tmp = expression_node_to_string(eval);
+        buffer_puts(&b, tmp);
+        free(tmp);
+
+        expression_node_destroy(eval);
+        expression_node_destroy(program);
+
+        lexer_destroy(ls);
+        free(ls);
+        free(ps);
+        free(r.fn_data);
+        free(src);
+      }
+      else { // variable substitution
         unsigned begin = ++i;
         while(isalnum(string[i]) && ++i < len);
 
