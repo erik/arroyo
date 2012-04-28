@@ -388,7 +388,7 @@ static fn_node* parse_function(parser_state* ps)
 
   // named function
   if(accept(ps, TK_ID))
-    fn->id = ps->info.string;
+    fn->id = strdup(ps->info.string);
 
   // argument list
   expect(ps, '(');
