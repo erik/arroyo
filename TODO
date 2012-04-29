@@ -1,8 +1,4 @@
 * Add macros
-* Add function calling
 * Add literal hashes
 * Need some kind of runtime error support
    Also, stop throwing every piece of error information out to stderr.
-
-
-
