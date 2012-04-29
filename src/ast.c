@@ -152,6 +152,41 @@ inline expression_node* expression_node_clone(expression_node* node)
   return cloned;
 }
 
+inline expression_node* expression_node_call(expression_node* node, expression_node* arg, scope* s)
+{
+  switch(node->type) {
+  case NODE_ARRAY: {
+    expression_node* eval = expression_node_evaluate(arg, s);
+
+    if(eval->type != NODE_REAL) {
+      printf("expected number for array access, not %s\n", node_type_string[node->type]);
+    } else {
+      long index = (long)eval->node.real;
+
+      if((double)index != eval->node.real) {
+        fprintf(stderr, "warning: array index is noninteger, truncating to %ld\n", index);
+      }
+
+      if(index >= node->node.array->nelements) {
+        fprintf(stderr, "warning: array index out of bounds: %ld\n", index);
+      } else {
+        expression_node_destroy(eval);
+        return expression_node_clone(node->node.array->elements[index]);
+      }
+    }
+
+    expression_node_destroy(eval);
+    break;
+  }
+
+  case NODE_FN: // TODO
+  default:
+    printf("call not supported for %s\n", node_type_string[node->type]);
+  }
+
+  return nil_node_create();
+}
+
 inline expression_node* expression_node_to_string_node(expression_node* node)
 {
   char* string = expression_node_to_string(node);

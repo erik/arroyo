@@ -117,7 +117,7 @@ static enum binary_op get_binop(parser_state* ps)
   case TK_CONCAT : return OP_CONCAT;
 
   case TK_ASSIGN : return OP_ASSIGN;
-
+  case TK_CALL   : return OP_CALL;
   default     : return OP_NOTBINOP;
   }
 }
@@ -131,6 +131,9 @@ static int op_precedence(unsigned op)
     // binary operators
   case OP_DOT:
     return 90;
+
+  case OP_CALL:
+    return 85;
 
   case OP_MUL: case OP_DIV: case OP_MOD:
     return 80;
@@ -411,7 +414,8 @@ static fn_node* parse_function(parser_state* ps)
       if(type == -1)
         parser_error(ps, "unrecognized type: %s", ps->info.string);
 
-      fn_node_add_argument(fn, id, type);
+      fprintf(stderr, "XXX: typed arguments not yet supported, ignoring\n");
+      fn_node_add_argument(fn, ps->info.string, -1);
     } else
       fn_node_add_argument(fn, ps->info.string, -1);
     free(id);

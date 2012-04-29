@@ -285,6 +285,14 @@ expression_node* binary_node_evaluate(binary_node* binary, scope* scope)
     return expression_node_create(NODE_STRING, (ast_node){.string = b.buf});
   }
 
+  case OP_CALL: {
+    left = expression_node_evaluate(binary->lhs, scope);
+    expression_node* ret = expression_node_call(left, binary->rhs, scope);
+
+    expression_node_destroy(left);
+    return ret;
+  }
+
   case OP_XOR:
   case OP_DOT:
   default:

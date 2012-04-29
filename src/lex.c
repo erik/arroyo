@@ -219,9 +219,16 @@ static int lex(lexer_state *ls, token_info *info)
       return TK_XOR;
     }
 
-    case '-': { // comment or minus
+    case '-': { // comment, minus or call
       // minus
-      if(next(ls) != '-') return '-';
+      if(next(ls) != '-') {
+        if(ls->current == '>') {
+          next(ls);
+          return TK_CALL;
+        }
+        else
+          return '-';
+      }
 
       // comment, skip line
       while(next(ls) != EOS && !isnewline(ls));
