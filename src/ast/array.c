@@ -1,3 +1,5 @@
+#include <stdio.h>
+
 #include "ast.h"
 #include "buffer.h"
 
@@ -41,6 +43,31 @@ array_node* array_node_clone(array_node* array)
   }
 
   return new;
+}
+
+expression_node* array_node_call(array_node* array, expression_node* arg, scope* s)
+{
+  expression_node* eval = expression_node_evaluate(arg, s);
+
+  if(eval->type != NODE_REAL) {
+    printf("expected number for array access, not %s\n", node_type_string[arg->type]);
+  } else {
+    long index = (long)eval->node.real;
+
+    if((double)index != eval->node.real) {
+      fprintf(stderr, "warning: array index is noninteger, truncating to %ld\n", index);
+    }
+
+    if(index >= array->nelements) {
+      fprintf(stderr, "warning: array index out of bounds: %ld\n", index);
+    } else {
+      expression_node_destroy(eval);
+      return expression_node_clone(array->elements[index]);
+    }
+  }
+
+    expression_node_destroy(eval);
+    return nil_node_create();
 }
 
 char* array_node_inspect(array_node* array)

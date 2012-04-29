@@ -1,3 +1,5 @@
+#include <stdio.h>
+
 #include "ast.h"
 #include "util.h"
 #include "buffer.h"
@@ -22,7 +24,6 @@ void fn_node_destroy(fn_node* fn)
   for(unsigned i = 0; i < fn->nargs; ++i)
     free(fn->args[i].id);
 
-
   free(fn->args);
 
   if(fn->body)
@@ -33,9 +34,6 @@ void fn_node_destroy(fn_node* fn)
 
 expression_node* fn_node_evaluate(fn_node* fn, scope* scope)
 {
-  expression_node* clone = expression_node_create(
-    NODE_FN, (ast_node) {.fn = fn_node_clone(fn)});
-
   // assign the id if it's given
   if(fn->id) {
 
@@ -48,32 +46,63 @@ expression_node* fn_node_evaluate(fn_node* fn, scope* scope)
       existing->value = expression_node_create(
         NODE_FN, (ast_node) {.fn = fn_node_clone(fn)});
 
-      return clone;
+      return expression_node_create(
+        NODE_FN, (ast_node) {.fn = fn_node_clone(fn)});
+
     }
 
     scope_insert(scope, strdup(fn->id), expression_node_create(
                    NODE_FN, (ast_node) {.fn = fn_node_clone(fn)}));
   }
 
-  return clone;
+  return expression_node_create(NODE_FN, (ast_node) {.fn = fn_node_clone(fn) });
 }
 
 fn_node* fn_node_clone(fn_node* fn)
 {
   fn_node* new = fn_node_create();
 
-  new->id = strdup(fn->id);
+  if(fn->id)
+    new->id = strdup(fn->id);
 
-  unsigned args_len = sizeof(struct typed_id) * fn->nargs;
-  new->args = malloc(args_len);
+  new->args = malloc(sizeof(struct typed_id) * fn->nargs);
+  new->nargs = fn->nargs;
 
-  for(unsigned i = 0; i < args_len; ++i) {
+  for(unsigned i = 0; i < fn->nargs; ++i) {
     new->args[i].id = strdup(fn->args[i].id);
     new->args[i].arg_type = fn->args[i].arg_type;
   }
 
   new->body = expression_node_clone(fn->body);
   return new;
+}
+
+expression_node* fn_node_call(fn_node* fn, expression_node* args, scope* scp)
+{
+  if(args->type != NODE_BLOCK) {
+    printf("error: expected argument list, not %s\n", node_type_string[args->type]);
+    return nil_node_create();
+  }
+
+  if(args->node.block->nelements != fn->nargs) {
+    fprintf(stderr, "error: incorrect number of arguments (%d for %d)\n",
+            args->node.block->nelements, fn->nargs);
+    return nil_node_create();
+  }
+
+  scope* local = scope_create(scp);
+  struct expression_list* arg = args->node.block->list;
+
+  for(unsigned i = 0; i < fn->nargs; ++i) {
+    scope_insert(local, strdup(fn->args[i].id), expression_node_evaluate(arg->expression, local));
+
+    arg = arg->next;
+  }
+
+  expression_node* ret = expression_node_evaluate(fn->body, local);
+  scope_destroy(local);
+
+  return ret;
 }
 
 char* fn_node_to_string(fn_node* fn)
@@ -136,10 +165,7 @@ char* fn_node_inspect(fn_node* fn)
 
 void fn_node_add_argument(fn_node* fn, char* name, int type)
 {
-  if(!fn->nargs)
-    fn->args = malloc(sizeof(struct typed_id) * ++fn->nargs);
-  else
-    fn->args = realloc(fn->args, sizeof(struct typed_id) * ++fn->nargs);
+  fn->args = realloc(fn->args, sizeof(struct typed_id) * ++fn->nargs);
 
   fn->args[fn->nargs - 1] = (struct typed_id) {
     .id = strdup(name),

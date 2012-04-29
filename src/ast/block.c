@@ -6,6 +6,7 @@ block_node* block_node_create(void)
   block_node* node = malloc(sizeof(block_node));
   node->list = NULL;
   node->last = NULL;
+  node->nelements = 0;
   return node;
 }
 
@@ -56,6 +57,8 @@ void block_node_push_expression(block_node* block, expression_node* node)
   struct expression_list* new = malloc(sizeof(struct expression_list));
   new->expression = node;
   new->next = NULL;
+
+  block->nelements += 1;
 
   if(!block->list)
     block->list = block->last = new;

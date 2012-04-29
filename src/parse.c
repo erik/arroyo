@@ -397,7 +397,7 @@ static fn_node* parse_function(parser_state* ps)
   expect(ps, '(');
 
   while(accept(ps, TK_ID)) {
-    char* id = strdup(ps->info.string);
+    char* id = ps->info.string;
     // typed argument
     if(accept(ps, ':')) {
       int type = -1;
@@ -415,10 +415,9 @@ static fn_node* parse_function(parser_state* ps)
         parser_error(ps, "unrecognized type: %s", ps->info.string);
 
       fprintf(stderr, "XXX: typed arguments not yet supported, ignoring\n");
-      fn_node_add_argument(fn, ps->info.string, -1);
+      fn_node_add_argument(fn, id, -1);
     } else
-      fn_node_add_argument(fn, ps->info.string, -1);
-    free(id);
+      fn_node_add_argument(fn, id, -1);
   }
 
   expect(ps, ')');

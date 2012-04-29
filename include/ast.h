@@ -91,7 +91,7 @@ typedef struct {
     struct expression_node* expression;
     struct expression_list* next;
   } expression_list;
-
+  unsigned nelements;
   struct expression_list* list, *last;
 
   scope* scope;
@@ -183,6 +183,7 @@ array_node*      array_node_create(void);
 void             array_node_destroy(array_node*);
 expression_node* array_node_evaluate(array_node*, scope*);
 array_node*      array_node_clone(array_node*);
+expression_node* array_node_call(array_node*, expression_node*, scope*);
 char*            array_node_to_string(array_node*);
 void             array_node_push_expression(array_node*, expression_node*);
 char*            array_node_inspect(array_node*);
@@ -225,6 +226,7 @@ fn_node*         fn_node_create(void);
 void             fn_node_destroy(fn_node*);
 expression_node* fn_node_evaluate(fn_node*, scope*);
 fn_node*         fn_node_clone(fn_node*);
+expression_node* fn_node_call(fn_node*, expression_node*, scope*);
 char*            fn_node_to_string(fn_node*);
 void             fn_node_add_argument(fn_node*, char* name, int type);
 char*            fn_node_inspect(fn_node*);
