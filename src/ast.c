@@ -14,6 +14,8 @@ inline expression_node* expression_node_create(node_type type, ast_node n)
 
 inline void expression_node_destroy(expression_node* node)
 {
+  if(!node) return;
+
   switch (node->type) {
   case NODE_NIL:
   case NODE_REAL:
@@ -40,6 +42,7 @@ inline void expression_node_destroy(expression_node* node)
     case_node_destroy(node->node.case_);
     break;
   case NODE_FN:
+  case NODE_MACRO:
     fn_node_destroy(node->node.fn);
     break;
   case NODE_IF:
@@ -88,6 +91,8 @@ inline expression_node* expression_node_evaluate(expression_node* node, scope* s
     return case_node_evaluate(node->node.case_, scope);
   case NODE_FN:
     return fn_node_evaluate(node->node.fn, scope);
+  case NODE_MACRO:
+    return macro_node_evaluate(node->node.fn, scope);
   case NODE_IF:
     return if_node_evaluate(node->node.if_, scope);
   case NODE_LOOP:
@@ -104,7 +109,8 @@ inline expression_node* expression_node_evaluate(expression_node* node, scope* s
 
 inline expression_node* expression_node_clone(expression_node* node)
 {
-  expression_node* cloned = expression_node_create(node->type, (ast_node) { .real = 0 });
+  expression_node* cloned = expression_node_create(node->type,
+                                                   (ast_node) { .real = 0 });
 
   switch (node->type) {
   case NODE_NIL:
@@ -133,6 +139,7 @@ inline expression_node* expression_node_clone(expression_node* node)
     cloned->node.case_ = case_node_clone(node->node.case_);
     break;
   case NODE_FN:
+  case NODE_MACRO:
     cloned->node.fn = fn_node_clone(node->node.fn);
     break;
   case NODE_IF:
@@ -152,7 +159,8 @@ inline expression_node* expression_node_clone(expression_node* node)
   return cloned;
 }
 
-inline expression_node* expression_node_call(expression_node* node, expression_node* arg, scope* s)
+inline expression_node* expression_node_call(expression_node* node,
+                                             expression_node* arg, scope* s)
 {
   switch(node->type) {
   case NODE_ARRAY:
@@ -160,6 +168,9 @@ inline expression_node* expression_node_call(expression_node* node, expression_n
 
   case NODE_FN:
     return fn_node_call(node->node.fn, arg, s);
+
+  case NODE_MACRO:
+    return macro_node_call(node->node.fn, arg, s);
 
   default:
     printf("call not supported for %s\n", node_type_string[node->type]);
@@ -203,6 +214,8 @@ inline char* expression_node_to_string(expression_node* node)
     return case_node_to_string(node->node.case_);
   case NODE_FN:
     return fn_node_to_string(node->node.fn);
+  case NODE_MACRO:
+    return macro_node_to_string(node->node.fn);
   case NODE_IF:
     return if_node_to_string(node->node.if_);
   case NODE_LOOP:
@@ -241,6 +254,8 @@ inline char* expression_node_inspect(expression_node* node)
     return case_node_inspect(node->node.case_);
   case NODE_FN:
     return fn_node_inspect(node->node.fn);
+  case NODE_MACRO:
+    return macro_node_inspect(node->node.fn);
   case NODE_IF:
     return if_node_inspect(node->node.if_);
   case NODE_LOOP:

@@ -16,6 +16,7 @@ typedef enum {
   NODE_NIL,
 
   NODE_FN,
+  NODE_MACRO,
   NODE_ARRAY,
   NODE_HASH,
 
@@ -33,7 +34,7 @@ typedef enum {
 
 static const char* node_type_string[MAX_NODE_TYPE] = {
   "literal_string", "string", "real", "bool", "id", "nil",
-  "function", "array", "hash", "binary", "unary",
+  "function", "macro", "array", "hash", "binary", "unary",
   "loop", "if", "case", "block"
 };
 
@@ -55,7 +56,8 @@ enum unary_op {
   OP_PRINT,
   OP_REQUIRE,
   OP_EVAL,
-  OP_QUOTE
+  OP_QUOTE,
+  OP_UNQUOTE
 };
 
 enum binary_op {
@@ -110,12 +112,16 @@ typedef struct {
   struct expression_node* default_case;
 } case_node;
 
-typedef struct {
+typedef struct fn_node {
   char* id;
   struct typed_id* args;
   unsigned int nargs;
   struct expression_node* body;
 } fn_node;
+
+// macros have the same elements as functions, just evaluated
+// differently
+typedef struct fn_node macro_node;
 
 typedef struct {
   enum loop_type type;
@@ -259,6 +265,12 @@ expression_node* loop_node_evaluate(loop_node*, scope*);
 loop_node*       loop_node_clone(loop_node*);
 char*            loop_node_to_string(loop_node*);
 char*            loop_node_inspect(loop_node*);
+
+// macro node
+expression_node* macro_node_evaluate(macro_node*, scope*);
+expression_node* macro_node_call(macro_node*, expression_node*, scope*);
+char*            macro_node_to_string(macro_node*);
+char*            macro_node_inspect(macro_node*);
 
 // nil
 expression_node* nil_node_create(void);

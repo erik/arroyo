@@ -13,6 +13,7 @@ static fn_node*         parse_function    (parser_state*);
 static hash_node*       parse_hash        (parser_state*);
 static if_node*         parse_if          (parser_state*);
 static loop_node*       parse_loop        (parser_state*);
+static macro_node*      parse_macro       (parser_state*);
 static expression_node* parse_primary     (parser_state*);
 static expression_node* parse_expression_ (parser_state*, expression_node*, int);
 
@@ -85,6 +86,7 @@ static enum unary_op get_unaryop(parser_state* ps)
   case '-'      : return OP_UNM;
   case TK_NOT   : return OP_NOT;
   case '#'      : return OP_QUOTE;
+  case '~'      : return OP_UNQUOTE;
   case TK_INC   : return OP_INC;
   case TK_PRINT : return OP_PRINT;
   case TK_EVAL  : return OP_EVAL;
@@ -278,6 +280,11 @@ static expression_node* parse_primary(parser_state* ps)
   }
   else if(accept(ps, TK_FN)) {
     type = NODE_FN;
+    node.fn = parse_function(ps);
+  }
+
+  else if(accept(ps, TK_MACRO)) {
+    type = NODE_MACRO;
     node.fn = parse_function(ps);
   }
 

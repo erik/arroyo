@@ -19,6 +19,8 @@ static inline char* get_unary_str(enum unary_op op)
     return "++";
   case OP_QUOTE:
     return "#";
+  case OP_UNQUOTE:
+    return "~";
   case OP_EVAL:
     return "eval";
   case OP_REQUIRE:
@@ -140,6 +142,13 @@ expression_node* unary_node_evaluate(unary_node* node, scope* scope)
 
   case OP_QUOTE: {
     return expression_node_clone(node->expr);
+  }
+
+  case OP_UNQUOTE: { // evaluate expression twice (first to remove quoting)
+    expression_node* eval = expression_node_evaluate(node->expr, scope);
+    expression_node* eval2 = expression_node_evaluate(eval, scope);
+    expression_node_destroy(eval);
+    return eval2;
   }
 
   case OP_REQUIRE: {

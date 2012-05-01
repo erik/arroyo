@@ -26,8 +26,10 @@ void fn_node_destroy(fn_node* fn)
 
   free(fn->args);
 
-  if(fn->body)
+  if(fn->body) {
     expression_node_destroy(fn->body);
+    fn->body = NULL;
+  }
 
   free(fn);
 }
@@ -94,7 +96,8 @@ expression_node* fn_node_call(fn_node* fn, expression_node* args, scope* scp)
   struct expression_list* arg = args->node.block->list;
 
   for(unsigned i = 0; i < fn->nargs; ++i) {
-    scope_insert(local, strdup(fn->args[i].id), expression_node_evaluate(arg->expression, local));
+    scope_insert(local, strdup(fn->args[i].id),
+                 expression_node_evaluate(arg->expression, local));
 
     arg = arg->next;
   }

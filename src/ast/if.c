@@ -8,8 +8,8 @@ if_node* if_node_create(void)
   node->thenbody = NULL;
 
   node->nelseif = 0;
-  node->elseifcondition = malloc(0);
-  node->elseifbody = malloc(0);
+  node->elseifcondition = NULL;
+  node->elseifbody = NULL;
 
   node->elsebody = NULL;
 
@@ -73,7 +73,8 @@ if_node* if_node_clone(if_node* node)
   for(unsigned i = 0; i < node->nelseif; ++i)
     if_node_add_elseif(new, node->elseifcondition[i], node->elseifbody[i]);
 
-  new->elsebody  = node->elsebody;
+  new->elsebody  = expression_node_clone(node->elsebody);
+
   return new;
 }
 
