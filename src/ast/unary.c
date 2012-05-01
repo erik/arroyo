@@ -19,6 +19,10 @@ static inline char* get_unary_str(enum unary_op op)
     return "++";
   case OP_QUOTE:
     return "#";
+  case OP_EVAL:
+    return "eval";
+  case OP_REQUIRE:
+    return "require";
   default:
     return "BADUNARY";
   }
@@ -136,6 +140,53 @@ expression_node* unary_node_evaluate(unary_node* node, scope* scope)
 
   case OP_QUOTE: {
     return expression_node_clone(node->expr);
+  }
+
+  case OP_REQUIRE: {
+    expression_node* file_name = expression_node_evaluate(node->expr, scope);
+
+    if(file_name->type != NODE_STRING) {
+      printf("require: expected string, not %s\n", node_type_string[file_name->type]);
+      break;
+    }
+
+    FILE* fp = fopen(file_name->node.string, "r");
+
+    // TODO: add a search path for requires
+    if(!fp) {
+      printf("require: can't open file '%s'\n", file_name->node.string);
+      break;
+    }
+
+    expression_node_destroy(file_name);
+
+    lexer_state* ls = calloc(sizeof(lexer_state), 1);
+    parser_state* ps = calloc(sizeof(parser_state), 1);
+
+    reader r;
+
+    file_reader_create(&r, fp);
+    lexer_create(ls, &r);
+
+    ps->ls = ls;
+    ps->die_on_error = 0;
+    ps->error.max = 20;
+    ps->t = lexer_next_token(ps->ls);
+
+    expression_node* program = parse_program(ps);
+    expression_node* eval = expression_node_evaluate(program, scope);
+    expression_node_destroy(eval);
+    expression_node_destroy(program);
+
+    lexer_destroy(ls);
+    free(ls);
+    free(ps);
+
+    free(r.fn_data);
+
+    fclose(fp);
+
+    return nil_node_create();
   }
 
   default:

@@ -60,3 +60,38 @@ const char* string_reader_read(void* data, unsigned* size)
   *size = strlen(dat->string);
   return dat->string;
 }
+
+// the reader's fn_data must be freed manually
+void file_reader_create(reader* r, FILE* fp)
+{
+  r->fn = file_reader_read;
+
+  file_reader_data* dat = calloc(sizeof(file_reader_data), 1);
+  dat->fp = fp;
+
+  r->fn_data = dat;
+  r->available = 0;
+  r->ptr = NULL;
+}
+
+const char* file_reader_read(void* data, unsigned* size)
+{
+  struct file_reader_data* file = data;
+
+  if(file->buf)
+    free(file->buf);
+
+  if(file->done) {
+    *size = 0;
+    return NULL;
+  }
+
+  file->buf = malloc(4096);
+
+  *size = fread(file->buf, 1, 4096, file->fp);
+
+  if(*size < 4096)
+    file->done = 1;
+
+  return file->buf;
+}

@@ -37,34 +37,6 @@ const char* readline_reader(void* dummy, unsigned* size)
   return ret;
 }
 
-static struct file_struct {
-  FILE* fp;
-  char* buf;
-  int done;
-} file_struct;
-
-const char* file_reader(void* f, unsigned* size)
-{
-  struct file_struct* file = f;
-
-  if(file->buf)
-    free(file->buf);
-
-  if(file->done) {
-    *size = 0;
-    return NULL;
-  }
-
-  file->buf = malloc(4096);
-
-  *size = fread(file->buf, 1, 4096, file->fp);
-
-  if(*size < 4096)
-    file->done = 1;
-
-  return file->buf;
-}
-
 int run_repl(scope* scope)
 {
   reader r;
@@ -109,7 +81,6 @@ int run_repl(scope* scope)
 
 int run_file(const char* filename, scope* scope)
 {
-  struct file_struct file;
   reader r;
 
   lexer_state* ls = calloc(sizeof(lexer_state), 1);
@@ -122,13 +93,7 @@ int run_file(const char* filename, scope* scope)
     return 1;
   }
 
-  file = (struct file_struct) {
-    .fp = fp,
-    .buf = NULL,
-    .done = 0
-  };
-
-  reader_create(&r, file_reader, &file);
+  file_reader_create(&r, fp);
   lexer_create(ls, &r);
 
   ps->ls = ls;
@@ -144,6 +109,8 @@ int run_file(const char* filename, scope* scope)
   lexer_destroy(ls);
   free(ls);
   free(ps);
+
+  free(r.fn_data);
 
   fclose(fp);
 

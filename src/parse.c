@@ -88,6 +88,7 @@ static enum unary_op get_unaryop(parser_state* ps)
   case TK_INC   : return OP_INC;
   case TK_PRINT : return OP_PRINT;
   case TK_EVAL  : return OP_EVAL;
+  case TK_REQUIRE  : return OP_REQUIRE;
   default       : return OP_NOTUNOP;
   }
 }

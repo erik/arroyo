@@ -57,7 +57,7 @@ enum token_type {
   TK_CONCAT,
   TK_CASE, TK_OF, TK_RARROW, TK_DEFAULT,
   // temporary
-  TK_PRINT, TK_EVAL,
+  TK_PRINT, TK_EVAL, TK_REQUIRE,
 
   LAST_TOK
 };
@@ -79,7 +79,7 @@ static const char* tokens[NUM_TOK] = {
   "++",
   "..",
   "case", "of", "=>", "default",
-  "print", "eval"
+  "print", "eval", "require"
 };
 
 // simplistic token to string handling

@@ -1,3 +1,4 @@
+* Make pseudo-functions (eval, print, etc) have same call syntax as actual functions
 * Add macros
 * Add literal hashes
 * Need some kind of runtime error support

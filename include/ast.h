@@ -53,6 +53,7 @@ enum unary_op {
   OP_UNM, OP_NOT,
   OP_INC,
   OP_PRINT,
+  OP_REQUIRE,
   OP_EVAL,
   OP_QUOTE
 };
