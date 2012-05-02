@@ -73,7 +73,8 @@ if_node* if_node_clone(if_node* node)
   for(unsigned i = 0; i < node->nelseif; ++i)
     if_node_add_elseif(new, node->elseifcondition[i], node->elseifbody[i]);
 
-  new->elsebody  = expression_node_clone(node->elsebody);
+  if(node->elsebody)
+    new->elsebody  = expression_node_clone(node->elsebody);
 
   return new;
 }
