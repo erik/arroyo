@@ -23,6 +23,9 @@ profile:
 clean:
 	rm -f $(OBJ)
 
+test: debug
+	valgrind --show-reachable=yes --leak-check=full --track-origins=yes ./arroyo test/runner.arr
+
 todo:
 	@ack 'XXX|TODO|FIXME'
 	@cat TODO
