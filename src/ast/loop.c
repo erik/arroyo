@@ -64,7 +64,9 @@ loop_node* loop_node_clone(loop_node* node)
   loop_node* new = loop_node_create();
 
   new->type = node->type;
-  new->init = expression_node_clone(node->init);
+
+  if(node->init)
+    new->init = expression_node_clone(node->init);
   new->cond = expression_node_clone(node->cond);
   new->body = expression_node_clone(node->body);
 
