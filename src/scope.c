@@ -44,15 +44,13 @@ scope* scope_create(scope* parent)
 {
   scope* s = calloc(sizeof(scope), 1);
   s->parent = parent;
+
   return s;
 }
 
 void scope_destroy(scope* scope)
 {
   for(unsigned i = 0; i < 256; ++i) {
-    if(!scope->buckets[i])
-      continue;
-
     for(bucket* ptr = scope->buckets[i]; ptr; ) {
       bucket* next = ptr->next;
 

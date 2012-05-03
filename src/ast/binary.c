@@ -46,6 +46,9 @@ inline char* get_binop_str(enum binary_op op)
     return ".";
   case OP_ASSIGN:
     return "<-";
+  case OP_CALL:
+    return "->";
+
   default:
     return "BADOP";
   }
