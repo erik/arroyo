@@ -1,7 +1,8 @@
 SRC := $(shell find src -name "*.c")
 OBJ := $(SRC:.c=.o)
+DEPS := $(SRC:.c=.d)
 
-CC  := gcc
+CC  := clang
 
 DFLAGS := -ggdb -O0
 LFLAGS := -lreadline -lm
@@ -10,8 +11,10 @@ CFLAGS := -Wall -Wextra -pedantic -std=c99 -Wno-unused -Wno-unused-parameter -Ii
 all: $(OBJ)
 	$(CC) $(OBJ) $(LFLAGS) -o arroyo
 
+-include $(SRC:.c=.d)
+
 %.o: %.c
-	$(CC) -c $(CFLAGS) $< -o $@
+	$(CC) -c -MD $(CFLAGS) $< -o $@
 
 debug:
 	$(MAKE) all "CFLAGS=$(CFLAGS) $(DFLAGS)"
@@ -21,7 +24,7 @@ profile:
 	$(CC) $(OBJ) $(LFLAGS) -pg -o arroyo
 
 clean:
-	rm -f $(OBJ)
+	rm -f $(OBJ) $(DEPS)
 
 test: debug
 	valgrind --show-reachable=yes --leak-check=full --track-origins=yes ./arroyo test/runner.arr
