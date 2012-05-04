@@ -2,11 +2,13 @@ SRC := $(shell find src -name "*.c")
 OBJ := $(SRC:.c=.o)
 DEPS := $(SRC:.c=.d)
 
-CC  := clang
+CC  := gcc
 
 DFLAGS := -ggdb -O0
 LFLAGS := -lreadline -lm
 CFLAGS := -Wall -Wextra -pedantic -std=c99 -Wno-unused -Wno-unused-parameter -Iinclude/
+
+.PHONY= all debug profile clean test todo loc sloc check-syntax
 
 all: $(OBJ)
 	$(CC) $(OBJ) $(LFLAGS) -o arroyo
