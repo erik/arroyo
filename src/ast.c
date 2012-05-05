@@ -45,6 +45,9 @@ inline void expression_node_destroy(expression_node* node)
   case NODE_MACRO:
     fn_node_destroy(node->node.fn);
     break;
+  case NODE_FOR:
+    for_node_destroy(node->node.for_);
+    break;
   case NODE_IF:
     if_node_destroy(node->node.if_);
     break;
@@ -91,6 +94,8 @@ inline expression_node* expression_node_evaluate(expression_node* node, scope* s
     return case_node_evaluate(node->node.case_, scope);
   case NODE_FN:
     return fn_node_evaluate(node->node.fn, scope);
+  case NODE_FOR:
+    return for_node_evaluate(node->node.for_, scope);
   case NODE_MACRO:
     return macro_node_evaluate(node->node.fn, scope);
   case NODE_IF:
@@ -147,6 +152,9 @@ inline expression_node* expression_node_clone(expression_node* node)
     break;
   case NODE_LOOP:
     cloned->node.loop = loop_node_clone(node->node.loop);
+    break;
+  case NODE_FOR:
+    cloned->node.for_ = for_node_clone(node->node.for_);
     break;
   case NODE_UNARY:
     cloned->node.unary = unary_node_clone(node->node.unary);
@@ -220,6 +228,8 @@ inline char* expression_node_to_string(expression_node* node)
     return if_node_to_string(node->node.if_);
   case NODE_LOOP:
     return loop_node_to_string(node->node.loop);
+  case NODE_FOR:
+    return for_node_to_string(node->node.for_);
   case NODE_UNARY:
     return unary_node_to_string(node->node.unary);
 
@@ -260,6 +270,8 @@ inline char* expression_node_inspect(expression_node* node)
     return if_node_inspect(node->node.if_);
   case NODE_LOOP:
     return loop_node_inspect(node->node.loop);
+  case NODE_FOR:
+    return for_node_inspect(node->node.for_);
   case NODE_UNARY:
     return unary_node_inspect(node->node.unary);
 

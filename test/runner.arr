@@ -1,5 +1,8 @@
 -- define some useful testing macros
 
+failed <- 0
+passed <- 0
+
 macro expect(expr value) (
    e <- ~expr
 
@@ -12,17 +15,19 @@ macro expect(expr value) (
 macro test(desc expr) (
    print "\ttesting: $desc"
 
-   if not ~expr
-      print "FAILED: $expr")
+   if not ~expr (
+      ++failed
+      print "Test FAILED: $expr")
+   else
+      ++passed)
 
 
-tests <- ["call", "case", "loop", "math", "precedence", "quote", nil]
+tests <- ["call", "case", "loop", "for", "math", "precedence", "quote"]
 
-loop _x <- 0 until tests->_x = nil (
-   name <- tests->_x
+for t in tests (
+   print "Running test unit '${t}'"
+   require "test/${t}.arr"
+   print "Finished $t \n"
+)
 
-   print "Running test unit '${name}'"
-   require "test/${name}.arr"
-   print "Finished $name \n"
-
-   ++_x)
+print "Testing finished.\n\t$failed tests failed\n\t$passed tests passed"

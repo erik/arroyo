@@ -10,6 +10,7 @@ static binary_node*     parse_assignment  (parser_state*);
 static block_node*      parse_block       (parser_state*);
 static case_node*       parse_case        (parser_state*);
 static fn_node*         parse_function    (parser_state*);
+static for_node*        parse_for         (parser_state*);
 static hash_node*       parse_hash        (parser_state*);
 static if_node*         parse_if          (parser_state*);
 static loop_node*       parse_loop        (parser_state*);
@@ -24,7 +25,8 @@ static void parser_error(parser_state* ps, const char* fmt, ...)
   va_list ap;
   va_start(ap, fmt);
 
-  fprintf(stderr, "Parse error on line %d, at '%s': ", ps->ls->linenum, tok_to_string(ps->t.type));
+  fprintf(stderr, "Parse error on line %d, at '%s': ", ps->ls->linenum,
+          tok_to_string(ps->t.type));
   vfprintf(stderr, fmt, ap);
   fprintf(stderr, "\n");
 
@@ -357,6 +359,11 @@ static expression_node* parse_primary(parser_state* ps)
     node.loop = parse_loop(ps);
   }
 
+  else if(accept(ps, TK_FOR)) {
+    type = NODE_FOR;
+    node.for_ = parse_for(ps);
+  }
+
   else if(accept(ps, TK_CASE)) {
     type = NODE_CASE;
     node.case_ = parse_case(ps);
@@ -434,6 +441,25 @@ static fn_node* parse_function(parser_state* ps)
   fn->body = parse_expression(ps);
 
   return fn;
+}
+
+static for_node* parse_for(parser_state* ps)
+{
+  for_node* node = for_node_create();
+
+  while(accept(ps, TK_ID))
+    for_node_add_id(node, ps->info.string);
+
+  if(node->num_ids == 0) {
+    parser_error(ps, "expect at least one variable for for statement");
+  }
+
+  expect(ps, TK_IN);
+  node->in_expr = parse_expression(ps);
+
+  node->body = parse_expression(ps);
+
+  return node;
 }
 
 /* "{" (PRIMITIVE ":" EXPRESSION)* "}" */

@@ -24,6 +24,7 @@ typedef enum {
   NODE_UNARY,
 
   NODE_LOOP,
+  NODE_FOR,
   NODE_IF,
   NODE_CASE,
 
@@ -35,7 +36,7 @@ typedef enum {
 static const char* node_type_string[MAX_NODE_TYPE] = {
   "literal_string", "string", "real", "bool", "id", "nil",
   "function", "macro", "array", "hash", "binary", "unary",
-  "loop", "if", "case", "block"
+  "loop", "for", "if", "case", "block"
 };
 
 struct typed_id {
@@ -123,6 +124,14 @@ typedef struct fn_node {
 // differently
 typedef struct fn_node macro_node;
 
+typedef struct for_node {
+  unsigned num_ids;
+  char** ids;
+
+  struct expression_node* in_expr;
+  struct expression_node* body;
+} for_node;
+
 typedef struct {
   enum loop_type type;
   struct expression_node* init;
@@ -131,8 +140,8 @@ typedef struct {
 } loop_node;
 
 typedef struct {
-  // TODO
-  int dummy;
+  scope* hash;
+
 } hash_node;
 
 typedef struct {
@@ -163,6 +172,7 @@ typedef union {
   block_node* block;
   case_node* case_;
   fn_node* fn;
+  for_node* for_;
   if_node* if_;
   loop_node* loop;
   unary_node* unary;
@@ -237,6 +247,15 @@ expression_node* fn_node_call(fn_node*, expression_node*, scope*);
 char*            fn_node_to_string(fn_node*);
 void             fn_node_add_argument(fn_node*, char* name, int type);
 char*            fn_node_inspect(fn_node*);
+
+// for node
+for_node*        for_node_create(void);
+void             for_node_destroy(for_node*);
+expression_node* for_node_evaluate(for_node*, scope*);
+for_node*        for_node_clone(for_node*);
+char*            for_node_to_string(for_node*);
+char*            for_node_inspect(for_node*);
+void             for_node_add_id(for_node* node, char* id);
 
 // TODO: hash_node
 
