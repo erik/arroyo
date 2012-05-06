@@ -251,6 +251,7 @@ static expression_node* parse_expression_(parser_state* ps, expression_node* lef
 
       rhs = bin;
       rhs = parse_expression_(ps, bin, op_precedence(next));
+
       next = get_binop(ps);
     }
 
@@ -369,9 +370,6 @@ static expression_node* parse_primary(parser_state* ps)
     node.case_ = parse_case(ps);
   }
 
-  else if(accept(ps, ','))
-    return parse_expression(ps);
-
   // binary operator is handled further down, can't start an expression by itself
   else if(get_binop(ps))
     parser_error(ps, "unexpected binary operator");
@@ -381,10 +379,6 @@ static expression_node* parse_primary(parser_state* ps)
     switch(ps->t.type) {
     case ')': case ']': case '}':
       parser_error(ps, "unmatched closing brace");
-      break;
-
-    case TK_EOS:
-      longjmp(ps->error.buf, 2);
       break;
 
     default:
@@ -563,6 +557,7 @@ expression_node* parse_program(parser_state* ps)
 
     // on EOF
   case 2:
+
     goto out;
   }
 

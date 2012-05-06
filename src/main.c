@@ -9,73 +9,61 @@
 #include <readline/history.h>
 #include <getopt.h>
 
-const char* readline_reader(void* dummy, unsigned* size)
-{
-  (void)dummy;
-
-  char* input = readline(">> ");
-
-  if(input == NULL) {
-    *size = 0;
-    return NULL;
-  }
-
-  add_history(input);
-
-  static char* ret = NULL;
-
-  if(ret != NULL)
-    free(ret);
-
-  ret = malloc(strlen(input) + 3);
-  strcpy(ret, input);
-  strcat(ret, ",\n");
-
-  free(input);
-
-  *size = strlen(ret);
-  return ret;
-}
-
 int run_repl(scope* scope)
 {
-  reader r;
-  lexer_state* ls = calloc(sizeof(lexer_state), 1);
   parser_state* ps = calloc(sizeof(parser_state), 1);
-
-  reader_create(&r, readline_reader, NULL);
-
-  lexer_create(ls, &r);
-
-  ps->ls = ls;
   ps->die_on_error = 0;
   ps->error.max = 20;
-  ps->t = lexer_next_token(ps->ls);
 
-  switch(setjmp(ps->error.buf)) {
-  case 1: // an error occurred, non fatal, so jump back into loop
+  for(unsigned line = 1; ; ++line) {
+    char* input = readline(">> ");
+
+    if(input == NULL)
+      break;
+
+    add_history(input);
+
+    char* ret = malloc(strlen(input) + 2);
+    strcpy(ret, input);
+    strcat(ret, "\n");
+    free(input);
+
+    reader r;
+    string_reader_create(&r, ret);
+
+    lexer_state* ls = calloc(sizeof(lexer_state), 1);
+    lexer_create(ls, &r);
+
+    ps->ls = ls;
+    ps->ls->linenum = line;
     ps->t = lexer_next_token(ps->ls);
-  case 0: // no error
-    while(ps->t.type != TK_EOS) {
-      expression_node* node = parse_expression(ps);
-      expression_node* eval = expression_node_evaluate(node, scope);
-      char* str = expression_node_inspect(eval);
 
-      printf("==> %s\n", str);
+    expression_node* program = parse_program(ps);
 
-      free(str);
-      expression_node_destroy(eval);
-      expression_node_destroy(node);
+    if(program && program->node.block) {
+
+      for(struct expression_list* expr = program->node.block->list; expr; expr = expr->next) {
+
+        expression_node* eval = expression_node_evaluate(expr->expression, scope);
+        char* str = expression_node_inspect(eval);
+
+        printf("==> %s\n", str);
+
+        free(str);
+        expression_node_destroy(eval);
+      }
+
+      expression_node_destroy(program);
+
+      free(r.fn_data);
+      lexer_destroy(ls);
+      free(ls);
+
+      free(ret);
     }
-    break;
-  case 2: // EOS, break out
-    break;
   }
 
-  lexer_destroy(ls);
-  free(ls);
   free(ps);
-
   return 0;
 }
 

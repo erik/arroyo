@@ -187,7 +187,7 @@ static int lex(lexer_state *ls, token_info *info)
       break;
     }
 
-    case ' ': case '\t': { // whitespace
+    case ' ': case '\t': case ',': { // whitespace
       next(ls);
       break;
     }
@@ -325,8 +325,8 @@ static int lex(lexer_state *ls, token_info *info)
       case '+': case '-': case '*': case '/':
       case '>': case '<': case '=': case '(':
       case ')': case '[': case ']': case '{':
-      case '}': case ':': case '.': case ',':
-      case '#': case '~':
+      case '}': case ':': case '.': case '#':
+      case '~':
         next(ls);
         return c;
 
