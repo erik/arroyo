@@ -180,9 +180,9 @@ void if_node_add_elseif(if_node* node, expression_node* cond, expression_node* b
 {
   node->nelseif += 1;
 
-  node->elseifcondition = realloc(node->elseifcondition, sizeof(expression_node) *
+  node->elseifcondition = realloc(node->elseifcondition, sizeof(expression_node*) *
                                   node->nelseif);
-  node->elseifbody = realloc(node->elseifbody, sizeof(expression_node) *
+  node->elseifbody = realloc(node->elseifbody, sizeof(expression_node*) *
                              node->nelseif);
 
   node->elseifcondition[node->nelseif - 1] = cond;
