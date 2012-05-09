@@ -2,3 +2,5 @@
 * Add literal hashes
 * Need some kind of runtime error support
    Also, stop throwing every piece of error information out to stderr.
+* Create FFI / start writing standard libraries
+* Add splat arguments to functions/macros
