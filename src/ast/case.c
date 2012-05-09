@@ -106,7 +106,7 @@ char* case_node_to_string(case_node* node)
   }
 
   if(node->default_case) {
-    buffer_puts(&b, "default => ");
+    buffer_puts(&b, " default => ");
     tmp = expression_node_to_string(node->default_case);
     buffer_puts(&b, tmp);
     free(tmp);
@@ -148,7 +148,7 @@ char* case_node_inspect(case_node* node)
   }
 
   if(node->default_case) {
-    buffer_puts(&b, "default => ");
+    buffer_puts(&b, " default => ");
     tmp = expression_node_inspect(node->default_case);
     buffer_puts(&b, tmp);
     free(tmp);

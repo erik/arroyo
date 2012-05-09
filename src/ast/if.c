@@ -8,8 +8,8 @@ if_node* if_node_create(void)
   node->thenbody = NULL;
 
   node->nelseif = 0;
-  node->elseifcondition = NULL;
-  node->elseifbody = NULL;
+  node->elseifcondition = malloc(0);
+  node->elseifbody = malloc(0);
 
   node->elsebody = NULL;
 
@@ -71,7 +71,9 @@ if_node* if_node_clone(if_node* node)
   new->thenbody  = expression_node_clone(node->thenbody);
 
   for(unsigned i = 0; i < node->nelseif; ++i)
-    if_node_add_elseif(new, node->elseifcondition[i], node->elseifbody[i]);
+    if_node_add_elseif(new,
+                       expression_node_clone(node->elseifcondition[i]),
+                       expression_node_clone(node->elseifbody[i]));
 
   if(node->elsebody)
     new->elsebody  = expression_node_clone(node->elsebody);
@@ -116,12 +118,13 @@ char* if_node_to_string(if_node* node)
   }
 
   if(node->elsebody) {
-    buffer_puts(&b, " else ");
+    buffer_puts(&b, "else ");
     tmp = expression_node_to_string(node->elsebody);
     buffer_puts(&b, tmp);
-    buffer_putc(&b, ' ');
     free(tmp);
   }
+
+  buffer_putc(&b, 0);
 
   return b.buf;
 }
@@ -162,21 +165,26 @@ char* if_node_inspect(if_node* node)
   }
 
   if(node->elsebody) {
-    buffer_puts(&b, " else ");
+    buffer_puts(&b, "else ");
     tmp = expression_node_inspect(node->elsebody);
     buffer_puts(&b, tmp);
-    buffer_putc(&b, ' ');
     free((char*)tmp);
   }
+
+  buffer_putc(&b, 0);
 
   return b.buf;
 }
 
 void if_node_add_elseif(if_node* node, expression_node* cond, expression_node* body)
 {
-  node->elseifcondition = realloc(node->elseifcondition, node->nelseif + 1);
-  node->elseifbody = realloc(node->elseifbody, node->nelseif + 1);
+  node->nelseif += 1;
 
-  node->elseifcondition[node->nelseif] = cond;
-  node->elseifbody[node->nelseif++] = body;
+  node->elseifcondition = realloc(node->elseifcondition, sizeof(expression_node*) *
+                                  node->nelseif);
+  node->elseifbody = realloc(node->elseifbody, sizeof(expression_node*) *
+                             node->nelseif);
+
+  node->elseifcondition[node->nelseif - 1] = cond;
+  node->elseifbody[node->nelseif - 1] = body;
 }
