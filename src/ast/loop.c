@@ -22,28 +22,22 @@ void loop_node_destroy(loop_node* loop)
   free(loop);
 }
 
-expression_node* loop_node_evaluate(loop_node* loop, scope* s)
+expression_node* loop_node_evaluate(loop_node* loop, context* ctx)
 {
   expression_node* value = nil_node_create();
-  scope* local = scope_create(s);
+  context* local = context_create();
+  local->scope = scope_create(ctx->scope);
 
   if(loop->init)
     expression_node_destroy(expression_node_evaluate(loop->init, local));
 
   for(;;) {
     expression_node* cond = expression_node_evaluate(loop->cond, local);
+    const bool b = bool_node_value_of(cond);
 
-    // this is very ugly, but doesn't require branching, so it may
-    // speed up evaluation ever so slightly for some loops
-
-    const int bool_val =
-      (cond->type == NODE_BOOL && cond->node.bool)
-      || cond->type == NODE_NIL;
-
-    const int do_break =
-      (loop->type == LOOP_WHILE && !bool_val)
-      || (loop->type == LOOP_UNTIL && bool_val)
-      || 0;
+    const bool do_break = (loop->type == LOOP_WHILE && !b)
+      || (loop->type == LOOP_UNTIL && b)
+      || false;
 
     expression_node_destroy(cond);
 
@@ -54,7 +48,7 @@ expression_node* loop_node_evaluate(loop_node* loop, scope* s)
     value = expression_node_evaluate(loop->body, local);
   }
 
-  scope_destroy(local);
+  context_destroy(local);
 
   return value;
 }

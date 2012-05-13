@@ -35,30 +35,30 @@ void if_node_destroy(if_node* node)
   free(node);
 }
 
-expression_node* if_node_evaluate(if_node* node, scope* scope)
+expression_node* if_node_evaluate(if_node* node, context* ctx)
 {
   expression_node* value, *cond;
-  int bool;
+  bool b;
 
-  cond = expression_node_evaluate(node->condition, scope);
-  bool = bool_node_value_of(cond);
+  cond = expression_node_evaluate(node->condition, ctx);
+  b = bool_node_value_of(cond);
 
   expression_node_destroy(cond);
 
-  if(bool)
-    return expression_node_evaluate(node->thenbody, scope);
+  if(b)
+    return expression_node_evaluate(node->thenbody, ctx);
 
   for(unsigned i = 0; i < node->nelseif; ++i) {
-    cond = expression_node_evaluate(node->elseifcondition[i], scope);
-    bool = bool_node_value_of(cond);
+    cond = expression_node_evaluate(node->elseifcondition[i], ctx);
+    b = bool_node_value_of(cond);
 
     expression_node_destroy(cond);
-    if(bool)
-      return expression_node_evaluate(node->elseifbody[i], scope);
+    if(b)
+      return expression_node_evaluate(node->elseifbody[i], ctx);
   }
 
   if(node->elsebody)
-    return expression_node_evaluate(node->elsebody, scope);
+    return expression_node_evaluate(node->elsebody, ctx);
 
   return nil_node_create();
 }

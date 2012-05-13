@@ -82,7 +82,7 @@ static int expect(parser_state* ps, int type)
   return 0;
 }
 
-static enum unary_op get_unaryop(parser_state* ps)
+static enum unary_op get_unaryop(const parser_state* ps)
 {
   switch(ps->t.type) {
   case '-'      : return OP_UNM;
@@ -97,7 +97,7 @@ static enum unary_op get_unaryop(parser_state* ps)
   }
 }
 
-static enum binary_op get_binop(parser_state* ps)
+static enum binary_op get_binop(const parser_state* ps)
 {
   switch(ps->t.type) {
   case '.'    : return OP_DOT;
@@ -161,9 +161,10 @@ static int op_precedence(unsigned op)
 
   case OP_ASSIGN:
     return 40;
-  }
 
-  return -1;
+  default:
+    return -1;
+  }
 }
 
 /* "[" EXPRESSION* "]" */
@@ -308,12 +309,12 @@ static expression_node* parse_primary(parser_state* ps)
 
   else if(accept(ps, TK_TRUE)) {
     type = NODE_BOOL;
-    node.bool = 1;
+    node.bool_ = 1;
   }
 
   else if(accept(ps, TK_FALSE)) {
     type = NODE_BOOL;
-    node.bool = 0;
+    node.bool_ = 0;
   }
 
   else if(accept(ps, TK_NIL))
@@ -557,7 +558,6 @@ expression_node* parse_program(parser_state* ps)
 
     // on EOF
   case 2:
-
     goto out;
   }
 

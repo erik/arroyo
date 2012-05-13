@@ -21,12 +21,12 @@ void array_node_destroy(array_node* array)
   free(array);
 }
 
-expression_node* array_node_evaluate(array_node* array, scope* scope)
+expression_node* array_node_evaluate(array_node* array, context* ctx)
 {
   array_node* new = array_node_create();
 
   for(unsigned i = 0; i < array->nelements; ++i) {
-    expression_node* eval = expression_node_evaluate(array->elements[i], scope);
+    expression_node* eval = expression_node_evaluate(array->elements[i], ctx);
     array_node_push_expression(new, eval);
   }
 
@@ -45,9 +45,9 @@ array_node* array_node_clone(array_node* array)
   return new;
 }
 
-expression_node* array_node_call(array_node* array, expression_node* arg, scope* s)
+expression_node* array_node_call(array_node* array, expression_node* arg, context* ctx)
 {
-  expression_node* eval = expression_node_evaluate(arg, s);
+  expression_node* eval = expression_node_evaluate(arg, ctx);
 
   if(eval->type != NODE_REAL) {
     printf("expected number for array access, not %s\n", node_type_string[arg->type]);

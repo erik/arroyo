@@ -5,7 +5,7 @@
 #include "scope.h"
 #include "util.h"
 
-expression_node* macro_node_call(macro_node* macro, expression_node* args, scope* s)
+expression_node* macro_node_call(macro_node* macro, expression_node* args, context* ctx)
 {
   if(args->type != NODE_BLOCK) {
     printf("error: expected argument list, not %s\n", node_type_string[args->type]);
@@ -18,32 +18,32 @@ expression_node* macro_node_call(macro_node* macro, expression_node* args, scope
     return nil_node_create();
   }
 
-  scope* local = scope_create(s);
+  context* local = context_create();
+  local->scope = scope_create(ctx->scope);
+
   struct expression_list* arg = args->node.block->list;
 
   for(unsigned i = 0; i < macro->nargs; ++i) {
     // pass each arg as it is received onto the macro
-    scope_insert(local, strdup(macro->args[i].id),
+    scope_insert(local->scope, strdup(macro->args[i].id),
                  expression_node_clone(arg->expression));
 
     arg = arg->next;
   }
 
   expression_node* ret = expression_node_evaluate(macro->body, local);
-  scope_destroy(local);
-
+  context_destroy(local);
 
   return ret;
 }
 
-
-expression_node* macro_node_evaluate(macro_node* macro, scope* scope)
+expression_node* macro_node_evaluate(macro_node* macro, context* ctx)
 {
   // assign the id if it's given
   if(macro->id) {
 
     // remove old binding if it exists
-    bucket* existing = scope_get_bucket(scope, macro->id);
+    bucket* existing = scope_get_bucket(ctx->scope, macro->id);
 
     if(existing) {
       expression_node_destroy(existing->value);
@@ -56,7 +56,7 @@ expression_node* macro_node_evaluate(macro_node* macro, scope* scope)
 
     }
 
-    scope_insert(scope, strdup(macro->id), expression_node_create(
+    scope_insert(ctx->scope, strdup(macro->id), expression_node_create(
                    NODE_MACRO, (ast_node) {.fn = fn_node_clone(macro)}));
   }
 

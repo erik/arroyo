@@ -34,13 +34,13 @@ void fn_node_destroy(fn_node* fn)
   free(fn);
 }
 
-expression_node* fn_node_evaluate(fn_node* fn, scope* scope)
+expression_node* fn_node_evaluate(fn_node* fn, context* ctx)
 {
   // assign the id if it's given
   if(fn->id) {
 
     // remove old binding if it exists
-    bucket* existing = scope_get_bucket(scope, fn->id);
+    bucket* existing = scope_get_bucket(ctx->scope, fn->id);
 
     if(existing) {
       expression_node_destroy(existing->value);
@@ -53,7 +53,7 @@ expression_node* fn_node_evaluate(fn_node* fn, scope* scope)
 
     }
 
-    scope_insert(scope, strdup(fn->id), expression_node_create(
+    scope_insert(ctx->scope, strdup(fn->id), expression_node_create(
                    NODE_FN, (ast_node) {.fn = fn_node_clone(fn)}));
   }
 
@@ -79,7 +79,7 @@ fn_node* fn_node_clone(fn_node* fn)
   return new;
 }
 
-expression_node* fn_node_call(fn_node* fn, expression_node* args, scope* scp)
+expression_node* fn_node_call(fn_node* fn, expression_node* args, context* ctx)
 {
   if(args->type != NODE_BLOCK) {
     printf("error: expected argument list, not %s\n", node_type_string[args->type]);
@@ -92,18 +92,20 @@ expression_node* fn_node_call(fn_node* fn, expression_node* args, scope* scp)
     return nil_node_create();
   }
 
-  scope* local = scope_create(scp);
+  context* local = context_create();
+  local->scope = scope_create(ctx->scope);
+
   struct expression_list* arg = args->node.block->list;
 
   for(unsigned i = 0; i < fn->nargs; ++i) {
-    scope_insert(local, strdup(fn->args[i].id),
+    scope_insert(local->scope, strdup(fn->args[i].id),
                  expression_node_evaluate(arg->expression, local));
 
     arg = arg->next;
   }
 
   expression_node* ret = expression_node_evaluate(fn->body, local);
-  scope_destroy(local);
+  context_destroy(local);
 
   return ret;
 }

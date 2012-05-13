@@ -66,7 +66,7 @@ inline void expression_node_destroy(expression_node* node)
   node = NULL;
 }
 
-inline expression_node* expression_node_evaluate(expression_node* node, scope* scope)
+inline expression_node* expression_node_evaluate(expression_node* node, context* ctx)
 {
   switch (node->type) {
   case NODE_NIL:
@@ -81,29 +81,29 @@ inline expression_node* expression_node_evaluate(expression_node* node, scope* s
   }
 
   case NODE_STRING:
-    return string_node_evaluate(node, scope);
+    return string_node_evaluate(node, ctx);
   case NODE_ID:
-    return id_node_evaluate(node, scope);
+    return id_node_evaluate(node, ctx);
   case NODE_ARRAY:
-    return array_node_evaluate(node->node.array, scope);
+    return array_node_evaluate(node->node.array, ctx);
   case NODE_BINARY:
-    return binary_node_evaluate(node->node.binary, scope);
+    return binary_node_evaluate(node->node.binary, ctx);
   case NODE_BLOCK:
-    return block_node_evaluate(node->node.block, scope);
+    return block_node_evaluate(node->node.block, ctx);
   case NODE_CASE:
-    return case_node_evaluate(node->node.case_, scope);
+    return case_node_evaluate(node->node.case_, ctx);
   case NODE_FN:
-    return fn_node_evaluate(node->node.fn, scope);
+    return fn_node_evaluate(node->node.fn, ctx);
   case NODE_FOR:
-    return for_node_evaluate(node->node.for_, scope);
+    return for_node_evaluate(node->node.for_, ctx);
   case NODE_MACRO:
-    return macro_node_evaluate(node->node.fn, scope);
+    return macro_node_evaluate(node->node.fn, ctx);
   case NODE_IF:
-    return if_node_evaluate(node->node.if_, scope);
+    return if_node_evaluate(node->node.if_, ctx);
   case NODE_LOOP:
-    return loop_node_evaluate(node->node.loop, scope);
+    return loop_node_evaluate(node->node.loop, ctx);
   case NODE_UNARY:
-    return unary_node_evaluate(node->node.unary, scope);
+    return unary_node_evaluate(node->node.unary, ctx);
 
   default:
     printf("BUG: evaluate hit default for %s\n", node_type_string[node->type]);
@@ -168,17 +168,17 @@ inline expression_node* expression_node_clone(expression_node* node)
 }
 
 inline expression_node* expression_node_call(expression_node* node,
-                                             expression_node* arg, scope* s)
+                                             expression_node* arg, context* ctx)
 {
   switch(node->type) {
   case NODE_ARRAY:
-    return array_node_call(node->node.array, arg, s);
+    return array_node_call(node->node.array, arg, ctx);
 
   case NODE_FN:
-    return fn_node_call(node->node.fn, arg, s);
+    return fn_node_call(node->node.fn, arg, ctx);
 
   case NODE_MACRO:
-    return macro_node_call(node->node.fn, arg, s);
+    return macro_node_call(node->node.fn, arg, ctx);
 
   default:
     printf("call not supported for %s\n", node_type_string[node->type]);
@@ -293,7 +293,7 @@ int expression_node_equal(expression_node* left, expression_node* right)
   case NODE_REAL:
     return left->node.real == right->node.real;
   case NODE_BOOL:
-    return left->node.bool == right->node.bool;
+    return left->node.bool_ == right->node.bool_;
   case NODE_ID:
   case NODE_STRING:
     return !strcmp(left->node.string, right->node.string);

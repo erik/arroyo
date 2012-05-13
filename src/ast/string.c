@@ -9,7 +9,7 @@
 #include "parse.h"
 #include "reader.h"
 
-expression_node* string_node_evaluate(expression_node* node, scope* scope)
+expression_node* string_node_evaluate(expression_node* node, context* ctx)
 {
   const char* string = node->node.string;
   unsigned len = strlen(string);
@@ -59,7 +59,7 @@ expression_node* string_node_evaluate(expression_node* node, scope* scope)
         ps->t = lexer_next_token(ps->ls);
 
         expression_node* program = parse_program(ps);
-        expression_node* eval = expression_node_evaluate(program, scope);
+        expression_node* eval = expression_node_evaluate(program, ctx);
 
         char* tmp = expression_node_to_string(eval);
         buffer_puts(&b, tmp);
@@ -83,7 +83,7 @@ expression_node* string_node_evaluate(expression_node* node, scope* scope)
         buffer_putsn(&var, (string+begin), i - begin);
         buffer_putc(&var, '\0');
 
-        expression_node* expr = scope_get(scope, var.buf);
+        expression_node* expr = scope_get(ctx->scope, var.buf);
         buffer_destroy(&var);
 
         if(expr) {

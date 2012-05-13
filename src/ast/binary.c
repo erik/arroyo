@@ -126,13 +126,13 @@ binary_node* binary_node_clone(binary_node* binary)
   return new;
 }
 
-expression_node* binary_node_evaluate(binary_node* binary, scope* scope)
+expression_node* binary_node_evaluate(binary_node* binary, context* ctx)
 {
   expression_node* left  = NULL;
   expression_node* right = NULL;
 
-#define LEFT  (left = expression_node_evaluate(binary->lhs, scope))
-#define RIGHT (right = expression_node_evaluate(binary->rhs, scope))
+#define LEFT  (left = expression_node_evaluate(binary->lhs, ctx))
+#define RIGHT (right = expression_node_evaluate(binary->rhs, ctx))
 
 #define TYPE_CHECK(obj, tpe) {                                  \
     node_type _t = (obj)->type;                                 \
@@ -157,10 +157,10 @@ expression_node* binary_node_evaluate(binary_node* binary, scope* scope)
 #define COMP(op) {                                                      \
     TYPE_CHECK(LEFT, NODE_REAL);                                        \
     TYPE_CHECK(RIGHT, NODE_REAL);                                       \
-    char b = left->node.real op right->node.real ? 1 : 0;              \
+    bool b = left->node.real op right->node.real ? 1 : 0;               \
     expression_node_destroy(left);                                      \
     expression_node_destroy(right);                                     \
-    return expression_node_create(NODE_BOOL, (ast_node){.bool = b});    \
+    return expression_node_create(NODE_BOOL, (ast_node){.bool_ = b});   \
   }
 
   switch(binary->op) {
@@ -193,26 +193,26 @@ expression_node* binary_node_evaluate(binary_node* binary, scope* scope)
     COMP(>=);
 
   case OP_EQ: {
-    left = expression_node_evaluate(binary->lhs, scope);
-    right = expression_node_evaluate(binary->rhs, scope);
+    left = expression_node_evaluate(binary->lhs, ctx);
+    right = expression_node_evaluate(binary->rhs, ctx);
 
-    ast_node bool = {.bool = expression_node_equal(left, right)};
+    ast_node b = {.bool_ = expression_node_equal(left, right)};
 
     expression_node_destroy(left);
     expression_node_destroy(right);
 
-    return EXPR(BOOL, bool);
+    return EXPR(BOOL, b);
   }
   case OP_NEQ: {
-    left = expression_node_evaluate(binary->lhs, scope);
-    right = expression_node_evaluate(binary->rhs, scope);
+    left = expression_node_evaluate(binary->lhs, ctx);
+    right = expression_node_evaluate(binary->rhs, ctx);
 
-    ast_node bool = {.bool = !expression_node_equal(left, right)};
+    ast_node b = {.bool_ = !expression_node_equal(left, right)};
 
     expression_node_destroy(left);
     expression_node_destroy(right);
 
-    return EXPR(BOOL, bool);
+    return EXPR(BOOL, b);
   }
 
   case OP_AND: {
@@ -220,7 +220,7 @@ expression_node* binary_node_evaluate(binary_node* binary, scope* scope)
 
     if(!left_bool) {
       expression_node_destroy(left);
-      return EXPR(BOOL, (ast_node){.bool = 0});
+      return EXPR(BOOL, (ast_node){.bool_ = 0});
     }
 
     int right_bool = bool_node_value_of(RIGHT);
@@ -229,7 +229,7 @@ expression_node* binary_node_evaluate(binary_node* binary, scope* scope)
       expression_node_destroy(left);
       expression_node_destroy(right);
 
-      return EXPR(BOOL, (ast_node){.bool = 0});
+      return EXPR(BOOL, (ast_node){.bool_ = 0});
     }
 
     expression_node_destroy(left);
@@ -250,10 +250,10 @@ expression_node* binary_node_evaluate(binary_node* binary, scope* scope)
   case OP_ASSIGN: {
     TYPE_CHECK(binary->lhs, NODE_ID);
 
-    right = expression_node_evaluate(binary->rhs, scope);
+    right = expression_node_evaluate(binary->rhs, ctx);
 
     // remove old binding if it exists
-    bucket* existing = scope_get_bucket(scope, binary->lhs->node.string);
+    bucket* existing = scope_get_bucket(ctx->scope, binary->lhs->node.string);
 
     if(existing) {
       expression_node_destroy(existing->value);
@@ -262,14 +262,14 @@ expression_node* binary_node_evaluate(binary_node* binary, scope* scope)
       return right;
     }
 
-    scope_insert(scope, strdup(binary->lhs->node.string), expression_node_clone(right));
+    scope_insert(ctx->scope, strdup(binary->lhs->node.string), expression_node_clone(right));
 
     return right;
   }
 
   case OP_CONCAT: {
     TYPE_CHECK(LEFT, NODE_STRING);
-    right = expression_node_evaluate(binary->rhs, scope);
+    right = expression_node_evaluate(binary->rhs, ctx);
 
     char* ls = left->node.string;
 
@@ -289,8 +289,8 @@ expression_node* binary_node_evaluate(binary_node* binary, scope* scope)
   }
 
   case OP_CALL: {
-    left = expression_node_evaluate(binary->lhs, scope);
-    expression_node* ret = expression_node_call(left, binary->rhs, scope);
+    left = expression_node_evaluate(binary->lhs, ctx);
+    expression_node* ret = expression_node_call(left, binary->rhs, ctx);
 
     expression_node_destroy(left);
     return ret;

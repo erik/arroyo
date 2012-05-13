@@ -30,9 +30,9 @@ void for_node_destroy(for_node* node)
   free(node);
 }
 
-expression_node* for_node_evaluate(for_node* node, scope* s)
+expression_node* for_node_evaluate(for_node* node, context* ctx)
 {
-  expression_node* eval = expression_node_evaluate(node->in_expr, s);
+  expression_node* eval = expression_node_evaluate(node->in_expr, ctx);
 
   switch(eval->type) {
   case NODE_ARRAY: {
@@ -45,17 +45,19 @@ expression_node* for_node_evaluate(for_node* node, scope* s)
 
     expression_node* ret = NULL;
 
-    scope* local = scope_create(s);
+    // XXX: FUCK YOU ERIK
+    context* local = context_create();
+    local->scope = scope_create(ctx->scope);
 
     unsigned len = eval->node.array->nelements;
 
     for(unsigned i = 0; i < len; ++i) {
-      scope_insert(local, strdup(node->ids[0]),
+      scope_insert(local->scope, strdup(node->ids[0]),
                    expression_node_clone(eval->node.array->elements[i]));
 
       ret = expression_node_evaluate(node->body, local);
 
-      struct bucket* b = scope_get_bucket(local, node->ids[0]);
+      struct bucket* b = scope_get_bucket(local->scope, node->ids[0]);
       expression_node_destroy(b->value);
       b->value = nil_node_create();
 
@@ -63,7 +65,7 @@ expression_node* for_node_evaluate(for_node* node, scope* s)
         expression_node_destroy(ret);
     }
 
-    scope_destroy(local);
+    context_destroy(local);
     expression_node_destroy(eval);
 
     return ret ? ret : nil_node_create();

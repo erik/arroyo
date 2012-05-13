@@ -12,7 +12,7 @@
 // additional token values
 typedef struct token_info {
   char* string;
-  long double number;
+  double number;
 } token_info;
 
 typedef struct token {

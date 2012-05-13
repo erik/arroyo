@@ -3,13 +3,14 @@
 #include "ast.h"
 #include "parse.h"
 #include "scope.h"
+#include "context.h"
 
 #include <stdio.h>
 #include <readline/readline.h>
 #include <readline/history.h>
 #include <getopt.h>
 
-int run_repl(scope* scope)
+int run_repl(context* ctx)
 {
   parser_state* ps = calloc(sizeof(parser_state), 1);
   ps->die_on_error = 0;
@@ -44,7 +45,7 @@ int run_repl(scope* scope)
 
       for(struct expression_list* expr = program->node.block->list; expr; expr = expr->next) {
 
-        expression_node* eval = expression_node_evaluate(expr->expression, scope);
+        expression_node* eval = expression_node_evaluate(expr->expression, ctx);
         char* str = expression_node_inspect(eval);
 
         printf("==> %s\n", str);
@@ -67,7 +68,7 @@ int run_repl(scope* scope)
   return 0;
 }
 
-int run_file(const char* filename, scope* scope)
+int run_file(const char* filename, context* ctx)
 {
   reader r;
 
@@ -90,7 +91,7 @@ int run_file(const char* filename, scope* scope)
   ps->t = lexer_next_token(ps->ls);
 
   expression_node* program = parse_program(ps);
-  expression_node* eval = expression_node_evaluate(program, scope);
+  expression_node* eval = expression_node_evaluate(program, ctx);
   expression_node_destroy(eval);
   expression_node_destroy(program);
 
@@ -150,14 +151,15 @@ int main(int argc, char** argv)
   if((!filename && !repl_flag) || help_flag)
     return usage();
 
-  scope* scope = scope_create(NULL);
+  context* root = context_create();
+  root->scope = scope_create(NULL);
 
   if(filename)
-    run_file(filename, scope);
+    run_file(filename, root);
 
   if(repl_flag)
-    run_repl(scope);
+    run_repl(root);
 
-  scope_destroy(scope);
+  context_destroy(root);
   return 0;
 }

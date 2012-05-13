@@ -46,11 +46,11 @@ void unary_node_destroy(unary_node* node)
   free(node);
 }
 
-expression_node* unary_node_evaluate(unary_node* node, scope* scope)
+expression_node* unary_node_evaluate(unary_node* node, context* ctx)
 {
   switch(node->op) {
   case OP_UNM: {
-    expression_node* expr = expression_node_evaluate(node->expr, scope);
+    expression_node* expr = expression_node_evaluate(node->expr, ctx);
     if(expr->type != NODE_REAL) {
       printf("unary not: expected real, not %s\n", node_type_string[expr->type]);
       break;
@@ -62,11 +62,11 @@ expression_node* unary_node_evaluate(unary_node* node, scope* scope)
     return expression_node_create(NODE_REAL, (ast_node){.real = inverted});
   }
   case OP_NOT: {
-    expression_node* expr = expression_node_evaluate(node->expr, scope);
-    int bool = bool_node_value_of(expr);
+    expression_node* expr = expression_node_evaluate(node->expr, ctx);
+    int b = bool_node_value_of(expr);
 
     expression_node_destroy(expr);
-    return expression_node_create(NODE_BOOL, (ast_node){.bool = !bool});
+    return expression_node_create(NODE_BOOL, (ast_node){.bool_ = !b});
   }
 
   case OP_INC: {
@@ -74,10 +74,10 @@ expression_node* unary_node_evaluate(unary_node* node, scope* scope)
     bucket* bucket = NULL;
 
     if(node->expr->type == NODE_ID) {
-      bucket = scope_get_bucket(scope, node->expr->node.string);
+      bucket = scope_get_bucket(ctx->scope, node->expr->node.string);
       expr = bucket->value;
     } else {
-      expr = expression_node_evaluate(node->expr, scope);
+      expr = expression_node_evaluate(node->expr, ctx);
     }
 
     if(expr->type != NODE_REAL) {
@@ -97,7 +97,7 @@ expression_node* unary_node_evaluate(unary_node* node, scope* scope)
   }
 
   case OP_PRINT: {
-    expression_node* expr = expression_node_evaluate(node->expr, scope);
+    expression_node* expr = expression_node_evaluate(node->expr, ctx);
     char* str = expression_node_to_string(expr);
     expression_node_destroy(expr);
 
@@ -109,7 +109,7 @@ expression_node* unary_node_evaluate(unary_node* node, scope* scope)
   }
 
   case OP_EVAL: {
-    expression_node* expr = expression_node_evaluate(node->expr, scope);
+    expression_node* expr = expression_node_evaluate(node->expr, ctx);
 
     if(expr->type != NODE_STRING) {
       printf("eval: expected string, not %s\n", node_type_string[expr->type]);
@@ -128,7 +128,7 @@ expression_node* unary_node_evaluate(unary_node* node, scope* scope)
     ps->t = lexer_next_token(ps->ls);
 
     expression_node* program = parse_program(ps);
-    expression_node* eval = expression_node_evaluate(program, scope);
+    expression_node* eval = expression_node_evaluate(program, ctx);
     expression_node_destroy(program);
 
     expression_node_destroy(expr);
@@ -145,14 +145,14 @@ expression_node* unary_node_evaluate(unary_node* node, scope* scope)
   }
 
   case OP_UNQUOTE: { // evaluate expression twice (first to remove quoting)
-    expression_node* eval = expression_node_evaluate(node->expr, scope);
-    expression_node* eval2 = expression_node_evaluate(eval, scope);
+    expression_node* eval = expression_node_evaluate(node->expr, ctx);
+    expression_node* eval2 = expression_node_evaluate(eval, ctx);
     expression_node_destroy(eval);
     return eval2;
   }
 
   case OP_REQUIRE: {
-    expression_node* file_name = expression_node_evaluate(node->expr, scope);
+    expression_node* file_name = expression_node_evaluate(node->expr, ctx);
 
     if(file_name->type != NODE_STRING) {
       printf("require: expected string, not %s\n", node_type_string[file_name->type]);
@@ -183,7 +183,7 @@ expression_node* unary_node_evaluate(unary_node* node, scope* scope)
     ps->t = lexer_next_token(ps->ls);
 
     expression_node* program = parse_program(ps);
-    expression_node* eval = expression_node_evaluate(program, scope);
+    expression_node* eval = expression_node_evaluate(program, ctx);
     expression_node_destroy(eval);
     expression_node_destroy(program);
 

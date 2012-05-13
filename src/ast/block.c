@@ -22,14 +22,14 @@ void block_node_destroy(block_node* block)
   free(block);
 }
 
-expression_node* block_node_evaluate(block_node* block, scope* s)
+expression_node* block_node_evaluate(block_node* block, context* ctx)
 {
-  scope* local = scope_create(s);
+  scope* local = scope_create(ctx->scope);
 
   expression_node* last = NULL;
 
   for(struct expression_list* ptr = block->list; ptr; ptr = ptr->next) {
-    last = expression_node_evaluate(ptr->expression, s);
+    last = expression_node_evaluate(ptr->expression, ctx);
     if(ptr->next)
       expression_node_destroy(last);
   }

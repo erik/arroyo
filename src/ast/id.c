@@ -12,9 +12,9 @@ char* id_node_inspect(expression_node* id)
   return strdup(id->node.string);
 }
 
-expression_node* id_node_evaluate(expression_node* id, scope* scope)
+expression_node* id_node_evaluate(expression_node* id, context* ctx)
 {
-  expression_node* value = scope_get(scope, id->node.string);
+  expression_node* value = scope_get(ctx->scope, id->node.string);
 
   if(!value)
     return nil_node_create();

@@ -29,9 +29,11 @@ void case_node_destroy(case_node* node)
   free(node);
 }
 
-expression_node* case_node_evaluate(case_node* node, scope* s)
+expression_node* case_node_evaluate(case_node* node, context* ctx)
 {
-  scope* local = scope_create(s);
+  context* local = context_create();
+  local->scope = scope_create(ctx->scope);
+
   expression_node* eval = expression_node_evaluate(node->expression, local);
 
   expression_node* result = NULL;
@@ -53,7 +55,7 @@ expression_node* case_node_evaluate(case_node* node, scope* s)
   }
 
   expression_node_destroy(eval);
-  scope_destroy(local);
+  context_destroy(local);
 
   return result ? result : nil_node_create();
 }
