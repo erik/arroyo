@@ -246,7 +246,8 @@ static expression_node* parse_expression_(parser_state* ps, expression_node* lef
     while(next != OP_NOTBINOP && op_precedence(next) > op_precedence(op)) {
       next_token(ps);
 
-      expression_node* bin = expression_node_create(NODE_BINARY, (ast_node){.binary = binary_node_create(next)});
+      expression_node* bin = expression_node_create(
+        NODE_BINARY, (ast_node){.binary = binary_node_create(next)});
       bin->node.binary->lhs = rhs;
       bin->node.binary->rhs = parse_primary(ps);
 
@@ -256,7 +257,8 @@ static expression_node* parse_expression_(parser_state* ps, expression_node* lef
       next = get_binop(ps);
     }
 
-    expression_node* bin = expression_node_create(NODE_BINARY, (ast_node){.binary = binary_node_create(op)});
+    expression_node* bin = expression_node_create(
+      NODE_BINARY, (ast_node){.binary = binary_node_create(op)});
     bin->node.binary->lhs = lhs;
     bin->node.binary->rhs = rhs;
 
@@ -396,8 +398,8 @@ static expression_node* parse_primary(parser_state* ps)
 /* "fn" "(" ID* ")" EXPRESSION */
 static fn_node* parse_function(parser_state* ps)
 {
-
   fn_node* fn = fn_node_create();
+  bool seen_splat = false;
 
   // named function
   if(accept(ps, TK_ID))
@@ -406,28 +408,46 @@ static fn_node* parse_function(parser_state* ps)
   // argument list
   expect(ps, '(');
 
-  while(accept(ps, TK_ID)) {
-    char* id = ps->info.string;
-    // typed argument
-    if(accept(ps, ':')) {
-      int type = -1;
+  for(;;) {
 
-      expect(ps, TK_ID);
+    if(accept(ps, TK_ID)) {
+      char* id = ps->info.string;
+      // typed argument
+      if(accept(ps, ':')) {
+        int type = -1;
 
-      for(unsigned i = 0; i < MAX_NODE_TYPE; ++i) {
-        if(!strcmp(ps->info.string, node_type_string[i])) {
-          type = i;
-          break;
+        expect(ps, TK_ID);
+
+        for(unsigned i = 0; i < MAX_NODE_TYPE; ++i) {
+          if(!strcmp(ps->info.string, node_type_string[i])) {
+            type = i;
+            break;
+          }
         }
+
+        if(type == -1)
+          parser_error(ps, "unrecognized type: %s", ps->info.string);
+
+        fprintf(stderr, "XXX: typed arguments not yet supported, ignoring\n");
       }
 
-      if(type == -1)
-        parser_error(ps, "unrecognized type: %s", ps->info.string);
+      fn_node_add_argument(fn, id, -1);
+    }
 
-      fprintf(stderr, "XXX: typed arguments not yet supported, ignoring\n");
-      fn_node_add_argument(fn, id, -1);
-    } else
-      fn_node_add_argument(fn, id, -1);
+    else if(accept(ps, '*')) { // splat args
+      if(seen_splat) {
+        parser_error(ps, "only one splat argument allowed");
+        return NULL;
+      }
+
+      expect(ps, TK_ID);
+      fn_node_add_argument(fn, ps->info.string, -2);
+      seen_splat = true;
+    }
+
+    else { // end of argument list (or syntax error)
+      break;
+    }
   }
 
   expect(ps, ')');

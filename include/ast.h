@@ -44,7 +44,11 @@ static const char* node_type_string[MAX_NODE_TYPE] = {
 
 struct typed_id {
   char* id;
-  int arg_type; // -1 for untyped
+
+  // TODO: use defines / enum / something other than magic numbers
+  // -1 for untyped
+  // -2 for splat
+  int arg_type;
 };
 
 enum loop_type {
@@ -119,7 +123,8 @@ typedef struct {
 typedef struct fn_node {
   char* id;
   struct typed_id* args;
-  unsigned int nargs;
+  unsigned nargs;
+  int arity;
   struct expression_node* body;
 } fn_node;
 

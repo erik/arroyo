@@ -45,7 +45,6 @@ expression_node* for_node_evaluate(for_node* node, context* ctx)
 
     expression_node* ret = NULL;
 
-    // XXX: FUCK YOU ERIK
     context* local = context_create();
     local->scope = scope_create(ctx->scope);
 

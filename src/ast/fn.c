@@ -10,6 +10,7 @@ fn_node* fn_node_create(void)
   fn->id = NULL;
 
   fn->nargs = 0;
+  fn->arity = 0;
   fn->args = NULL;
   fn->body = NULL;
 
@@ -69,6 +70,7 @@ fn_node* fn_node_clone(fn_node* fn)
 
   new->args = malloc(sizeof(struct typed_id) * fn->nargs);
   new->nargs = fn->nargs;
+  new->arity = fn->arity;
 
   for(unsigned i = 0; i < fn->nargs; ++i) {
     new->args[i].id = strdup(fn->args[i].id);
@@ -86,22 +88,56 @@ expression_node* fn_node_call(fn_node* fn, expression_node* args, context* ctx)
     return nil_node_create();
   }
 
-  if(args->node.block->nelements != fn->nargs) {
-    fprintf(stderr, "error: incorrect number of arguments (%d for %d)\n",
-            args->node.block->nelements, fn->nargs);
-    return nil_node_create();
-  }
-
   context* local = context_create();
   local->scope = scope_create(ctx->scope);
 
   struct expression_list* arg = args->node.block->list;
 
-  for(unsigned i = 0; i < fn->nargs; ++i) {
-    scope_insert(local->scope, strdup(fn->args[i].id),
-                 expression_node_evaluate(arg->expression, local));
+  if(fn->arity < 0) {
+    unsigned min_args = -(fn->arity + 1);
 
-    arg = arg->next;
+    if(args->node.block->nelements < min_args) {
+      context_destroy(local);
+      fprintf(stderr, "error: incorrect number of arguments (%d for %d+)\n",
+              args->node.block->nelements, min_args);
+      return nil_node_create();
+    }
+
+    for(unsigned i = 0; i < min_args; ++i) {
+      scope_insert(local->scope, strdup(fn->args[i].id),
+                   expression_node_evaluate(arg->expression, local));
+      arg = arg->next;
+    }
+
+    array_node* array = array_node_create();
+
+    for(unsigned i = min_args; i < args->node.block->nelements; ++i) {
+      array_node_push_expression(
+        array, expression_node_evaluate(arg->expression, local));
+      arg = arg->next;
+    }
+
+    scope_insert(local->scope, strdup(fn->args[min_args].id),
+                 expression_node_create(NODE_ARRAY,
+                                        (ast_node){.array=array}));
+
+  }
+
+  else {
+
+    if(args->node.block->nelements != fn->nargs) {
+      context_destroy(local);
+      fprintf(stderr, "error: incorrect number of arguments (%d for %d)\n",
+              args->node.block->nelements, fn->nargs);
+      return nil_node_create();
+    }
+
+    for(unsigned i = 0; i < fn->nargs; ++i) {
+      scope_insert(local->scope, strdup(fn->args[i].id),
+                   expression_node_evaluate(arg->expression, local));
+
+      arg = arg->next;
+    }
   }
 
   expression_node* ret = expression_node_evaluate(fn->body, local);
@@ -110,6 +146,7 @@ expression_node* fn_node_call(fn_node* fn, expression_node* args, context* ctx)
   return ret;
 }
 
+// TODO: display splat args
 char* fn_node_to_string(fn_node* fn)
 {
   buffer b;
@@ -138,6 +175,7 @@ char* fn_node_to_string(fn_node* fn)
   return b.buf;
 }
 
+// TODO: display splat args
 char* fn_node_inspect(fn_node* fn)
 {
   buffer b;
@@ -176,4 +214,10 @@ void fn_node_add_argument(fn_node* fn, char* name, int type)
     .id = strdup(name),
     .arg_type = type
   };
+
+  if(type == -2)
+    fn->arity = -1 - fn->arity;
+
+  else
+    fn->arity += 1;
 }

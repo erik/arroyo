@@ -22,6 +22,9 @@ test->("functions returning functions",
        expect->((fn() fn(x) "= $x")->()->("abc"),
                 "= abc"))
 
+test->("splat arguments",
+       expect->((fn(*x) x)->(1 2 3), [1 2 3]))
+
 -- test macros
 
 test->("anonymous macros",
