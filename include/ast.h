@@ -11,7 +11,7 @@
 #include <setjmp.h>
 
 typedef enum {
-  NODE_LITERAL_STRING,
+  NODE_LITERAL_STRING = 0,
   NODE_STRING,
   NODE_REAL,
   NODE_BOOL,
@@ -42,13 +42,15 @@ static const char* node_type_string[MAX_NODE_TYPE] = {
   "loop", "for", "if", "case", "block"
 };
 
+typedef enum {
+  ARG_SPLAT   = -2,
+  ARG_UNTYPED = -1
+  // 0 onwards represented by enum node_type
+} arg_type;
+
 struct typed_id {
   char* id;
-
-  // TODO: use defines / enum / something other than magic numbers
-  // -1 for untyped
-  // -2 for splat
-  int arg_type;
+  arg_type type;
 };
 
 enum loop_type {

@@ -76,9 +76,9 @@ char* macro_node_to_string(macro_node* macro)
   buffer_puts(&b, " (");
   for(unsigned i = 0; i < macro->nargs; ++i) {
     buffer_puts(&b, macro->args[i].id);
-    if(macro->args[i].arg_type != -1) {
+    if(macro->args[i].type != ARG_UNTYPED) {
       buffer_putc(&b, ':');
-      buffer_puts(&b, node_type_string[macro->args[i].arg_type]);
+      buffer_puts(&b, node_type_string[macro->args[i].type]);
     }
     if(i != macro->nargs - 1) buffer_putc(&b, ' ');
   }
@@ -104,9 +104,9 @@ char* macro_node_inspect(macro_node* macro)
   buffer_puts(&b, " (");
   for(unsigned i = 0; i < macro->nargs; ++i) {
     buffer_puts(&b, macro->args[i].id);
-    if(macro->args[i].arg_type != -1) {
+    if(macro->args[i].type != ARG_UNTYPED) {
       buffer_putc(&b, ':');
-      buffer_puts(&b, node_type_string[macro->args[i].arg_type]);
+      buffer_puts(&b, node_type_string[macro->args[i].type]);
     }
     if(i != macro->nargs - 1)
       buffer_putc(&b, ' ');

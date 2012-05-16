@@ -74,7 +74,7 @@ fn_node* fn_node_clone(fn_node* fn)
 
   for(unsigned i = 0; i < fn->nargs; ++i) {
     new->args[i].id = strdup(fn->args[i].id);
-    new->args[i].arg_type = fn->args[i].arg_type;
+    new->args[i].type = fn->args[i].type;
   }
 
   new->body = expression_node_clone(fn->body);
@@ -158,9 +158,9 @@ char* fn_node_to_string(fn_node* fn)
   buffer_puts(&b, " (");
   for(unsigned i = 0; i < fn->nargs; ++i) {
     buffer_puts(&b, fn->args[i].id);
-    if(fn->args[i].arg_type != -1) {
+    if(fn->args[i].type != ARG_UNTYPED) {
       buffer_putc(&b, ':');
-      buffer_puts(&b, node_type_string[fn->args[i].arg_type]);
+      buffer_puts(&b, node_type_string[fn->args[i].type]);
     }
     if(i != fn->nargs - 1) buffer_putc(&b, ' ');
   }
@@ -187,9 +187,9 @@ char* fn_node_inspect(fn_node* fn)
   buffer_puts(&b, " (");
   for(unsigned i = 0; i < fn->nargs; ++i) {
     buffer_puts(&b, fn->args[i].id);
-    if(fn->args[i].arg_type != -1) {
+    if(fn->args[i].type != ARG_UNTYPED) {
       buffer_putc(&b, ':');
-      buffer_puts(&b, node_type_string[fn->args[i].arg_type]);
+      buffer_puts(&b, node_type_string[fn->args[i].type]);
     }
     if(i != fn->nargs - 1)
       buffer_putc(&b, ' ');
@@ -212,7 +212,7 @@ void fn_node_add_argument(fn_node* fn, char* name, int type)
 
   fn->args[fn->nargs - 1] = (struct typed_id) {
     .id = strdup(name),
-    .arg_type = type
+    .type = type
   };
 
   if(type == -2)

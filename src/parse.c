@@ -414,7 +414,7 @@ static fn_node* parse_function(parser_state* ps)
       char* id = ps->info.string;
       // typed argument
       if(accept(ps, ':')) {
-        int type = -1;
+        int type = ARG_UNTYPED;
 
         expect(ps, TK_ID);
 
@@ -425,13 +425,14 @@ static fn_node* parse_function(parser_state* ps)
           }
         }
 
-        if(type == -1)
+        if(type == ARG_UNTYPED)
           parser_error(ps, "unrecognized type: %s", ps->info.string);
 
         fprintf(stderr, "XXX: typed arguments not yet supported, ignoring\n");
       }
 
-      fn_node_add_argument(fn, id, -1);
+      // TODO: typed arguments
+      fn_node_add_argument(fn, id, ARG_UNTYPED);
     }
 
     else if(accept(ps, '*')) { // splat args
@@ -441,7 +442,7 @@ static fn_node* parse_function(parser_state* ps)
       }
 
       expect(ps, TK_ID);
-      fn_node_add_argument(fn, ps->info.string, -2);
+      fn_node_add_argument(fn, ps->info.string, ARG_SPLAT);
       seen_splat = true;
     }
 
