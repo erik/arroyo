@@ -73,7 +73,7 @@ expression_node* array_node_call(array_node* array, expression_node* arg, contex
 char* array_node_inspect(array_node* array)
 {
   buffer b;
-  buffer_create(&b, array->nelements * 10);
+  buffer_create(&b, array->nelements * 10 + 2);
 
   buffer_putc(&b, '[');
 
