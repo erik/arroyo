@@ -49,6 +49,9 @@ inline char* get_binop_str(enum binary_op op)
   case OP_CALL:
     return "->";
 
+  case OP_SHIFT:
+    return "<<";
+
   default:
     return "BADOP";
   }
@@ -294,6 +297,14 @@ expression_node* binary_node_evaluate(binary_node* binary, context* ctx)
 
     expression_node_destroy(left);
     return ret;
+  }
+
+  case OP_SHIFT: {
+    TYPE_CHECK(LEFT, NODE_ARRAY);
+
+    array_node_push_expression(left->node.array, RIGHT);
+
+    return left;
   }
 
   case OP_XOR:

@@ -123,6 +123,8 @@ static enum binary_op get_binop(const parser_state* ps)
 
   case TK_ASSIGN : return OP_ASSIGN;
   case TK_CALL   : return OP_CALL;
+
+  case TK_SHIFT  : return OP_SHIFT;
   default     : return OP_NOTBINOP;
   }
 }
@@ -145,6 +147,9 @@ static int op_precedence(unsigned op)
 
   case OP_ADD: case OP_SUB:
     return 70;
+
+  case OP_SHIFT:
+    return 67;
 
   case OP_LT: case OP_LTE:
   case OP_GT: case OP_GTE:

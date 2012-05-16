@@ -262,9 +262,13 @@ static int lex(lexer_state *ls, token_info *info)
         next(ls);
         return TK_LTE;
       }
-      else if(ls->current == '-'){
+      else if(ls->current == '-') {
         next(ls);
         return TK_ASSIGN;
+      }
+      else if(ls->current == '<') {
+        next(ls);
+        return TK_SHIFT;
       }
       else return '<';
     }

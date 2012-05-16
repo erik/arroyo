@@ -83,7 +83,9 @@ enum binary_op {
   // members
   OP_DOT,
   OP_ASSIGN,
-  OP_CALL
+  OP_CALL,
+
+  OP_SHIFT
 };
 
 struct expression_node;
