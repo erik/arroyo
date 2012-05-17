@@ -300,11 +300,24 @@ expression_node* binary_node_evaluate(binary_node* binary, context* ctx)
   }
 
   case OP_SHIFT: {
-    TYPE_CHECK(LEFT, NODE_ARRAY);
+    bucket* bucket = NULL;
+    expression_node* expr = NULL;
 
-    array_node_push_expression(left->node.array, RIGHT);
+    if(binary->lhs->type == NODE_ID) {
+      bucket = scope_get_bucket(ctx->scope, binary->lhs->node.string);
+      expr = bucket->value;
+    } else {
+      expr = expression_node_evaluate(binary->lhs, ctx);
+    }
 
-    return left;
+    TYPE_CHECK(expr, NODE_ARRAY);
+
+    array_node_push_expression(expr->node.array, RIGHT);
+
+    if(bucket)
+      return expression_node_clone(expr);
+
+    return expr;
   }
 
   case OP_XOR:

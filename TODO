@@ -4,3 +4,4 @@
    Also, stop throwing every piece of error information out to stderr.
 * Create FFI / start writing standard libraries
 * Add splat arguments to functions/macros
+* Variable scope is currently leaky, needs to be updated.
