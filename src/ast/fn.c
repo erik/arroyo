@@ -146,7 +146,6 @@ expression_node* fn_node_call(fn_node* fn, expression_node* args, context* ctx)
   return ret;
 }
 
-// TODO: display splat args
 char* fn_node_to_string(fn_node* fn)
 {
   buffer b;
@@ -157,8 +156,13 @@ char* fn_node_to_string(fn_node* fn)
 
   buffer_puts(&b, " (");
   for(unsigned i = 0; i < fn->nargs; ++i) {
+    if(fn->args[i].type == ARG_SPLAT)
+      buffer_putc(&b, '*');
     buffer_puts(&b, fn->args[i].id);
-    if(fn->args[i].type != ARG_UNTYPED) {
+
+    if(fn->args[i].type != ARG_UNTYPED &&
+       fn->args[i].type != ARG_SPLAT) {
+
       buffer_putc(&b, ':');
       buffer_puts(&b, node_type_string[fn->args[i].type]);
     }
@@ -175,7 +179,6 @@ char* fn_node_to_string(fn_node* fn)
   return b.buf;
 }
 
-// TODO: display splat args
 char* fn_node_inspect(fn_node* fn)
 {
   buffer b;
@@ -186,8 +189,13 @@ char* fn_node_inspect(fn_node* fn)
 
   buffer_puts(&b, " (");
   for(unsigned i = 0; i < fn->nargs; ++i) {
+    if(fn->args[i].type == ARG_SPLAT)
+      buffer_putc(&b, '*');
+
     buffer_puts(&b, fn->args[i].id);
-    if(fn->args[i].type != ARG_UNTYPED) {
+
+    if(fn->args[i].type != ARG_UNTYPED &&
+       fn->args[i].type != ARG_SPLAT) {
       buffer_putc(&b, ':');
       buffer_puts(&b, node_type_string[fn->args[i].type]);
     }
