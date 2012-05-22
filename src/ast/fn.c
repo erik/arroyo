@@ -104,8 +104,15 @@ expression_node* fn_node_call(fn_node* fn, expression_node* args, context* ctx)
     }
 
     for(unsigned i = 0; i < min_args; ++i) {
-      scope_insert(local->scope, strdup(fn->args[i].id),
-                   expression_node_evaluate(arg->expression, local));
+      expression_node* expr = expression_node_evaluate(arg->expression, local);
+
+      if(fn->args[i].type != ARG_UNTYPED && expr->type != (node_type)fn->args[i].type) {
+        fprintf(stderr, "error: incorrect argument type for argument %d: got %s, expected %s\n" ,
+                i, node_type_string[expr->type], node_type_string[fn->args[i].type]);
+        return nil_node_create();
+      }
+
+      scope_insert(local->scope, strdup(fn->args[i].id), expr);
       arg = arg->next;
     }
 
@@ -133,8 +140,15 @@ expression_node* fn_node_call(fn_node* fn, expression_node* args, context* ctx)
     }
 
     for(unsigned i = 0; i < fn->nargs; ++i) {
-      scope_insert(local->scope, strdup(fn->args[i].id),
-                   expression_node_evaluate(arg->expression, local));
+      expression_node* expr = expression_node_evaluate(arg->expression, local);
+
+      if(fn->args[i].type != ARG_UNTYPED && expr->type != (node_type)fn->args[i].type) {
+        fprintf(stderr, "error: incorrect argument type for argument %d: got %s, expected %s\n" ,
+                i, node_type_string[expr->type], node_type_string[fn->args[i].type]);
+        return nil_node_create();
+      }
+
+      scope_insert(local->scope, strdup(fn->args[i].id), expr);
 
       arg = arg->next;
     }

@@ -416,7 +416,7 @@ static fn_node* parse_function(parser_state* ps)
   for(;;) {
 
     if(accept(ps, TK_ID)) {
-      char* id = ps->info.string;
+      char* id = strdup(ps->info.string);
       // typed argument
       if(accept(ps, ':')) {
         int type = ARG_UNTYPED;
@@ -433,11 +433,13 @@ static fn_node* parse_function(parser_state* ps)
         if(type == ARG_UNTYPED)
           parser_error(ps, "unrecognized type: %s", ps->info.string);
 
-        fprintf(stderr, "XXX: typed arguments not yet supported, ignoring\n");
+        fn_node_add_argument(fn, id, type);
+      }
+      else {
+        fn_node_add_argument(fn, id, ARG_UNTYPED);
       }
 
-      // TODO: typed arguments
-      fn_node_add_argument(fn, id, ARG_UNTYPED);
+      free(id);
     }
 
     else if(accept(ps, '*')) { // splat args
