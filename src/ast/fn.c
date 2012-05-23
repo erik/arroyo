@@ -106,9 +106,12 @@ expression_node* fn_node_call(fn_node* fn, expression_node* args, context* ctx)
     for(unsigned i = 0; i < min_args; ++i) {
       expression_node* expr = expression_node_evaluate(arg->expression, local);
 
-      if(fn->args[i].type != ARG_UNTYPED && expr->type != (node_type)fn->args[i].type) {
-        fprintf(stderr, "error: incorrect argument type for argument %d: got %s, expected %s\n" ,
-                i, node_type_string[expr->type], node_type_string[fn->args[i].type]);
+      if(fn->args[i].type != ARG_UNTYPED &&
+         expr->type != (node_type)fn->args[i].type) {
+        fprintf(stderr, "error: incorrect argument type for argument %d: " \
+                "got %s, expected %s\n" ,
+                i, node_type_string[expr->type],
+                node_type_string[fn->args[i].type]);
         return nil_node_create();
       }
 
@@ -142,9 +145,12 @@ expression_node* fn_node_call(fn_node* fn, expression_node* args, context* ctx)
     for(unsigned i = 0; i < fn->nargs; ++i) {
       expression_node* expr = expression_node_evaluate(arg->expression, local);
 
-      if(fn->args[i].type != ARG_UNTYPED && expr->type != (node_type)fn->args[i].type) {
-        fprintf(stderr, "error: incorrect argument type for argument %d: got %s, expected %s\n" ,
-                i, node_type_string[expr->type], node_type_string[fn->args[i].type]);
+      if(fn->args[i].type != ARG_UNTYPED &&
+         expr->type != (node_type)fn->args[i].type) {
+        fprintf(stderr, "error: incorrect argument type for argument %d: "\
+                "got %s, expected %s\n" ,
+                i, node_type_string[expr->type],
+                node_type_string[fn->args[i].type]);
         return nil_node_create();
       }
 

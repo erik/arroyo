@@ -5,16 +5,11 @@
 #include "scope.h"
 #include "util.h"
 
-expression_node* macro_node_call(macro_node* macro, expression_node* args, context* ctx)
+expression_node* macro_node_call(macro_node* macro, expression_node* args,
+                                 context* ctx)
 {
   if(args->type != NODE_BLOCK) {
     printf("error: expected argument list, not %s\n", node_type_string[args->type]);
-    return nil_node_create();
-  }
-
-  if(args->node.block->nelements != macro->nargs) {
-    fprintf(stderr, "error: incorrect number of arguments (%d for %d)\n",
-            args->node.block->nelements, macro->nargs);
     return nil_node_create();
   }
 
@@ -23,12 +18,70 @@ expression_node* macro_node_call(macro_node* macro, expression_node* args, conte
 
   struct expression_list* arg = args->node.block->list;
 
-  for(unsigned i = 0; i < macro->nargs; ++i) {
-    // pass each arg as it is received onto the macro
-    scope_insert(local->scope, strdup(macro->args[i].id),
-                 expression_node_clone(arg->expression));
+  if(macro->arity < 0) {
+    unsigned min_args = -(macro->arity + 1);
 
-    arg = arg->next;
+    if(args->node.block->nelements < min_args) {
+      context_destroy(local);
+      fprintf(stderr, "error: incorrect number of arguments (%d for %d+)\n",
+              args->node.block->nelements, min_args);
+      return nil_node_create();
+    }
+
+    for(unsigned i = 0; i < min_args; ++i) {
+      expression_node* expr = expression_node_clone(arg->expression);
+
+      if(macro->args[i].type != ARG_UNTYPED &&
+         expr->type != (node_type)macro->args[i].type) {
+        fprintf(stderr, "error: incorrect argument type for argument %d: " \
+                "got %s, expected %s\n" ,
+                i, node_type_string[expr->type],
+                node_type_string[macro->args[i].type]);
+        return nil_node_create();
+      }
+
+      scope_insert(local->scope, strdup(macro->args[i].id), expr);
+      arg = arg->next;
+    }
+
+    array_node* array = array_node_create();
+
+    for(unsigned i = min_args; i < args->node.block->nelements; ++i) {
+      array_node_push_expression(
+        array, expression_node_clone(arg->expression));
+      arg = arg->next;
+    }
+
+    scope_insert(local->scope, strdup(macro->args[min_args].id),
+                 expression_node_create(NODE_ARRAY,
+                                        (ast_node){.array=array}));
+  }
+
+  else {
+
+    if(args->node.block->nelements != macro->nargs) {
+      context_destroy(local);
+      fprintf(stderr, "error: incorrect number of arguments (%d for %d)\n",
+              args->node.block->nelements, macro->nargs);
+      return nil_node_create();
+    }
+
+    for(unsigned i = 0; i < macro->nargs; ++i) {
+      expression_node* expr = expression_node_clone(arg->expression);
+
+      if(macro->args[i].type != ARG_UNTYPED &&
+         expr->type != (node_type)macro->args[i].type) {
+        fprintf(stderr, "error: incorrect argument type for argument %d: "\
+                "got %s, expected %s\n" ,
+                i, node_type_string[expr->type],
+                node_type_string[macro->args[i].type]);
+        return nil_node_create();
+      }
+
+      scope_insert(local->scope, strdup(macro->args[i].id), expr);
+
+      arg = arg->next;
+    }
   }
 
   expression_node* ret = expression_node_evaluate(macro->body, local);
