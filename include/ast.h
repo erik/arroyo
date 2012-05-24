@@ -269,7 +269,15 @@ char*            for_node_to_string(for_node*);
 char*            for_node_inspect(for_node*);
 void             for_node_add_id(for_node* node, char* id);
 
-// TODO: hash_node
+// hash node
+hash_node*       hash_node_create(void);
+void             hash_node_destroy(hash_node*);
+expression_node* hash_node_evaluate(hash_node*, context*);
+hash_node*       hash_node_clone(hash_node*);
+expression_node* hash_node_call(hash_node*, expression_node*, context*);
+char*            hash_node_to_string(hash_node*);
+char*            hash_node_inspect(hash_node*);
+void             hash_node_insert(hash_node*, char*, expression_node*);
 
 // id node
 expression_node* id_node_evaluate(expression_node*, context*);
