@@ -16,7 +16,7 @@ all: $(OBJ)
 -include $(SRC:.c=.d)
 
 %.o: %.c
-	$(CC) -c -MD $(CFLAGS) $< -o $@
+	$(CC) -c -MMD $(CFLAGS) $< -o $@
 
 debug:
 	$(MAKE) all "CFLAGS=$(CFLAGS) $(DFLAGS)"

@@ -334,7 +334,7 @@ static expression_node* parse_primary(parser_state* ps)
 
   else if(accept(ps, '{')) {
     type = NODE_HASH;
-    // node = parse_hash(ps);
+    node.hash = parse_hash(ps);
   }
 
   else if(accept(ps, '[')) {
@@ -488,23 +488,25 @@ static for_node* parse_for(parser_state* ps)
 /* "{" (PRIMITIVE ":" EXPRESSION)* "}" */
 static hash_node* parse_hash(parser_state* ps)
 {
-  parser_error(ps, "hash values not yet supported");
+  hash_node* hash = hash_node_create();
 
   while(ps->t.type != '}') {
-    /* TODO: AST things here */
+    char* id = NULL;
 
-    if(accept(ps, TK_STRING)) ;
-    else if(accept(ps, TK_ID));
+    if(accept(ps, TK_STRING) || accept(ps, TK_ID))
+      id = strdup(ps->info.string);
     else
       parser_error(ps, "invalid key type");
 
     expect(ps, ':');
 
-    parse_expression(ps);
+    expression_node* expr = parse_expression(ps);
+
+    hash_node_insert(hash, id, expr);
   }
   expect(ps, '}');
 
-  return NULL;
+  return hash;
 }
 
 /* "if" EXPRESSION EXPRESSION("elseif" EXPRESSION EXPRESSION)* ("else" EXPRESSION)? */

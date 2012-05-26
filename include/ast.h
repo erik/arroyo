@@ -186,6 +186,7 @@ typedef union {
   fn_node* fn;
   for_node* for_;
   if_node* if_;
+  hash_node* hash;
   loop_node* loop;
   unary_node* unary;
 
