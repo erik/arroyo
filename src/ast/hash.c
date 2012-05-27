@@ -4,8 +4,6 @@
 
 #include <stdio.h>
 
-// TODO: placeholder methods for hash nodes, need to be filled in
-
 hash_node* hash_node_create(void)
 {
   hash_node* hash = malloc(sizeof(hash_node));
@@ -41,8 +39,20 @@ hash_node* hash_node_clone(hash_node* hash)
 
 expression_node* hash_node_call(hash_node* hash, expression_node* arg, context* ctx)
 {
-  // TODO
-  return NULL;
+  expression_node* eval = expression_node_evaluate(arg, ctx);
+
+  if(eval->type != NODE_STRING) {
+    printf("expected string for hash key, not %s\n", node_type_string[arg->type]);
+    expression_node_destroy(eval);
+  } else {
+    expression_node* val = scope_get(hash->hash, eval->node.string);
+    expression_node_destroy(eval);
+
+    if(val)
+      return expression_node_clone(val);
+  }
+
+  return nil_node_create();
 }
 
 char* hash_node_to_string(hash_node* hash)
