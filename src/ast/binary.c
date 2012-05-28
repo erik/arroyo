@@ -137,13 +137,15 @@ expression_node* binary_node_evaluate(binary_node* binary, context* ctx)
 #define LEFT  (left = expression_node_evaluate(binary->lhs, ctx))
 #define RIGHT (right = expression_node_evaluate(binary->rhs, ctx))
 
-#define TYPE_CHECK(obj, tpe) {                                  \
-    node_type _t = (obj)->type;                                 \
-    if(_t != tpe) {                                             \
-      printf("type mismatch. (got %s, expected %s)\n",          \
-             node_type_string[_t], node_type_string[tpe]);      \
-      return nil_node_create();                                 \
-    }                                                           \
+#define TYPE_CHECK(obj, tpe) {                                          \
+    node_type _t = (obj)->type;                                         \
+    if(_t != tpe) {                                                     \
+      char* _tmp = expression_node_to_string(obj);                      \
+      printf("%s: type mismatch. (got %s, expected %s)\n",              \
+             _tmp, node_type_string[_t], node_type_string[tpe]);        \
+      free(_tmp);                                                       \
+      return nil_node_create();                                         \
+    }                                                                   \
   }
 
 #define EXPR(type, val) expression_node_create(NODE_##type, val)

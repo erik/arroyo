@@ -33,16 +33,14 @@ expression_node* loop_node_evaluate(loop_node* loop, context* ctx)
 
   for(;;) {
     expression_node* cond = expression_node_evaluate(loop->cond, local);
-    const bool b = bool_node_value_of(cond);
-
-    const bool do_break = (loop->type == LOOP_WHILE && !b)
-      || (loop->type == LOOP_UNTIL && b)
-      || false;
+    bool boolean = bool_node_value_of(cond);
 
     expression_node_destroy(cond);
 
-    if(do_break)
+    if((loop->type == LOOP_WHILE && !boolean) ||
+       (loop->type == LOOP_UNTIL && boolean)) {
       break;
+    }
 
     expression_node_destroy(value);
     value = expression_node_evaluate(loop->body, local);
